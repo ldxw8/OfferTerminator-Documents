@@ -28,17 +28,20 @@
 
 ### 笔试算法
 #### 开源格式说明
+
+![开源项目结构说明](img/OfferTerminator-documents_1-1.png)
+
 - 使用集成开发环境 `IntelliJ Idea` 构建工程项目，并且每一题以单独 `Module` 立项。
 - 每一题目以 `类` 进行封装，同一题目的解题思路以 `函数` 为实现载体。
 - 类名命名规范：`来源-序号-题目名称` / `来源-题目名称`。
 
-	> 例如：JzOffer-05-ReplaceSpaces、Leetcode-TwoSum
+	> 例如：JzOffer-05-ReplaceSpaces、JzOffer-07-RebuildBinaryTree、Leetcode-TwoSum 等。
 
-- 函数命名规范：驼峰式命名法。
+- 函数命名规范：`驼峰式命名法`
 	
-	> 例如：pulbic String repalceSpace(StringBuffer src){...}
+	> 例如：pulbic String rebuildBinaryTree(StringBuffer src){...}
 
-- 黑盒测试用例：便于解题、复习的用途，是否将测试用例定义为类的成员变量，或者是将测试用例放于类注释中？
+- 设计测试用例：便于解题、复习的用途，是否将测试用例定义为类的成员变量，或者是将测试用例放于类注释中，方便验证或者使用？
 	- 有效等价类：取值范围、数据类型、限制条件或规则等。
 	- 无效等价类：刚好与有效等价类的概念相反。
 	- 边界值分析法：作为对等价类划分法的补充，通常其测试用例来自等价类的边界。
