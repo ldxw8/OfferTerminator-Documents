@@ -7,7 +7,7 @@
 - 📖 | 书籍 | [《编程之美》小组. 编程之美 [M]. 第1版. 电子工业出版社, 2018](https://book.douban.com/subject/30351275/)
 - 📝 | 文章 | [ApacheCN. 简历指南 + LeetCode + Kaggle [OL]. github.com](https://github.com/apachecn/Interview) (👍)
 	- `简历`：[ApacheCN. 简历分享系列视频 [OL]. bilibili.com](https://www.bilibili.com/video/av53122083)
-	- `笔试`：[ApacheCN. 面试必备算法题目[OL]. github.com](https://github.com/apachecn/Interview/tree/master/docs/Algorithm)
+	- `笔试`：[ApacheCN. 面试必备算法题目 [OL]. github.com](https://github.com/apachecn/Interview/tree/master/docs/Algorithm)
 	- `笔试`：[0voice. BAT 等技术面试题目/答案/专家出题人分析汇总 [OL]. github.com](https://github.com/0voice/interview_internal_reference)
 - 📝 | 文章 | [CyC2018. CS-Notes [OL]. github.com](https://github.com/CyC2018/CS-Notes) (👍)
 
