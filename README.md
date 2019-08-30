@@ -21,11 +21,14 @@
 
 	> 实现语言是 Java，题库按简单/中等/困难分类，且解释足够详细。
 
+## 在线编程
+- [牛客网 -- 剑指Offer -- 编程题](https://www.nowcoder.com/ta/coding-interviews?page=3)
+
 ## 核心内容
 ### 读书笔记
 > 命名格式：书籍 -- 主题描述 -- 立项时间
 
-- [剑指 Offer -- 面经与解题笔记 -- 2019.08.29](doc/Coding-Interviews-Questions-Analysis-and-Solutions.md)
+- [剑指 Offer -- 面经与解题启发性笔记 -- 2019.08.29](doc/Coding-Interviews-Questions-Analysis-and-Solutions.md)
 
 ### 面试经验
 > 命名格式：面试企业 -- 职业 -- 面试时间 -- 面试人 ( 个人 / 其他人 )
@@ -45,15 +48,18 @@
 	
 	> 例如：pulbic String rebuildBinaryTree(StringBuffer src){...}
 
-- 设计测试用例：便于解题、复习的用途，是否将测试用例定义为类的成员变量，或者是将测试用例放于类注释中，方便验证或者使用？
-	- 有效等价类：取值范围、数据类型、限制条件或规则等。
+- 设计测试用例：便于解题、复习的用途，使用单元测试框架 Junit 编写测试用例。
+	- 有效等价类：根据取值范围、数据类型、限制条件或规则等，求得合理的、有意义的输入数据构成的集合。
 	- 无效等价类：刚好与有效等价类的概念相反。
 	- 边界值分析法：作为对等价类划分法的补充，通常其测试用例来自等价类的边界。
 
 #### 解题方案整理
-- [ldxw8. OfferTerminator-Algorithm. github.com](#)
-	- JzOffer-xx-xxx
-	- Leetcode-xxx
+- [ldxw8. OfferTerminator-Solutions. github.com](https://github.com/ldxw8/OfferTerminator-Solutions)
+
+	> 参考另一位兄弟的开源项目，题目命名也不用愁。 [Jchanghong. CodingInterviewChinese2. github.com](https://github.com/jchanghong/CodingInterviewChinese2)
+	
+	- JzOffer-20-NumericString
+	- JzOffer-67-Str2Int
 
 
 ## 参考资料
