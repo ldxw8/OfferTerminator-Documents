@@ -40,7 +40,7 @@
 
 - 使用集成开发环境 `IntelliJ Idea` 构建工程项目，并且每一题以单独 `Module` 立项。
 - 每一题目以 `类` 进行封装，同一题目的解题思路以 `函数` 为实现载体。
-- 类名命名规范：`来源-序号-题目名称` / `来源-题目名称`。
+- 项目命名规范：`来源-序号-题目名称` / `来源-题目名称`。
 
 	> 例如：JzOffer-05-ReplaceSpaces、JzOffer-07-RebuildBinaryTree、Leetcode-TwoSum 等。
 
