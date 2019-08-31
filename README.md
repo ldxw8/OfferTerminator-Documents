@@ -13,7 +13,7 @@
 
 	>  技术面试必备基础知识、Leetcode 题解、Java、C++、Python、后端面试、操作系统、计算机网络、系统设计等。
 
-- 📝 | 文章 | [MisterBooo. LeetCodeAnimation [OL]. github.com](https://github.com/MisterBooo/LeetCodeAnimation)
+- ⌨️ | 算法 | [MisterBooo. LeetCodeAnimation [OL]. github.com](https://github.com/MisterBooo/LeetCodeAnimation)
 
 	> 本开源项目是用动画的形式呈现 LeetCode 的解题思路。
 	
@@ -21,8 +21,14 @@
 
 	> 实现语言是 Java，题库按简单/中等/困难分类，且解释足够详细。
 
+- ⌨️ | 算法 | [azl397985856. Leetcode-Solutions. github.com](https://github.com/azl397985856/leetcode)
+
+	> 实现语言是 JavaScript，题库按简单/中等/困难分类，题目按照算法思想、数据结构归档分类，解题思路图示等。
+
+
 ## 在线编程
 - [牛客网 -- 剑指Offer -- 编程题](https://www.nowcoder.com/ta/coding-interviews?page=3)
+
 
 ## 核心内容
 ### 读书笔记
@@ -34,7 +40,7 @@
 > 命名格式：面试企业 -- 职业 -- 面试时间 -- 面试人 ( 个人 / 其他人 )
 
 ### 笔试算法
-#### 开源格式说明
+#### 项目使用说明
 
 ![开源项目结构说明](img/OfferTerminator-documents_1-1.png)
 
@@ -53,13 +59,14 @@
 	- 无效等价类：刚好与有效等价类的概念相反。
 	- 边界值分析法：作为对等价类划分法的补充，通常其测试用例来自等价类的边界。
 
-#### 解题方案整理
+#### 解题源码整理
 - [ldxw8. OfferTerminator-Solutions. github.com](https://github.com/ldxw8/OfferTerminator-Solutions)
 
 	> 参考另一位兄弟的开源项目，题目命名也不用愁。 [Jchanghong. CodingInterviewChinese2. github.com](https://github.com/jchanghong/CodingInterviewChinese2)
 	
-	- JzOffer-20-NumericString
-	- JzOffer-67-Str2Int
+	- JzOffer-03-DuplicationInArray：数组中重复的数字
+	- JzOffer-20-NumericString：表示数值的字符串
+	- JzOffer-67-Str2Int：字符串转整数
 
 
 ## 参考资料
