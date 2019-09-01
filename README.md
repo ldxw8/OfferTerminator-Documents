@@ -35,6 +35,7 @@
 > 命名格式：书籍 -- 主题描述 -- 立项时间
 
 - [剑指 Offer -- 面经与解题启发性笔记 -- 2019.08.29](doc/Coding-Interviews-Questions-Analysis-and-Solutions.md)
+- [技术面试必备基础知识+CyC2018 -- 知识点总结 -- 2019.09.01](doc/CyC2018-CS-Notes.md)
 
 ### 面试经验
 > 命名格式：面试企业 -- 职业 -- 面试时间 -- 面试人 ( 个人 / 其他人 )
@@ -42,7 +43,11 @@
 ### 笔试算法
 #### 项目使用说明
 
-![开源项目结构说明](img/OfferTerminator-documents_1-1.png)
+|![开源项目结构说明](img/OfferTerminator-documents_1-1.png)|
+|:---:|
+|图 1-1 开源项目结构说明|
+
+
 
 - 使用集成开发环境 `IntelliJ Idea` 构建工程项目，并且每一题以单独 `Module` 立项。
 - 每一题目以 `类` 进行封装，同一题目的解题思路以 `函数` 为实现载体。
