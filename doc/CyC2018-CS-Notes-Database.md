@@ -583,8 +583,14 @@ WHERE SOUNDEX(col1) = SOUNDEX('apple')
 
 
 ## LeetCode for SQL
-
-
+- 更多题目和解题思路请参考原文 (内含在线编程连接)：[LeetCode for SQL](https://cyc2018.github.io/CS-Notes/#/notes/Leetcode-Database%20题解)
+- 综合自己的情况，以下挑选了难度较大的题目，留作启发性笔记：
+	- [181. Employees Earning More Than Their Managers](https://cyc2018.github.io/CS-Notes/#/notes/Leetcode-Database%20题解?id=_181-employees-earning-more-than-their-managers)
+	- [184. Department Highest Salary](https://cyc2018.github.io/CS-Notes/#/notes/Leetcode-Database%20题解?id=_184-department-highest-salary)
+	- [176. Second Highest Salary](https://cyc2018.github.io/CS-Notes/#/notes/Leetcode-Database%20题解?id=_176-second-highest-salary)
+	- [178. Rank Scores](https://cyc2018.github.io/CS-Notes/#/notes/Leetcode-Database%20题解?id=_178-rank-scores)
+	- [180. Consecutive Numbers](https://cyc2018.github.io/CS-Notes/#/notes/Leetcode-Database%20题解?id=_180-consecutive-numbers)
+	
 ## MySQL
 
 
