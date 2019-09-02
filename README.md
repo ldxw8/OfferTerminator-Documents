@@ -25,17 +25,15 @@
 
 	> 实现语言是 JavaScript，题库按简单/中等/困难分类，题目按照算法思想、数据结构归档分类，解题思路图示等。
 
-
 ## 在线编程
 - [牛客网 -- 剑指Offer -- 编程题](https://www.nowcoder.com/ta/coding-interviews?page=3)
-
 
 ## 核心内容
 ### 读书笔记
 > 命名格式：书籍 -- 主题描述 -- 立项时间
 
 - [剑指 Offer -- 面经与解题启发性笔记 -- 2019.08.29](doc/Coding-Interviews-Questions-Analysis-and-Solutions.md)
-- [技术面试必备基础知识+CyC2018 -- 知识点总结 -- 2019.09.01](doc/CyC2018-CS-Notes.md)
+- [CyC2018 技术面试必备基础知识 -- 数据库篇 -- 知识点总结 -- 2019.09.01](doc/CyC2018-CS-Notes-Database.md)
 
 ### 面试经验
 > 命名格式：面试企业 -- 职业 -- 面试时间 -- 面试人 ( 个人 / 其他人 )
@@ -72,6 +70,3 @@
 	- JzOffer-03-DuplicationInArray：数组中重复的数字
 	- JzOffer-20-NumericString：表示数值的字符串
 	- JzOffer-67-Str2Int：字符串转整数
-
-
-## 参考资料
