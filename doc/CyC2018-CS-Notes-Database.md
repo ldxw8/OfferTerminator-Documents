@@ -380,6 +380,7 @@
 	| :---: |
 	| 图 1-10 简单的学生课程 ER 模型 |
 
+
 ## SQL
 ### 基础
 - 模式定义了数据如何存储、存储什么样的数据以及数据如何分解等信息，数据库和表都有模式。
@@ -590,7 +591,8 @@ WHERE SOUNDEX(col1) = SOUNDEX('apple')
 	- [176. Second Highest Salary](https://cyc2018.github.io/CS-Notes/#/notes/Leetcode-Database%20题解?id=_176-second-highest-salary)
 	- [178. Rank Scores](https://cyc2018.github.io/CS-Notes/#/notes/Leetcode-Database%20题解?id=_178-rank-scores)
 	- [180. Consecutive Numbers](https://cyc2018.github.io/CS-Notes/#/notes/Leetcode-Database%20题解?id=_180-consecutive-numbers)
-	
+
+
 ## MySQL
 
 
