@@ -393,10 +393,7 @@
 	SELECT *
 	FROM mytable; -- 注释 2
 	
-	/**
-	 * 注释 3-1
-   	 * 注释 3-2
-   	 */
+	/* 注释 3-1 */
 	```
 
 - 数据库创建与使用：
@@ -566,8 +563,7 @@ FROM mytable;
 | SOUNDEX() | 转换为语音值
 
 ```sql
-其中， SOUNDEX() 可以将一个字符串转换为描述其语音表示的字母数字模式。
-
+# 其中 SOUNDEX() 可以将一个字符串转换为描述其语音表示的字母数字模式
 SELECT *
 FROM mytable
 WHERE SOUNDEX(col1) = SOUNDEX('apple')
