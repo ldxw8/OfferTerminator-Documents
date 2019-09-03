@@ -576,9 +576,51 @@ WHERE SOUNDEX(col1) = SOUNDEX('apple')
 
 ### 分组
 
+### 排序
+
 ### 连接
 
-### 嵌套查询
+### 子查询
+#### 非关联子查询
+ - 概念：非相关子查询是独立于外部查询的子查询，子查询执行完毕后将值传递给外部查询。子查询中只查询一次并返回一个字段的数据。
+- 可以将子查询的结果作为 WHRER 语句的过滤条件：
+
+	```sql
+	SELECT *
+	FROM mytable1
+	WHERE col1 IN (
+		SELECT col2 FROM mytable2
+	);
+	```
+- 下面的语句可以检索出客户的订单数量，子查询语句会对第一个查询检索出的每个客户执行一次：
+
+	```sql
+	SELECT cust_name, (
+		SELECT COUNT(*)
+		FROM Orders
+		WHERE Orders.cust_id = Customers.cust_id) AS orders_num
+	FROM Customers
+	ORDER BY cust_name;
+	```
+
+#### 关联子查询
+- 概念：关联子查询会引用外部查询中的一列或多列。这种子查询之所以被称为关联子查询，是因为子查询的确与外部查询有关。当问题的答案需要依赖于外部查询中包含的每一行中的值时，通常就需要使用关联子查询 $^{[3]}$。 
+- 相关子查询的执行依赖于外部查询的数据，外部查询执行一行，子查询就执行一次。并且是外部先查询一次，然后再执行一次内部查询。
+- 例如，查询部门工资前三高的所有员工 ([Leetcode](https://leetcode-cn.com/problems/department-top-three-salaries/submissions/))：
+
+	```sql
+	Select d.Name as Department, e.Name as Employee, e.Salary
+	From Employee as e, Department as d
+	Where 1=1 AND e.DepartmentId = d.Id
+	Group By e.DepartmentId, e.id
+	Having (
+		Select Count(distinct es.Salary) 
+		From Employee as es 
+		Where 1=1 -- "1=1" 没有特殊意义，仅为了对齐语句格式
+			AND e.DepartmentID = es.DepartmentID
+			AND es.Salary > e.Salary
+	) < 3
+	```
 
 ### 组合查询
 
@@ -600,5 +642,6 @@ WHERE SOUNDEX(col1) = SOUNDEX('apple')
 
 
 ## 参考资料
-- [美团技术团队. Innodb 中的事务隔离级别和锁的关系 [OL]. meituan.com, 2014](https://tech.meituan.com/2014/08/20/innodb-lock.html)
-- [Draveness. 浅入浅出 MySQL 和 InnoDB [OL]. draveness.me, 2017](https://draveness.me/mysql-innodb)
+- [1] [美团技术团队. Innodb 中的事务隔离级别和锁的关系 [OL]. meituan.com, 2014](https://tech.meituan.com/2014/08/20/innodb-lock.html)
+- [2] [Draveness. 浅入浅出 MySQL 和 InnoDB [OL]. draveness.me, 2017](https://draveness.me/mysql-innodb)
+- [3] [普里斯 . Oracle Database 10g SQL开发指南 [M]. 清华大学出版社, 2005](https://book.douban.com/subject/1318884/)
