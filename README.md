@@ -6,12 +6,13 @@
 - 📖 | 书籍 | [何海涛. 剑指 Offer [M]. 第2版. 电子工业出版社, 2017](https://book.douban.com/subject/27008702/)
 - 📖 | 书籍 | [《编程之美》小组. 编程之美 [M]. 第1版. 电子工业出版社, 2018](https://book.douban.com/subject/30351275/)
 - 📝 | 文章 | [ApacheCN. 简历指南 + LeetCode + Kaggle [OL]. github.com](https://github.com/apachecn/Interview) (👍)
-	- `简历`：[ApacheCN. 简历分享系列视频 [OL]. bilibili.com](https://www.bilibili.com/video/av53122083)
 	- `笔试`：[ApacheCN. 面试必备算法题目 [OL]. github.com](https://github.com/apachecn/Interview/tree/master/docs/Algorithm)
-	- `笔试`：[0voice. BAT 等技术面试题目/答案/专家出题人分析汇总 [OL]. github.com](https://github.com/0voice/interview_internal_reference)
+	- `面试`：[0voice. BAT 等技术面试题目/答案/专家出题人分析汇总 [OL]. github.com](https://github.com/0voice/interview_internal_reference)
 - 📝 | 文章 | [CyC2018. CS-Notes [OL]. github.com](https://github.com/CyC2018/CS-Notes) (👍)
 
 	>  技术面试必备基础知识、Leetcode 题解、Java、C++、Python、后端面试、操作系统、计算机网络、系统设计等。
+	
+- 🌝 | 面试 | [小土刀. 小土刀的面试刷题笔记. wdxtub.com](https://wdxtub.com/interview/14520843616037.html) (👍)
 
 - ⌨️ | 算法 | [MisterBooo. LeetCodeAnimation [OL]. github.com](https://github.com/MisterBooo/LeetCodeAnimation)
 
@@ -69,7 +70,7 @@
 #### 解题源码整理
 - [ldxw8. OfferTerminator-Solutions. github.com](https://github.com/ldxw8/OfferTerminator-Solutions)
 
-	> 参考另一位兄弟的开源项目，题目命名也不用愁。 [Jchanghong. CodingInterviewChinese2. github.com](https://github.com/jchanghong/CodingInterviewChinese2)
+	> 题目集中于剑指 Offer、Leetcode 的经典题目。且参考另一位兄弟的开源项目，可直接复用他的题目命名和题目描述。 [Jchanghong. CodingInterviewChinese2. github.com](https://github.com/jchanghong/CodingInterviewChinese2)
 	
 	- JzOffer-03-DuplicationInArray：数组中重复的数字
 	- JzOffer-20-NumericString：表示数值的字符串
