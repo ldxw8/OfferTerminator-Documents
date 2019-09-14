@@ -12,7 +12,7 @@
 
 	>  技术面试必备基础知识、Leetcode 题解、Java、C++、Python、后端面试、操作系统、计算机网络、系统设计等。
 	
-- 🌝 | 面试 | [小土刀. 小土刀的面试刷题笔记. wdxtub.com](https://wdxtub.com/interview/14520843616037.html) (👍)
+- 🌝 | 面试 | [小土刀. 小土刀的面试刷题笔记. wdxtub.com](https://wdxtub.com/interview/index.html) (👍)
 
 - ⌨️ | 算法 | [MisterBooo. LeetCodeAnimation [OL]. github.com](https://github.com/MisterBooo/LeetCodeAnimation)
 
