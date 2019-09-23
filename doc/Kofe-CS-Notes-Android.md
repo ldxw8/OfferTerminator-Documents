@@ -3,9 +3,9 @@
 ## Android 生命周期
 ### Activity 的生命周期
 
-| ![图1-1Activity的完整生命周期](#) |
+| ![图1-1Activity的完整生命周期](img/Kofe-CS-Notes-Android_1-1.png) |
 | :-: |
-| 图 1-1 Activity的完整生命周期 |
+| 图 1-1 Activity 的完整生命周期 |
 
 - 在系统中，触发 Activity 生命周期改变的方式：
 	- 有用户参与的生命周期改变；
@@ -43,3 +43,14 @@
 	
 			> 仅用于系统导致的页面重建，而用户导致的页面重建需在 onCreate() 中由开发者自主恢复状态信息。
 
+### Service 的生命周期
+
+| ![图1-Service的完整生命周期](img/Kofe-CS-Notes-Android_1-2.png) |
+| :-: |
+| 图 1-2 Service 的完整生命周期 |
+
+### Fragment 的生命周期
+
+| ![图1-Fragment的完整生命周期](img/Kofe-CS-Notes-Android_1-3.png) |
+| :-: |
+| 图 1-3 Fragment 的完整生命周期 |
