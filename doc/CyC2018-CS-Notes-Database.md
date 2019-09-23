@@ -459,6 +459,8 @@
 	```
 
 #### LIMIT
+> LIMIT 关键字只能在 MySQL 数据库中使用，属于 MySQL 的方言。在 SQL Server 使用 TOP 关键字替代使用。
+
 - 限制返回的行数。可以有两个参数，第一个参数为起始行，从 0 开始；第二个参数为返回的总行数。
 
 	```sql
@@ -471,6 +473,9 @@
 	SELECT *
 	FROM mytable
 	LIMIT 2, 3;
+	
+	// SQL Server
+	SELECT TOP 5 * from mytable;
 	```
 	
 ### 过滤
