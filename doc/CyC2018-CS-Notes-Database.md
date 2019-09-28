@@ -9,6 +9,11 @@
 | :---: |
 | 图 1-0 数据库系统原理章节导读 |
 
+### 参考资料
+- [美团技术团队. Innodb 中的事务隔离级别和锁的关系 [OL]. meituan.com, 2014](https://tech.meituan.com/2014/08/20/innodb-lock.html)
+- [Draveness. 浅入浅出 MySQL 和 InnoDB [OL]. draveness.me, 2017](https://draveness.me/mysql-innodb)
+- [普里斯 . Oracle Database 10g SQL开发指南 [M]. 清华大学出版社, 2005](https://book.douban.com/subject/1318884/)
+
 ### 事务
 - 概念：事务指的是满足 `ACID` 特性的一组操作，可以通过 Commit 提交一个事务，也可以使用 Rollback 进行回滚。
 - ACID：
@@ -400,10 +405,6 @@
 
 
 ## SQL
-
-### 参考资料
-- [1] [福达. SQL 必知必会 [M]. 人民邮电出版社, 2013](https://book.douban.com/subject/24250054/)
-
 ### 基础
 - 模式定义了数据如何存储、存储什么样的数据以及数据如何分解等信息，数据库和表都有模式。
 - 主键的值不允许修改，也不允许复用；(不能将已经删除的主键值赋给新数据行的主键。
@@ -466,7 +467,7 @@
 	```
 
 ### 插入 / 更新 / 删除 / 查询
-> 数据表的增删改查操作就不依依列举了，推荐阅读参考资料 [1]。
+> 数据表的增删改查操作就不一一列举了，推荐阅读参考资料：[福达. SQL 必知必会 [M]. 人民邮电出版社, 2013](https://book.douban.com/subject/24250054/)
 
 #### DISTINCT
 - 相同值只会出现一次。它作用于所有列，也就是说所有列的值都相同才算相同。
@@ -687,13 +688,12 @@ WHERE SOUNDEX(col1) = SOUNDEX('apple')
 - 内连接又称等值连接，使用 `INNER JOIN` 关键字。
 
 	```sql
-	# 
 	SELECT A.value, B.value
 	FROM tablea AS A INNER JOIN tableb AS B
 	ON A.key = B.key;
 	```
 	
-- 可以不明确使用 `INNER JOIN`，而使用普通查询并在 WHERE 中将两个表中要连接的列用等值方法连接起来。
+- 可以不明确使用 `INNER JOIN`，而使用普通查询并在 `WHERE` 中将两个表中要连接的列用等值方法连接起来。
 
 	```sql
 	SELECT A.value, B.value
@@ -737,7 +737,7 @@ WHERE SOUNDEX(col1) = SOUNDEX('apple')
 
 	例如，检索所有顾客的订单信息，包括还没有订单信息的顾客。
 	
-	customers 表：
+	Customers 表：
 	
 	| cust_id | cust_name |
 	| ------- | --------- |
@@ -745,7 +745,7 @@ WHERE SOUNDEX(col1) = SOUNDEX('apple')
 	| 2       | b         |
 	| 3       | c         |
 	
-	orders 表：
+	Orders 表：
 	
 	| order_id | cust_id |
 	| -------- | ------- |
@@ -765,7 +765,7 @@ WHERE SOUNDEX(col1) = SOUNDEX('apple')
 	| 2       | b         | Null     |
 	
 	```sql
-	SELECT Customers.cust_id, Orders.order_num
+	SELECT Customers.cust_id, Customers.cust_name, Orders.order_id
 	FROM Customers LEFT OUTER JOIN Orders
 	ON Customers.cust_id = Orders.cust_id;
 	```
@@ -812,9 +812,6 @@ WHERE SOUNDEX(col1) = SOUNDEX('apple')
 	) < 3
 	```
 
-### 组合查询
-
-
 ## LeetCode for SQL
 - 更多题目和解题思路请参考原文 (内含在线编程连接)：[LeetCode for SQL](https://cyc2018.github.io/CS-Notes/#/notes/Leetcode-Database%20题解)
 - 综合自己的情况，以下挑选了难度较大的题目，留作启发性笔记：
@@ -833,12 +830,12 @@ WHERE SOUNDEX(col1) = SOUNDEX('apple')
 | :---: |
 | 图 3-0 MySQL 章节导读 |
 
-### 索引
-#### 参考资料
-- [1] [Nullzx. B 树和 B+ 树的插入删除图文详解. cnblogs.com](https://www.cnblogs.com/nullzx/p/8729425.html)
-- [2] [WorthWaitingFor. MySQL索引原理以及查询优化. cnblogs.com](https://www.cnblogs.com/bypp/p/7755307.html)
-- [3] [割肉机. MySQL 查询优化常用方式. cnblogs.com](https://www.cnblogs.com/williamjie/p/9132390.html)
+### 参考资料
+- [Nullzx. B 树和 B+ 树的插入删除图文详解. cnblogs.com](https://www.cnblogs.com/nullzx/p/8729425.html)
+- [WorthWaitingFor. MySQL索引原理以及查询优化. cnblogs.com](https://www.cnblogs.com/bypp/p/7755307.html)
+- [割肉机. MySQL 查询优化常用方式. cnblogs.com](https://www.cnblogs.com/williamjie/p/9132390.html)
 
+### 索引
 #### B+Tree 原理
 ##### 数据结构
 - B-Tree (平衡树, Balance Tree)：也称为 `多路平衡查找树`，并且所有叶子节点位于同一层。
@@ -1082,16 +1079,16 @@ WHERE SOUNDEX(col1) = SOUNDEX('apple')
 - 内部做了很多优化，包括从磁盘读取数据时采用的可预测性读、能够加快读操作并且自动创建的自适应哈希索引、能够加速插入操作的插入缓冲区等。
 - 支持真正的 `在线热备份`。其它存储引擎不支持在线热备份，要获取一致性视图需要停止对所有表的写入，而在读写混合场景中，停止写入可能也意味着停止读取。
 
-#### MyiSAM
+#### MyISAM
 - 管理非事务表，是 ISAM (Indexed Sequential Access Method，有索引的顺序访问方法) 的扩展格式。
 - 不是事务安全的，且不支持外键。
 - 不支持行级锁，只能对整张表加锁，读取时会对需要读到的所有表加共享锁，写入时则对表加排它锁。但在表有读取操作的同时，也可以往表中插入新的记录，这被称为并发插入。
 - 可手工或者自动执行检查和修复操作，但是和事务恢复以及崩溃恢复不同，可能导致一些数据丢失，而且修复操作是非常慢的。
 
 #### 两者比较
-- 事务：InnoDB 是事务型的，可以使用 Commit 和 Rollback 语句。
+- 事务：InnoDB 是事务型的，可以使用 Commit 和 Rollback 语句。MyISAM 不支持事务。
 - 并发：MyISAM 只支持表级锁，而 InnoDB 还支持行级锁。
-- 外键：InnoDB 支持外键。
+- 外键：InnoDB 支持外键。MyISAM 不支持外键。
 - 备份：InnoDB 支持在线热备份。
 - 崩溃恢复：MyISAM 崩溃后发生损坏的概率比 InnoDB 高很多，而且恢复的速度也更慢。
 - 其它特性：MyISAM 支持压缩表和空间数据索引。
@@ -1140,8 +1137,3 @@ WHERE SOUNDEX(col1) = SOUNDEX('apple')
 
 ## Redis
 
-
-## 参考资料
-- [1] [美团技术团队. Innodb 中的事务隔离级别和锁的关系 [OL]. meituan.com, 2014](https://tech.meituan.com/2014/08/20/innodb-lock.html)
-- [2] [Draveness. 浅入浅出 MySQL 和 InnoDB [OL]. draveness.me, 2017](https://draveness.me/mysql-innodb)
-- [3] [普里斯 . Oracle Database 10g SQL开发指南 [M]. 清华大学出版社, 2005](https://book.douban.com/subject/1318884/)
