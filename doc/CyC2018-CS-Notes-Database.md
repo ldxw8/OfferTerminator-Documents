@@ -400,6 +400,10 @@
 
 
 ## SQL
+
+### 参考资料
+- [1] [福达. SQL 必知必会 [M]. 人民邮电出版社, 2013](https://book.douban.com/subject/24250054/)
+
 ### 基础
 - 模式定义了数据如何存储、存储什么样的数据以及数据如何分解等信息，数据库和表都有模式。
 - 主键的值不允许修改，也不允许复用；(不能将已经删除的主键值赋给新数据行的主键。
@@ -461,13 +465,9 @@
 	DROP TABLE mytable;
 	```
 
-### 插入
+### 插入 / 更新 / 删除 / 查询
+> 数据表的增删改查操作就不依依列举了，推荐阅读参考资料 [1]。
 
-### 更新
-
-### 删除
-
-### 查询
 #### DISTINCT
 - 相同值只会出现一次。它作用于所有列，也就是说所有列的值都相同才算相同。
 
@@ -575,16 +575,16 @@ FROM mytable;
 ```
 
 #### 文本处理
-| 函 数 | 说 明 | 
-| :---: | :---: | 
-| LEFT() | 左边的字符
-| RIGHT() | 右边的字符
-| LOWER() | 转换为小写字符
-| UPPER()	 | 转换为大写字符
-| LTRIM() | 去除左边的空格
-| RTRIM() | 去除右边的空格
-| LENGTH() | 长度
-| SOUNDEX() | 转换为语音值
+| 函 数 | 说 明 |
+| :---: | :---: |
+| LEFT() | 左边的字符 |
+| RIGHT() | 右边的字符 |
+| LOWER() | 转换为小写字符 |
+| UPPER()	 | 转换为大写字符 |
+| LTRIM() | 去除左边的空格 |
+| RTRIM() | 去除右边的空格 |
+| LENGTH() | 长度 |
+| SOUNDEX() | 转换为语音值 |
 
 ```sql
 # 其中 SOUNDEX() 可以将一个字符串转换为描述其语音表示的字母数字模式
@@ -594,14 +594,181 @@ WHERE SOUNDEX(col1) = SOUNDEX('apple')
 ```
 
 #### 日期和时间处理
+- 日期格式：YYYY-MM-DD
+- 时间格式：HH:MM:SS
+
+| 函数 | 说明 |
+| :-: | :-: |
+| ADDDATE()     | 增加一个日期 (天、周等) |
+| ADDTIME()     | 增加一个时间 (时、分等) |
+| CURDATE()     | 返回当前日期 |
+| CURTIME()     | 返回当前时间 |
+| DATE()        | 返回日期时间的日期部分 |
+| DATEDIFF()    | 计算两个日期之差 |
+| DATE_ADD()    | 高度灵活的日期运算函数 |
+| DATE_FORMAT() | 返回一个格式化的日期或时间串 |
+| DAY()         | 返回一个日期的天数部分 |
+| DAYOFWEEK()   | 对于一个日期，返回对应的星期几 |
+| HOUR()        | 返回一个时间的小时部分 |
+| MINUTE()      | 返回一个时间的分钟部分 |
+| MONTH()       | 返回一个日期的月份部分 |
+| NOW()         | 返回当前日期和时间 |
+| SECOND()      | 返回一个时间的秒部分 |
+| TIME()        | 返回一个日期时间的时间部分 |
+| YEAR()        | 返回一个日期的年份部分 |
 
 #### 数值处理
 
+| 函数 | 说明 |
+| :-: | :-: |
+| SIN()  | 正弦   |
+| COS()  | 余弦   |
+| TAN()  | 正切   |
+| ABS()  | 绝对值 |
+| SQRT() | 平方根 |
+| MOD()  | 余数   |
+| EXP()  | 指数   |
+| PI()   | 圆周率 |
+| RAND() | 随机数 |
+
 ### 分组
+- 把具有相同的数据值的行放在同一组中。
+- 指定的分组字段除了能按该字段进行分组，也会自动按该字段进行排序。
+- 可以对同一分组数据使用汇总函数进行处理，例如求分组数据的计数等。
+
+	```sql
+	SELECT col, COUNT(*) AS num
+	FROM mytable
+	GROUP BY col;
+	```
+	
+- GROUP BY 自动按分组字段进行排序，当然可通过 ORDER BY 按要求的汇总字段排序。
+
+	```sql
+	SELECT col, COUNT(*) AS num
+	FROM mytable
+	GROUP BY col
+	ORDER BY num;
+	```
+	
+- WHERE 过滤行，HAVING 过滤分组，`行过滤应当先于分组过滤`。
+
+	```sql
+	SELECT col, COUNT(*) AS num
+	FROM mytable
+	WHERE col > 2
+	GROUP BY col
+	HAVING num >= 2;
+	```
+	
+- 分组规定：
+	- GROUP BY 子句需出现在 WHERE 子句之后，ORDER BY 子句之前；
+	- 除了汇总字段外，SELECT 语句中的每一字段都必须在 GROUP BY 子句中给出；
+	- NULL 的行会单独分为一组；
+	- 大多数 SQL 实现不支持 GROUP BY 列具有可变长度的数据类型。
+	
 
 ### 排序
+- 升序：ASC (默认)
+- 降序：DESC
+- 可以按多个列进行排序，并且为每个列指定不同的排序方式：
+
+	```sql
+	SELECT *
+	FROM mytable
+	ORDER BY col1 DESC, col2 ASC;
+	```
 
 ### 连接
+- 连接用于连接多个表，使用 `JOIN` 关键字，并且条件语句使用 `ON` 而不是 `WHERE`。
+- 连接可以替换子查询，并且比子查询的效率一般会更快。
+
+#### 内连接
+- 内连接又称等值连接，使用 `INNER JOIN` 关键字。
+
+	```sql
+	# 
+	SELECT A.value, B.value
+	FROM tablea AS A INNER JOIN tableb AS B
+	ON A.key = B.key;
+	```
+	
+- 可以不明确使用 `INNER JOIN`，而使用普通查询并在 WHERE 中将两个表中要连接的列用等值方法连接起来。
+
+	```sql
+	SELECT A.value, B.value
+	FROM tablea AS A, tableb AS B
+	WHERE A.key = B.key;
+	```
+
+#### 自连接
+- 自连接可以看成内连接的一种，只是连接的表是自身而已。
+
+	例如：一张员工表，包含员工姓名和员工所属部门，要找出与 Jim 处在同一部门的所有员工姓名。
+	
+	```sql
+	# 子查询版本
+	SELECT name
+	FROM employee
+	WHERE department = (
+		SELECT department
+		FROM employee
+		WHERE name = "Jim"
+	);
+      
+	# 自连接版本
+	SELECT e1.name
+	FROM employee AS e1 INNER JOIN employee AS e2
+	ON e1.department = e2.department AND e2.name = "Jim";
+	```
+
+#### 自然连接
+- 自然连接是把同名列通过等值测试连接起来的，同名列可以有多个。
+
+	> 内连接和自然连接的区别：内连接提供连接的列，而自然连接自动连接所有同名列。
+
+	```sql
+	SELECT A.value, B.value
+	FROM tablea AS A NATURAL JOIN tableb AS B;
+	```
+
+#### 外连接
+- 外连接保留了没有关联的那些行。分为左外连接，右外连接以及全外连接，左外连接就是保留左表没有关联的行。
+
+	例如，检索所有顾客的订单信息，包括还没有订单信息的顾客。
+	
+	customers 表：
+	
+	| cust_id | cust_name |
+	| ------- | --------- |
+	| 1       | a         |
+	| 2       | b         |
+	| 3       | c         |
+	
+	orders 表：
+	
+	| order_id | cust_id |
+	| -------- | ------- |
+	| 1        | 1       |
+	| 2        | 1       |
+	| 3        | 3       |
+	| 4        | 3       |
+	
+	Output：
+	
+	| cust_id | cust_name | order_id |
+	| ------- | --------- | -------- |
+	| 1       | a         | 1        |
+	| 1       | a         | 2        |
+	| 3       | c         | 3        |
+	| 3       | c         | 4        |
+	| 2       | b         | Null     |
+	
+	```sql
+	SELECT Customers.cust_id, Orders.order_num
+	FROM Customers LEFT OUTER JOIN Orders
+	ON Customers.cust_id = Orders.cust_id;
+	```
 
 ### 子查询
 #### 非关联子查询
