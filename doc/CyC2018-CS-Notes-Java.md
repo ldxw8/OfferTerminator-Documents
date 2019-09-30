@@ -50,7 +50,7 @@
 
 | ![CyC2018-CS-Notes-Java-ArrayList_1-1](img/CyC2018-CS-Notes-Java-ArrayList_1-1.png)|
 | :---: |
-| 图 1-1 ArrayList 概述 |
+| 图 2-1 ArrayList 概述 |
 
 ##### 参考资料
 - [细雨蒙情. ArrayList (JDK1.8) 源码分析. jianshu.com](https://www.jianshu.com/p/ea4f943206ea)
@@ -232,7 +232,7 @@
 
 | ![CyC2018-CS-Notes-Java-LinkedList_1-1](img/CyC2018-CS-Notes-Java-LinkedList_1-1.png) |
 | :---: |
-| 图 1-1 LinkedList 概述 |
+| 图 2-2 LinkedList 概述 |
 
 ##### 参考资料
 - [十二页. LinkedList (JDK1.8/JDK1.7/JDK1.6). csdn.net](https://blog.csdn.net/u011392897/article/details/57115818)
@@ -242,8 +242,8 @@
 - JDK 1.7 之后使用的是不带头结点的普通的双向链表，增加两个节点指针 first、last 分别指向首尾节点，示意图如下：
 
 	| ![CyC2018-CS-Notes-Java-LinkedList_1-2](img/CyC2018-CS-Notes-Java-LinkedList_1-2.png) |
-	| :---: |
-	| 图 1-2 不带头结点的双向链表 |
+	| :----------------------------------------------------------: |
+	|                图 2-2-1 不带头结点的双向链表                 |
 	
 -  与 ArrayList 一样，LinkedList 所有方法都没有进行同步，它是 `线程不安全` 的。为此在多线程并发读写时需要外部同步。
 
@@ -367,7 +367,7 @@
 
 | ![CyC2018-CS-Notes-Java-HashMap_1-1](img/CyC2018-CS-Notes-Java-HashMap_1-1.png) |
 | :---: |
-| 图 1-1 HashMap 概述 |
+| 图 2-3 HashMap 概述 |
 
 ##### 参考资料
 - [十二页. HashMap JDK1.8 源码分析. csdn.net](https://blog.csdn.net/u011392897/article/details/60151323)
@@ -380,11 +380,11 @@
 
 	> 通过源码可知：以内部类 Node 表示结点，存储着键值对，且包含了四个字段。其中 next 字段我们可以看出 Node 会相链组成一个链表。即数组中的每个位置被当成一个桶，一个桶存放一个链表。
 
-	故在 JDK 1.8 中如果链表长度到达阀值 (默认是8)，就会将链表转换成 `红黑二叉树` 保存，以提高 Hash 冲突时的查找速度。整体结构如图 1-2 所示：
+	故在 JDK 1.8 中如果链表长度到达阀值 (默认是8)，就会将链表转换成 `红黑二叉树` 保存，以提高 Hash 冲突时的查找速度。整体结构如图 2-3-1 所示：
 
 	| ![CyC2018-CS-Notes-Java-HashMap_1-2](img/CyC2018-CS-Notes-Java-HashMap_1-2.png) |
 	| :---: |
-	| 图 1-2 HashMap 的整体结构 |
+	| 图 2-3-1 HashMap 的整体结构 |
 
 - 链表添加时，新节点会放在链表末尾，而不是像 JDK 1.6/1.7 一样放在头部；
 - 扩容操作也会尽量保证扩容后还在同一条链表上的节点之间的 `相对顺序` 不变。
@@ -579,7 +579,7 @@
 		
 		| ![CyC2018-CS-Notes-Java-HashMap_1-3](img/CyC2018-CS-Notes-Java-HashMap_1-3.png) |
 		| :---: |
-		| 图 1-3 h & (length-1) 的计算原理 |
+		| 图 2-3-2 h & (length-1) 的计算原理 |
 		
 		> 注意：`h & (length-1)`  但要求 Entry 数组的长度大小满足 2 的幂。   
 		> 原理：去掉 h 的高位值，只保留 h 的低位值作为数组下标。
@@ -612,15 +612,15 @@
 
 		> JDK 1.6/1.7 版本的结点迁移方式是 `遍历链表`，即一个一个重新添加到新链表的头部，会颠倒原来链表中结点的 `相对顺序`。
 
-	- 因为新增的 1 bit 是 1 或者 0，则可以认为是随机的过程。因此在扩容 resize() 的执行过程，则可以把之前冲突的结点均匀地分散到新的哈希桶中，如图 1-5 所示。
+	- 因为新增的 1 bit 是 1 或者 0，则可以认为是随机的过程。因此在扩容 resize() 的执行过程，则可以把之前冲突的结点均匀地分散到新的哈希桶中，如图 2-3-4 所示。
 
 	| ![CyC2018-CS-Notes-Java-HashMap_1-4](img/CyC2018-CS-Notes-Java-HashMap_1-4.png) |
 	| :---: |
-	| 图 1-4 扩容机制中的结点迁移方式探究 |
+	| 图 2-3-3 扩容机制中的结点迁移方式探究 |
 	
 	| ![CyC2018-CS-Notes-Java-HashMap_1-5](img/CyC2018-CS-Notes-Java-HashMap_1-5.png) |
 	| :---: |
-	| 图 1-5 分布均匀的哈希桶 |
+	| 图 2-3-4 分布均匀的哈希桶 |
 
 ##### 总结
 - 基于 JDK 1.8 的 HashMap 是由 `数组+链表+红黑树` 组成，当链表长度超过 8 时会自动转换成红黑树，当红黑树节点个数小于 6 时，又会转化成链表。
