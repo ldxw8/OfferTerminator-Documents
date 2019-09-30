@@ -141,7 +141,7 @@
 - [Julycoding. 教你透彻了解红黑树. github.com](https://github.com/julycoding/The-Art-Of-Programming-By-July/blob/master/ebook/zh/03.01.md)
 
 ##### 基本概念
-- 红黑树：又称堆成二叉树，是一种 `自平衡` 的二叉查找树。如图 7-3-1 所示为一棵红黑树。
+- 红黑树：是一种 `自平衡` 的二叉查找树。如图 7-3-1 所示为一棵红黑树。
 
 	| ![红黑树](img/Kofe-CS-Notes-DataStruct-Tree_1-3-1.png) |
 	| :-: |
