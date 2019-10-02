@@ -836,6 +836,7 @@ WHERE SOUNDEX(col1) = SOUNDEX('apple')
 - [Nullzx. B 树和 B+ 树的插入删除图文详解. cnblogs.com](https://www.cnblogs.com/nullzx/p/8729425.html)
 - [WorthWaitingFor. MySQL索引原理以及查询优化. cnblogs.com](https://www.cnblogs.com/bypp/p/7755307.html)
 - [割肉机. MySQL 查询优化常用方式. cnblogs.com](https://www.cnblogs.com/williamjie/p/9132390.html)
+- [CodingLabs. MySQL索引背后的数据结构及算法原理. CodingLabs.org](http://blog.codinglabs.org/articles/theory-of-mysql-index.html)
 
 ### 索引
 #### B+Tree 原理
