@@ -426,6 +426,34 @@
 	CREATE DATABASE test;
 	USE test;
 	```
+	
+### 顺序
+- SQL 中语法顺序和执行顺序是不一致的：
+
+	> 便于理解，下述实例 (MySQL) 并没有把所有的 SQL 语法结构都列出来。且不同数据库的版本也不一样。
+
+	```sql
+	# 语法顺序
+	SELECT[DISTINCT]
+	FROM
+	WHERE
+	GROUP BY
+	HAVING
+	UNION
+	ORDER BY
+	
+	# 执行顺序
+	FROM
+	WHERE
+	GROUP BY
+	HAVING
+	SELECT
+	DISTINCT
+	UNION
+	ORDER BY
+	```
+
+
 
 ### 创建表
 - 创建表：
