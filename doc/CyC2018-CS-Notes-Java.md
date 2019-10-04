@@ -637,7 +637,7 @@
 #### ConcurrentHashMap
 
 ## Java 并发
-### 线程状态转换
+### 线程状态
 
 ### 使用线程
 - Java 中有三种使用线程的方法： 实现 `Runnable` 接口；实现 `Callable` 接口；继承 `Thread` 类。
@@ -707,7 +707,7 @@
 	> 为此实现接口会更好一些。
 
 ### 基础线程机制
-### 中断机制
+### 线程中断机制
 
 ### 同步互斥
 - Java 提供了两种锁机制来控制 `多个线程` 对共享资源的 `互斥访问`，第一个是 JVM 实现的 `synchronized`，而另一个是 JDK 实现的 `ReentrantLock`。
@@ -954,13 +954,170 @@
 - 因为 synchronized 是 `JVM` 实现的一种锁机制，JVM 原生地支持它，而 ReentrantLock 不是所有的 JDK 版本都支持。
 - 并且使用 synchronized 不用担心没有释放锁而导致 `死锁问题`，因为 JVM 会确保锁的释放。
 
-### 线程之间协作
+### 线程协作
+
+### 线程不安全示例
+
+### Java 内存模型
+- Java 内存模型试图屏蔽各种 `硬件` 和 `操作系统` 的内存访问差异，以实现让 Java 程序在各种平台下都能达到一致的内存访问效果。
+
+#### 主内存与工作内存
+- 处理器上的寄存器的读写的速度比内存快几个数量级，为了解决这种 `速度矛盾`，在它们之间加入了 `高速缓存`。
+
+	加入高速缓存带来了一个新的问题：`缓存一致性`。如果多个缓存共享同一块主内存区域，那么多个缓存的数据可能会不一致，需要一些 `协议` 来解决这个问题。
+
+	| ![P、C、M的交互关系](img/Cys2018-CS-Notes-Java_3-7.png) |
+	| :-: |
+	| 图 3-7 处理器、高速缓存、主内存间的交互关系 |
+	
+- 所有的变量都存储在主内存中，每个线程还有自己的工作内存，工作内存存储在高速缓存或者寄存器中，保存了该线程使用的变量的主内存副本拷贝。
+
+	线程只能直接操作工作内存中的变量，不同线程之间的变量值传递需要通过主内存来完成。
+
+	| ![P、C、M的交互关系](img/Cys2018-CS-Notes-Java_3-7-1.png) |
+	| :-: |
+	| 图 3-7-1 线程、工作内存、主内存间的交互关系 (对比图 3-7) |
+
+#### 两内存间交互操作
+| ![主内存和工作内存的交互操作](img/Cys2018-CS-Notes-Java_3-7-2.png) |
+| :-: |
+| 图 3-7-2 主内存和工作内存的交互操作 |
+
+- Java 内存模型定义了 8 个操作来完成主内存和工作内存的交互操作，如图 3-7-2 所示：
+	- lock：作用于主内存的变量，把一个变量标识别为一条线程独占的状态。
+	- unlock：作用于主内存的变量，释放出于锁定状态的变量。
+	- read：作用于主内存的变量，把一个变量的值从主内存传输到工作内存中。
+	- load：作用于工作内存的变量，在 read 之后执行，把 read 得到的值放入工作内存的变量副本中。
+	- use：作用于工作内存的变量，把工作内存中一个变量的值传递给执行引擎。
+	- assign：作用于工作内存的变量，把一个从执行引擎接收到的值赋给工作内存的变量。
+	- store：作用于工作内存的变量，把工作内存的一个变量的值传送到主内存中。
+	- write：作用于主内存的变量，在 store 之后执行，把 store 得到的值放入主内存的变量中。
+
+#### 内存模型三大特征
+##### 原子性
+- Java 内存模型保证了 read、load、assign、use、store、write、lock 和 unlock 操作具有原子性，例如对一个 int 类型的变量执行 assign 赋值操作，这个操作就是原子性的。
+
+	> long 和 double 的非原子性协定：Java 内存模型允许虚拟机将没有被 `volatile` 修饰的 64 位数据 (long，double) 的读写操作划分为两次 32 位的操作来进行，即 load、store、read 和 write 操作可以不具备原子性。
+	
+- 有一个错误认识就是，int 等原子性的类型在多线程环境中不会出现线程安全问题。前面的线程不安全示例代码中，cnt 属于 int 类型变量，1000 个线程对它进行自增操作之后，得到的值为 997 而不是 1000。
+
+	下图演示了两个线程同时对 cnt 进行操作，load、assign、store 这一系列操作整体上看不具备原子性，那么在 T1 修改 cnt 并且还没有将修改后的值写入主内存，T2 依然可以读入旧值。可以看出，这两个线程虽然执行了两次自增运算，但是主内存中 cnt 的值最后为 1 而不是 2。因此对 int 类型读写操作满足原子性只是说明 load、assign、store 这些单个操作具备原子性。
+	
+	> 为了方便讨论，将内存间的交互操作简化为 3 个：load、assign、store。
+
+	| ![两个线程同时对cnt进行操作示意](img/Cys2018-CS-Notes-Java_3-7-3.png) | ![AtomicInteger对cnt进行操作示意](img/Cys2018-CS-Notes-Java_3-7-4.png) |
+	| :-: | :-: |
+	| 图 3-7-3 两个线程同时对 cnt 进行操作示意 | 图 3-7-4 AtomicInteger 对 cnt 进行操作示意 |
+
+- `AtomicInteger` 能保证多个线程修改的原子性，如图 3-7-4 所示。
+
+- 使用 AtomicInteger 重写之前线程不安全的代码之后得到以下线程安全实现：
+
+	```java
+	public class AtomicExample {
+	    private AtomicInteger cnt = new AtomicInteger();
+
+	    public void add() {
+		    cnt.incrementAndGet();
+	    }
+
+	    public int get() {
+		    return cnt.get();
+	    }
+	}
+	
+	public static void main(String[] args) throws InterruptedException {
+	    final int threadSize = 1000;
+	    AtomicExample example = new AtomicExample(); // 只修改这条语句
+	    final CountDownLatch countDownLatch = new CountDownLatch(threadSize);
+	    ExecutorService executorService = Executors.newCachedThreadPool();
+	    for (int i = 0; i < threadSize; i++) {
+	        executorService.execute(() -> {
+	            example.add();
+	            countDownLatch.countDown();
+	        });
+	    }
+	    countDownLatch.await();
+	    executorService.shutdown();
+	    System.out.println(example.get());
+	}
+	
+	// Output: 1000
+	```
+
+- 除了使用原子类之外，也可以使用 `synchronized` 互斥锁来保证操作的原子性。它对应的内存间交互操作为 lock 和 unlock，在虚拟机实现上对应的字节码指令为 monitorenter 和 monitorexit。
+
+	```java
+	public class AtomicSyncExample {
+	    private int cnt = 0;
+	
+	    public synchronized void add() {
+	        cnt++;
+	    }
+	
+	    public synchronized int get() {
+	        return cnt;
+	    }
+	}
+	
+	public static void main(String[] args) throws InterruptedException {
+	    final int threadSize = 1000;
+	    AtomicSyncExample example = new AtomicSyncExample();
+	    final CountDownLatch countDownLatch = new CountDownLatch(threadSize);
+	    ExecutorService executorService = Executors.newCachedThreadPool();
+	    for (int i = 0; i < threadSize; i++) {
+	        executorService.execute(() -> {
+	            example.add();
+	            countDownLatch.countDown();
+	        });
+	    }
+	    countDownLatch.await();
+	    executorService.shutdown();
+	    System.out.println(example.get());
+	}
+	
+	// Output: 1000
+	```
+
+##### 可见性
+- 可见性：指当一个线程修改了共享变量的值，其它线程能够立即得知这个修改。Java 内存模型是通过在变量修改后将新值同步回主内存，在变量读取前从主内存刷新变量值来实现可见性的。
+- 主要有三种实现可见性的方式：
+	- `volatile`：volatile 的特殊规则保证了新值能立即同步到主内存，以及每次使用前立即从主内存刷新。
+	- `synchronized`：对一个变量执行 unlock 操作之前，必须把变量值同步回主内存。
+	- `final`：被 final 关键字修饰的字段在构造器中一旦初始化完成，并且没有发生 `this 逃逸`，那么其它线程就能看见 final 字段的值。
+
+		> `this 逃逸`：其它线程通过 this 引用访问到初始化了一半的对象。
+
+- 对前面的线程不安全示例中的 cnt 变量使用 volatile 修饰，不能解决线程不安全问题，因为 volatile 并不能保证操作的原子性。
+
+##### 有序性
+- 有序性：指在本线程内观察，所有操作都是有序的。在一个线程观察另一个线程，所有操作都是无序的，无序是因为发生了指令重排序。在 Java 内存模型中，允许编译器和处理器对指令进行重排序，重排序过程不会影响到单线程程序的执行，却会影响到多线程并发执行的正确性。
+
+- volatile 关键字通过添加内存屏障的方式来禁止指令重排，即重排序时不能把后面的指令放到内存屏障之前。
+
+- 也可以通过 synchronized 来保证有序性，它保证每个时刻只有一个线程执行同步代码，相当于是让线程顺序执行同步代码。
+
+#### 先行发生原则
+
+### 线程安全
+#### Java 语言的线程安全
+- `不可变`：
+
+#### 线程安全的实现方法
+##### 互斥同步
+##### 非阻塞同步
+##### 无同步方案
+
+### 锁优化
+
+#### 自旋锁
+#### 锁消除
+#### 锁粗化
+#### 轻量级锁
+#### 偏向锁
+
 ### J.U.C - AQS
 ### J.U.C - 其他组件
-### 线程不安全示例
-### Java 内存模型
-### 线程安全
-### 锁优化
 ### 多线程开发良好实践
 
 ## Java 虚拟机
@@ -1193,7 +1350,10 @@
 	- 新生代中对象存活率低，使用 `复制算法`。
 	- 老年代中对象存活率高、没有额外空间对它进行分配担保，使用 `标记-清除` 算法或者 `标记-整理` 算法。
 
+
 #### 垃圾收集器
+> 以下垃圾收集器是基于 JDK 1.7 展开介绍的。
+
 | ![HotSpot虚拟机的垃圾收集器](img/Cys2018-CS-Notes-Java_4-2-5.png) |
 | :-: |
 | 图 4-2-5 HotSpot 虚拟机的垃圾收集器 |
@@ -1306,7 +1466,7 @@
 ##### 垃圾收集器总结
 - 综上所述，7 种垃圾收集器大致的细节差异，如表 4-2-1 所示：
 
-	| 收集器 | 适用主体 | 分代收集 | 运行方式 | 线程环境 | 适用场景 |
+	| 收集器 | 架构模式 | 分代收集 | 运行方式 | 线程环境 | 适用场景 |
 	| :---: | :---: | :---: | :---: | :---: | :--- |
 	| Serial | Client | 新生代 | 串行 | 单线程 | -- |
 	| ParNew | Server | 新生代 | 并行 | 多线程 | -- |
@@ -1317,42 +1477,49 @@
 	| G1 | Server | 新 / 老 | 并发 | 多线程 | 并发收集、低停顿；<br>不产生内存空间碎片 |
 
 ### 内存分配与回收策略
-#### Minor GC 和 Full GC
-- Minor GC：回收新生代，因为新生代对象存活时间很短，因此 Minor GC 会频繁执行，执行的速度一般也会比较快。
-- Full GC：回收老年代和新生代，老年代对象其存活时间长，因此 Full GC 很少执行，执行速度会比 Minor GC 慢很多。
+#### 内存分配策略
+##### Minor GC 和 Full GC
+- `Minor GC`：回收 `新生代`，因为新生代对象存活时间很短，因此 Minor GC 会频繁执行，执行的速度也比较快。
+- `Full GC`：回收 `老年代` 和 `新生代`，老年代对象其存活时间长，因此 Full GC 很少执行，执行速度会比 Minor GC 慢很多。
 
-#### Full GC 的触发条件
-- `System.gc()`：调用 System.gc() 只是建议虚拟机执行 Full GC，但是虚拟机不一定真正去执行。不建议使用这种方式，而是让虚拟机管理内存。
+##### 对象优先在 Eden 分配
+- 大多数情况下，对象在新生代 Eden 上分配，当 Eden 空间不够时，发起 Minor GC。
+
+##### 大对象直接进入老年代
+- 大对象是指需要连续内存空间的对象，最典型的大对象是那种很长的字符串以及数组。
+- 经常出现大对象会提前触发垃圾收集以获取足够的连续空间分配给大对象。
+- `-XX:PretenureSizeThreshold`：大于 此值的对象直接在老年代分配，避免在 Eden 和 Survivor 之间的大量内存复制。
+
+##### 长期存活对象进入老年代
+- 为对象定义年龄计数器，对象在 Eden 出生并经过 Minor GC 依然存活，将移动到 Survivor 中，年龄就增加 1 岁，增加到一定年龄则移动到老年代中。
+- `-XX:MaxTenuringThreshold`：用来定义年龄的阈值。
+
+##### 动态对象年龄判定
+- 虚拟机并不是永远要求对象的年龄必须达到 MaxTenuringThreshold 才能晋升老年代，如果在 Survivor 中相同年龄所有对象大小的总和大于 Survivor 空间的一半，则年龄大于或等于该年龄的对象可以直接进入老年代，无需等到 MaxTenuringThreshold 中要求的年龄。
+
+##### 空间分配担保
+- 在发生 Minor GC 之前，虚拟机先检查老年代最大可用的连续空间是否大于新生代所有对象总空间，如果条件成立的话，那么 Minor GC 可以确认是安全的。
+- 如果不成立的话虚拟机会查看 HandlePromotionFailure 的值是否允许担保失败，若允许那么就会继续检查老年代最大可用的连续空间是否大于历次晋升到老年代对象的平均大小。
+	- 如果大于，将尝试着进行一次 Minor GC；
+	- 如果小于，或者 HandlePromotionFailure 的值不允许冒险，那么就要进行一次 Full GC。
+
+#### 内存回收策略
+- `System.gc()`：调用 System.gc() 只是 `建议` 虚拟机执行 Full GC，但虚拟机不一定真正去执行。
+
+	> 不建议使用这种方式，而是让虚拟机管理内存。
+
 - `老年代空间不足`：
 	- 老年代空间不足的常见场景为前文所讲的大对象直接进入老年代、长期存活的对象进入老年代等。
-	- 为了避免以上原因引起的 Full GC，应当尽量不要创建过大的对象以及数组。除此之外，可以通过 -Xmn 虚拟机参数调大新生代的大小，让对象尽量在新生代被回收掉，不进入老年代。还可以通过 -XX:MaxTenuringThreshold 调大对象进入老年代的年龄，让对象在新生代多存活一段时间。
-- `空间分配担保失败`：使用复制算法的 Minor GC 需要老年代的内存空间作担保，如果担保失败会执行一次 Full GC。具体内容请参考上面的第 5 小节。
+	- 为了避免以上原因引起的 Full GC，应当尽量不要创建过大的对象以及数组。
+	- 除此之外，可以通过 `-Xmn` 虚拟机参数调大新生代的大小，让对象尽量在新生代被回收掉，不进入老年代。
+	- 还可以通过` -XX:MaxTenuringThreshold` 调大对象进入老年代的年龄，让对象在新生代多存活一段时间。
+- `空间分配担保失败`：使用复制算法的 Minor GC 需要老年代的内存空间作担保，如果担保失败会执行一次 Full GC。具体内容请参考上面 [空间分配担保](#空间分配担保)。
 - `永久代空间不足`：
-	- 在 JDK 1.7 及以前，HotSpot 虚拟机中的方法区是用永久代实现的，永久代中存放的为一些 Class 的信息、常量、静态变量等数据。
+	- 在 `JDK 1.7` 及以前，HotSpot 虚拟机中的方法区是用永久代实现的，永久代中存放的为一些 Class 的信息、常量、静态变量等数据。
 	- 当系统中要加载的类、反射的类和调用的方法较多时，永久代可能会被占满，在未配置为采用 CMS GC 的情况下也会执行 Full GC。如果经过 Full GC 仍然回收不了，那么虚拟机会抛出 java.lang.OutOfMemoryError。
 	- 为避免以上原因引起的 Full GC，可采用的方法为增大永久代空间或转为使用 CMS GC。
 - `Concurrent Mode Failure`：执行 CMS GC 的过程中同时有对象要放入老年代，而此时老年代空间不足（可能是 GC 过程中浮动垃圾过多导致暂时性的空间不足），便会报 Concurrent Mode Failure 错误，并触发 Full GC。
 
-#### 对象优先在 Eden 分配
-- 大多数情况下，对象在新生代 Eden 上分配，当 Eden 空间不够时，发起 Minor GC。
-
-#### 大对象直接进入老年代
-- 大对象是指需要连续内存空间的对象，最典型的大对象是那种很长的字符串以及数组。
-- 经常出现大对象会提前触发垃圾收集以获取足够的连续空间分配给大对象。
-- -XX:PretenureSizeThreshold，大于此值的对象直接在老年代分配，避免在 Eden 和 Survivor 之间的大量内存复制。
-
-#### 长期存活的对象进入老年代
-- 为对象定义年龄计数器，对象在 Eden 出生并经过 Minor GC 依然存活，将移动到 Survivor 中，年龄就增加 1 岁，增加到一定年龄则移动到老年代中。
-- -XX:MaxTenuringThreshold 用来定义年龄的阈值。
-
-#### 动态对象年龄判定
-- 虚拟机并不是永远要求对象的年龄必须达到 MaxTenuringThreshold 才能晋升老年代，如果在 Survivor 中相同年龄所有对象大小的总和大于 Survivor 空间的一半，则年龄大于或等于该年龄的对象可以直接进入老年代，无需等到 MaxTenuringThreshold 中要求的年龄。
-
-#### 空间分配担保
-- 在发生 Minor GC 之前，虚拟机先检查老年代最大可用的连续空间是否大于新生代所有对象总空间，如果条件成立的话，那么 Minor GC 可以确认是安全的。
-- 如果不成立的话虚拟机会查看 HandlePromotionFailure 的值是否允许担保失败，如果允许那么就会继续检查老年代最大可用的连续空间是否大于历次晋升到老年代对象的平均大小，如果大于，将尝试着进行一次 Minor GC；如果小于，或者 HandlePromotionFailure 的值不允许冒险，那么就要进行一次 Full GC。
-
 ### 虚拟机类加载机制
-
 
 ## Java I/O
