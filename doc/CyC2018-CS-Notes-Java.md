@@ -957,6 +957,48 @@
 ### 线程协作
 
 ### 线程不安全示例
+- 若多个线程对同一个共享数据进行访问而不采取同步操作的话，那么操作的结果是不一致的。
+
+	以下代码演示了 1000 个线程同时对 cnt 执行自增操作，操作结束之后它的值有可能小于 1000。
+	
+	```java
+    public class ThreadUnsafeExample {
+	    private int cnt = 0;
+	    
+	    public void add() {
+	        cnt++;
+        }
+
+	    public int get() {
+	        return cnt;
+	    }
+    }
+    
+	public static void main(String[] args) throws InterruptedException {
+	    final int threadSize = 1000;
+	    
+	    ThreadUnsafeExample example = 
+	    	new ThreadUnsafeExample();
+	    	
+	    final CountDownLatch countDownLatch = 
+	    	new CountDownLatch(threadSize);
+	    	
+	    ExecutorService executorService = 
+	    	Executors.newCachedThreadPool();
+	    	
+	    for (int i = 0; i < threadSize; i++) {
+	        executorService.execute(() -> {
+	            example.add();
+	            countDownLatch.countDown();
+	        });
+	    }
+	    countDownLatch.await();
+	    executorService.shutdown();
+	    System.out.println(example.get());
+	}
+
+	// Output: 997
+	```
 
 ### Java 内存模型
 - Java 内存模型试图屏蔽各种 `硬件` 和 `操作系统` 的内存访问差异，以实现让 Java 程序在各种平台下都能达到一致的内存访问效果。
@@ -1003,7 +1045,7 @@
 
 	> long 和 double 的非原子性协定：Java 内存模型允许虚拟机将没有被 `volatile` 修饰的 64 位数据 (long，double) 的读写操作划分为两次 32 位的操作来进行，即 load、store、read 和 write 操作可以不具备原子性。
 	
-- 有一个错误认识就是，int 等原子性的类型在多线程环境中不会出现线程安全问题。前面的线程不安全示例代码中，cnt 属于 int 类型变量，1000 个线程对它进行自增操作之后，得到的值为 997 而不是 1000。
+- 有一个错误认识就是，int 等原子性的类型在多线程环境中不会出现线程安全问题。前面的 [线程不安全示例](线程不安全示例) 代码中，cnt 属于 int 类型变量，1000 个线程对它进行自增操作之后，得到的值为 997 而不是 1000。
 
 	下图演示了两个线程同时对 cnt 进行操作，load、assign、store 这一系列操作整体上看不具备原子性，那么在 T1 修改 cnt 并且还没有将修改后的值写入主内存，T2 依然可以读入旧值。可以看出，这两个线程虽然执行了两次自增运算，但是主内存中 cnt 的值最后为 1 而不是 2。因此对 int 类型读写操作满足原子性只是说明 load、assign、store 这些单个操作具备原子性。
 	
@@ -1103,30 +1145,55 @@
 
 #### 先行发生原则
 - 上面提到了可以用 volatile 和 synchronized 来保证有序性。除此之外，JVM 还规定了先行发生原则，让一个操作无需控制就能先于另一个操作完成。
+- 若两个操作之间的关系不在下列规则，并且无法从下列规则推导出来的话，则它们没有顺序性保障，JVM 可以对它们随意地进行重排序。
 
 ##### 程序次序原则
-- 程序次序原则 (Program Order Rule)：在一个线程内，在程序前面的操作先行发生于后面的操作。
+- 程序次序原则 (Program Order Rule)：在一个线程内，在程序前面的操作先行发生于后面的操作。更准确说,应该是代码中控制流的顺序，因为要考虑分支、循环结构。如图 3-7-5 所示。
+
+	| ![程序次序原则](img/Cys2018-CS-Notes-Java_3-7-5.png) |
+	| :-: |
+	| 图 3-7-5 程序次序原则 |
 
 ##### 管程锁定规则
-- 管程锁定规则 (Monitor Lock Rulu)：
+- 管程锁定规则 (Monitor Lock Rulu)：一个 unlock 操作先行发生于后面对同一个锁的 lock 操作。如图 3-7-6 所示。
+
+	> 必须是同一个锁；“后面” 指时间上的先后顺序。
+
+	| ![程序次序原则](img/Cys2018-CS-Notes-Java_3-7-6.png) |
+	| :-: |
+	| 图 3-7-6 管程锁定规则 |
 
 ##### Volatile 变量规则
-- volatile 变量规则 (Volatile Variable Rule)：
+- volatile 变量规则 (Volatile Variable Rule)：对一个 volatile 变量的写操作先行发生于后面对这个变量的读操作。如图 3-7-7 所示。
+
+	> “后面” 指时间上的先后顺序。
+
+	| ![程序次序原则](img/Cys2018-CS-Notes-Java_3-7-7.png) |
+	| :-: |
+	| 图 3-7-7 Volatile 变量规则 |
 
 ##### 线程启动规则
-- 线程启动规则 (Thread Start Rule)：
+- 线程启动规则 (Thread Start Rule)：Thread 对象的 start() 方法调用先行发生于此线程的每一个动作。
+
+	| ![线程启动规则](img/Cys2018-CS-Notes-Java_3-7-8.png) |
+	| :-: |
+	| 图 3-7-8 线程启动规则 |
 
 ##### 线程终止规则
-- 线程终止规则 (Thread Termination Rule):
+- 线程终止规则 (Thread Termination Rule)：线程中的所有操作都先行发生于对此线程的终止检测。可通过 Thread.join() 方法结束、Thread.isAlive() 的返回值等手段检测到线程已经终止执行。
+
+	| ![线程终止规则](img/Cys2018-CS-Notes-Java_3-7-9.png) |
+	| :-: |
+	| 图 3-7-9 线程终止规则 |
 
 ##### 线程中断规则
-- 线程中断规则 (Thread Interruption Rule)：
+- 线程中断规则 (Thread Interruption Rule)：对线程 interrupt() 方法的调用先行发生于被中断线程的代码检测到中断事件的发生，可以通过 Thread.interrupted() 方法检测到是否有中断发生。
 
 ##### 对象终结规则
-- 对象终结规则 (Finalizer Rule)：
+- 对象终结规则 (Finalizer Rule)：一个对象的初始化完成 (构造函数执行结束) 先行发生于它的 finalize() 方法的开始。
 
 ##### 传递性
-- 传递性 (Transitivity)：
+- 传递性 (Transitivity)：如果操作 A 先行发生于操作 B，操作 B 先行发生于操作 C，那么操作 A 先行发生于操作 C。
 
 ### 线程安全
 #### Java 语言的线程安全
