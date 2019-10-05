@@ -638,6 +638,48 @@
 
 ## Java 并发
 ### 线程状态
+-  Java 语言定义了 5 种线程状态，在任意时间点，一个线程有且只能拥有一种状态。
+
+	| ![线程状态转换](img/CyC2018-CS-Notes-Java-_3-1.png) |
+	| :-: |
+	| 图 3-1 线程状态转换 |
+
+#### 新建 / New
+- 创建后尚未启动的线程。
+
+#### 运行 / Runable
+- 可能正在运行，也可能正在等待 CPU 时间片。包含了操作系统线程状态中的 Running 和 Ready。
+
+#### 阻塞 / Blocked
+- 等待获取一个排它锁，如果其线程释放了锁就会结束此状态。
+
+#### 无限期等待 / Waiting 
+- 处于这种状态的线程不会被分配 CPU 执行时间，需等待其它线程 `显式地` 唤醒，否则不会被分配 CPU 时间片。
+
+  | 进入方法 | 退出方法 |
+  | :--- | :--- |
+  | 没有设置 Timeout 参数的 Object.wait() 方法 | Object.notify() / Object.notifyAll() |
+  | 没有设置 Timeout 参数的 Thread.join() 方法 | 被调用的线程执行完毕 |
+  | LockSupport.park() 方法 | LockSupport.unpark(Thread) |
+
+#### 限期等待 / Timed Waiting
+- 处于这种状态的线程不会被分配 CPU 执行时间，不过无需等待其它线程显式地唤醒，在一定时间之后会被 `系统自动唤醒`。
+
+	| 进入方法 | 退出方法 |
+	| :--- | :--- |
+	| Thread.sleep() 方法 | 时间结束 |
+	| 设置了 Timeout 参数的 Object.wait() 方法 | 时间结束 / Object.notify() / Object.notifyAll() |
+	| 设置了 Timeout 参数的 Thread.join() 方法 | 时间结束 / 被调用的线程执行完毕 |
+	| LockSupport.parkNanos() 方法 | LockSupport.unpark(Thread) |
+	| LockSupport.parkUntil() 方法 | LockSupport.unpark(Thread) |
+	
+	- 调用 Thread.sleep() 方法使线程进入限期等待状态时，常常用“使一个线程睡眠”进行描述。
+	- 调用 Object.wait() 方法使线程进入限期等待或者无限期等待时，常常用“挂起一个线程”进行描述。
+	- 睡眠和挂起是用来描述行为，而阻塞和等待用来描述状态。
+	- 阻塞和等待的区别在于，阻塞是被动的，它是在等待获取一个排它锁。而等待是主动的，通过调用 Thread.sleep() 和 Object.wait() 等方法进入。
+	
+#### 死亡 / Terminated
+- 可以是线程结束任务之后自己结束，或者产生了异常而结束。
 
 ### 使用线程
 - Java 中有三种使用线程的方法： 实现 `Runnable` 接口；实现 `Callable` 接口；继承 `Thread` 类。
@@ -708,6 +750,7 @@
 
 ### 基础线程机制
 ### 线程中断机制
+### 线程协作
 
 ### 同步互斥
 - Java 提供了两种锁机制来控制 `多个线程` 对共享资源的 `互斥访问`，第一个是 JVM 实现的 `synchronized`，而另一个是 JDK 实现的 `ReentrantLock`。
@@ -954,8 +997,6 @@
 - 因为 synchronized 是 `JVM` 实现的一种锁机制，JVM 原生地支持它，而 ReentrantLock 不是所有的 JDK 版本都支持。
 - 并且使用 synchronized 不用担心没有释放锁而导致 `死锁问题`，因为 JVM 会确保锁的释放。
 
-### 线程协作
-
 ### 线程不安全示例
 - 若多个线程对同一个共享数据进行访问而不采取同步操作的话，那么操作的结果是不一致的。
 
@@ -1196,34 +1237,314 @@
 - 传递性 (Transitivity)：如果操作 A 先行发生于操作 B，操作 B 先行发生于操作 C，那么操作 A 先行发生于操作 C。
 
 ### 线程安全
+- 线程安全：当多个线程访问一个对象时，如果不考虑这些线程在运行时环境下的调度和交替执行，也不需要进行额外的同步，或者在调用方法进行任何其他的协调操作，调用这个对象的行为都可以获得正确的结果，那么这个对象是线程安全的  $^{[1, 2]}$。
+
+	> 该定义较严谨，它要求线程安全的代码都必须具备一个特征：代码本身封装了所有必要的正确性保障手段 (同步互斥等)，令调用者无须关系多线程的问题，无须自己采取措施来保证多线程的正确调用。
+
+#### 参考资料
+- [1] [周志明. 深入理解 Java 虚拟机 [M]. 第二版. 机械工业出版社, 2013](https://book.douban.com/subject/24722612/)
+- [2] [ Brian Goetz. Java Concurrency in Practice [M]. Addison-Wesley Professional, 2016](https://book.douban.com/subject/1888733/)
+
 #### Java 语言的线程安全
-- `不可变`：
+- 不可变：
+	- 不可变 (Immutable) 的对象一定是线程安全的，不需要再采取任何的线程安全保障措施。只要一个不可变的对象被正确地构建出来，永远也不会看到它在多个线程之中处于不一致的状态。
+	- 多线程环境下，应当尽量使对象成为不可变，来满足线程安全。
+
+- 不可变的类型：
+	- final 关键字修饰的基本数据类型；
+	- String 类型；
+	- 枚举类型；
+	- Number 部分子类，如 Long 和 Double 等数值包装类型，BigInteger 和 BigDecimal 等大数据类型。但同为 Number 的原子类 AtomicInteger 和 AtomicLong 则是可变的。
+
+- 对于集合类型：可以使用 `Collections.unmodifiableXXX()` 方法来获取一个不可变的集合。
+
+	```java
+	public class ImmutableExample {
+	    public static void main(String[] args) {
+	        Map<String, Integer> map = new HashMap<>();
+	        Map<String, Integer> unmodifiableMap = 
+	            Collections.unmodifiableMap(map);
+	        unmodifiableMap.put("a", 1);
+	    }
+	}
+	```
+	
+	- 执行 unmodifiableMap.put() 则会抛出以下异常：
+	
+		```java
+		Exception in thread "main" java.lang.UnsupportedOperationException
+		    at java.util.Collections$UnmodifiableMap.put(Collections.java:1457)
+		    at ImmutableExample.main(ImmutableExample.java:9)
+		```
+	
+	- Collections.unmodifiableXXX() 先对原始的集合进行拷贝，需要对集合进行修改的方法都直接抛出异常。
+	
+		```java
+		public V put(K key, V value) {
+		    throw new UnsupportedOperationException();
+		}
+		```
 
 #### 线程安全的实现方法
 ##### 互斥同步
+- 互斥同步 (Synchronization) 是常见的一种并发正确性保障手段。
+	- 同步是指多个线程并发访问共享数据时，保证共享数据在同一时刻只被一个线程使用 (使用信号量时可以是一些线程)。
+	- 互斥是实现同步的一种手段，临界区、互斥量和信号量都是主要的互斥实现方式。
+
+		> 互斥是因，同步是果；互斥是方法，同步是目的。
+	
+- synchronized 关键字和 ReentrantLock 接口。详细见上述章节 [同步互斥](#同步互斥)。
+
 ##### 非阻塞同步
+- 互斥同步最主要的问题就是 `线程阻塞和唤醒` 所带来的 `性能问题`，因此这种同步也称为阻塞同步 (Blocking Synchronization)。
+- `互斥同步` 属于一种 `悲观并发策略`，总是认为只要不去做正确的同步措施，那就肯定会出现问题。无论共享数据是否真的会出现竞争，它都要进行加锁 (这里讨论的是概念模型，实际上虚拟机会优化掉很大一部分不必要的加锁)、用户态核心态转换、维护锁计数器和检查是否有被阻塞的线程需要唤醒等操作。
+- 随着硬件指令集的发展，我们可以使用基于 `冲突检测` 的 `乐观并发策略`：先进行操作，如果没有其它线程争用共享数据，那操作就成功了，否则采取补偿措施，即 `不断地重试`，直到成功为止。这种乐观的并发策略的许多实现都不需要将线程阻塞，因此这种同步操作称为 `非阻塞同步`。
+
+###### CAS
+- 乐观锁需要操作和冲突检测这两个步骤具备原子性，这里就不能再使用互斥同步来保证了，只能靠硬件来完成。硬件支持的原子性操作最典型的是：`比较并交换` (Compare-and-Swap，CAS)。
+- CAS 指令需要有 3 个操作数，分别是内存地址 V、旧的预期值 A 和新值 B。当执行操作时，只有当 V 的值等于 A，才将 V 的值更新为 B。
+
+###### AtomicInteger
+- J.U.C 包 (java.util.concurrent) 里面的整数原子类 AtomicInteger 的方法调用了 Unsafe 类的 CAS 操作。
+
+	- 以下代码使用了 AtomicInteger 执行了自增的操作。
+	
+		```java
+		private AtomicInteger cnt = new AtomicInteger();
+	
+		public void add() {
+		    cnt.incrementAndGet();
+		}
+		```
+		
+	- 以下代码是 incrementAndGet() 的源码，它调用了 Unsafe 的 getAndAddInt() 。
+
+		```java
+		public final int incrementAndGet() {
+		    return unsafe.getAndAddInt(this, valueOffset, 1) + 1;
+		}
+		```
+		
+	- 以下代码是 getAndAddInt() 源码，var1 指示对象内存地址，var2 指示该字段相对对象内存地址的偏移，var4 指示操作需要加的数值，这里为 1。
+
+		通过 getIntVolatile(var1, var2) 得到旧的预期值，通过调用 compareAndSwapInt() 来进行 CAS 比较，如果该字段内存地址中的值等于 var5，那么就更新内存地址为 var1+var2 的变量为 var5+var4。
+
+		可以看到 getAndAddInt() 在一个循环中进行，发生冲突的做法是不断的进行重试。
+	
+		```java
+		public final int getAndAddInt(Object var1, long var2, int var4) {
+		    int var5;
+		    do {
+		        var5 = this.getIntVolatile(var1, var2);
+		    } while(!this.compareAndSwapInt(var1, var2, var5, var5 + var4));
+		
+		    return var5;
+		}
+		```
+
+###### ABA
+- 如果一个变量初次读取的时候是 A 值，它的值被改成了 B，后来又被改回为 A，那 CAS 操作就会误认为它从来没有被改变过。
+- J.U.C 包提供了一个带有标记的原子引用类 AtomicStampedReference 来解决这个问题，它可以通过控制变量值的版本来保证 CAS 的正确性。大部分情况下 ABA 问题不会影响程序并发的正确性，如果需要解决 ABA 问题，改用传统的 `互斥同步` 可能会比原子类更高效。
+
 ##### 无同步方案
+- 要保证线程安全，同步并不是必要步骤。毕竟同步只是保证共享数据争用时的正确性手段，若一个方法本身就不设计不涉及共享数据，那么它无须任何同步措施去确保正确性。
+
+###### 栈封闭
+- 多个线程访问同一个方法的局部变量时，不会出现线程安全问题，因为 `局部变量` 存储在 `虚拟机栈` 中，属于线程私有的。
+
+	```java
+	public class StackClosedExample {
+	    public void add() {
+	        int cnt = 0;
+	        for (int i = 0; i < 100; i++) {
+	            cnt++;
+	        }
+	        System.out.println(cnt);
+	    }
+	}
+	
+	public static void main(String[] args) {
+	    StackClosedExample example = new StackClosedExample();
+	    ExecutorService executorService = Executors.newCachedThreadPool();
+	    executorService.execute(() -> example.add());
+	    executorService.execute(() -> example.add());
+	    executorService.shutdown();
+	}
+	```
+
+######  线程本地存储
+- 线程本地存储 (Thread Local Storage)：如果一段代码中所需要的数据必须与其他代码共享，判断这些共享数据的代码是否能保证在同一个线程中执行。若能保证就可以把共享数据的可见范围限制在同一个线程之内，这样无须同步也能保证线程之间不出现数据争用的问题。
+
+- 符合这种特点的应用并不少见，大部分使用 `消费队列架构模式` (如 `生产者-消费者` 模式) 都会将产品的消费过程尽量在一个线程中消费完。
+
+	> 一个经典应用实例就是 Web 交互模型中的 “一个请求对应一个服务器线程” (Thread-per-Request)，这种处理方式的广泛应用使得很多 Web 服务端应用都可以使用线程本地存储来解决线程安全问题。
+
+- 可以使用 `java.lang.ThreadLocal` 类来实现线程本地存储功能。
+	- 对于以下代码，thread1 中设置 threadLocal 为 1，而 thread2 设置 threadLocal 为 2。过了一段时间之后，thread1 读取 threadLocal 依然是 1，不受 thread2 的影响。
+
+		```java
+		public class ThreadLocalExample {
+		    public static void main(String[] args) {
+		        ThreadLocal threadLocal = new ThreadLocal();
+		        Thread thread1 = new Thread(() -> {
+		            threadLocal.set(1);
+		            try {
+		                Thread.sleep(1000);
+		            } catch (InterruptedException e) {
+		                e.printStackTrace();
+		            }
+		            System.out.println(threadLocal.get());
+		            threadLocal.remove();
+		        });
+		        Thread thread2 = new Thread(() -> {
+		            threadLocal.set(2);
+		            threadLocal.remove();
+		        });
+		        thread1.start();
+		        thread2.start();
+		    }
+		}
+		```
+		
+	- 为了理解 ThreadLocal，先看以下代码：
+
+		```java
+		public class ThreadLocalExample1 {
+		    public static void main(String[] args) {
+		        ThreadLocal threadLocal1 = new ThreadLocal();
+		        ThreadLocal threadLocal2 = new ThreadLocal();
+		        Thread thread1 = new Thread(() -> {
+		            threadLocal1.set(1);
+		            threadLocal2.set(1);
+		        });
+		        Thread thread2 = new Thread(() -> {
+		            threadLocal1.set(2);
+		            threadLocal2.set(2);
+		        });
+		        thread1.start();
+		        thread2.start();
+		    }
+		}
+		```
+		
+		它所对应的底层结构图为：
+		
+		| ![ThreadLocal底层结构图](img/Cys2018-CS-Notes-Java_3-8.png) |
+		| :-: |
+		| 图 3-8 ThreadLocal底层结构图 |
+	
+	- 每个 Thread 都有一个 ThreadLocal.ThreadLocalMap 对象。
+
+		```java
+		/**
+		 * ThreadLocal values pertaining to this thread. 
+		 * This map is maintained by the ThreadLocal class.
+		 */
+		ThreadLocal.ThreadLocalMap threadLocals = null;
+		```
+		
+	- 当调用一个 ThreadLocal 的 set(T value) 方法时，先得到当前线程的 ThreadLocalMap 对象，然后将 ThreadLocal->value 键值对插入到该 Map 中。
+
+		> get() 方法类似。
+
+		```java
+		public void set(T value) {
+		    Thread t = Thread.currentThread();
+		    ThreadLocalMap map = getMap(t);
+		    if (map != null)
+		        map.set(this, value);
+		    else
+		        createMap(t, value);
+		}
+		```
+
+- ThreadLocal 从理论上讲并不是用来解决多线程并发问题的，因为根本不存在多线程竞争。
+
+	在一些场景下，尤其是使用线程池，由于 ThreadLocal.ThreadLocalMap 的底层数据结构导致 ThreadLocal 有内存泄漏的情况，应该尽可能在每次使用 ThreadLocal 后手动调用 remove()，以避免出现 ThreadLocal 经典的内存泄漏甚至是造成自身业务混乱的风险。
+
+######  可重入代码
+-  可重入代码 (Reentrant Code)：也称纯代码 (Pure Code)，可以在代码执行的任何时刻中断它，转而去执行另外一段代码 (包括递归调用它本身)，而在控制权返回后，原来的程序不会出现任何错误。
+- 可重入代码有一些共同的特征，例如不依赖存储在堆上的数据和公用的系统资源、用到的状态量都由参数中传入、不调用非可重入的方法等。
+- 通过简单原则来判断代码是否具备可重入性：如果一个方法，它的返回结果是可以预测的，只要输入相同的数据就能返回相同的结果，那么它满足可重入性的要求，当然也是线程安全的。
 
 ### 锁优化
+- 这里的锁优化主要是指 JVM 对 `synchronized` 的优化。
 
 #### 自旋锁
-#### 锁消除
-#### 锁粗化
-#### 轻量级锁
-#### 偏向锁
+- 互斥同步进入阻塞状态的开销都很大，应该尽量避免。在许多应用中，共享数据的锁定状态只会持续很短的一段时间。自旋锁的思想是让一个线程在请求一个共享数据的锁时执行 `忙循环 (自旋)` 一段时间，如果在这段时间内能获得锁，就可以避免进入阻塞状态。
+- 自旋锁虽然能避免进入阻塞状态从而减少开销，但是它需要进行忙循环操作占用 CPU 时间，它只适用于共享数据的锁定状态很短的场景。
+- 在 JDK 1.6 中引入了自适应的自旋锁。自适应意味着自旋的次数不再固定了，而是由前一次在同一个锁上的自旋次数及锁的拥有者的状态来决定。
 
-### J.U.C - AQS
-### J.U.C - 其他组件
+#### 锁消除
+- 锁消除是指对于被检测出不可能存在竞争的共享数据的锁进行消除。
+- 锁消除主要是通过 `逃逸分析` 来支持，如果堆上的共享数据不可能逃逸出去被其它线程访问到，那么就可以把它们当成私有数据对待，也就可以将它们的锁进行消除。
+- 对于一些看起来没有加锁的代码，其实 `隐式` 的加了很多锁。例如下面的字符串拼接代码就隐式加了锁：
+
+	```java
+	public static String concatString(String s1, String s2, String s3) {
+	    return s1 + s2 + s3;
+	}
+	```
+	
+- String 是一个不可变的类，编译器会对 String 的拼接自动优化。在 JDK 1.5 之前，会转化为 StringBuffer 对象的连续 append() 操作：
+
+	每个 append() 方法中都有一个同步块。虚拟机观察变量 sb，很快就会发现它的动态作用域被限制在 concatString() 方法内部。也就是说，sb 的所有引用永远不会逃逸到 concatString() 方法之外，其他线程无法访问到它，因此可以进行消除。
+
+	```java
+	public static String concatString(String s1, String s2, String s3) {
+	    StringBuffer sb = new StringBuffer();
+	    sb.append(s1);
+	    sb.append(s2);
+	    sb.append(s3);
+	    return sb.toString();
+	}
+	```
+
+#### 锁粗化
+- 如果一系列的连续操作都对同一个对象反复加锁和解锁，频繁的加锁操作就会导致性能损耗。
+
+- 上一节的示例代码中连续的 append() 方法就属于这类情况。如果虚拟机探测到由这样的一串零碎的操作都对同一个对象加锁，将会把加锁的范围扩展 (粗化) 到整个操作序列的外部。
+
+	对于上一节的示例代码就是扩展到第一个 append() 操作之前直至最后一个 append() 操作之后，这样只需要加锁一次就可以了。
+
+#### 轻量级锁
+- JDK 1.6 引入了偏向锁和轻量级锁，从而让锁拥有了四个状态：无锁状态 (unlocked)、偏向锁状态 (biasble)、轻量级锁状态 (lightweight locked) 和重量级锁状态 (inflated)。
+
+	> 轻量级锁是较于传统的 “重量级” 锁的说法，它并不是用来代替重量级锁的，而是在没有多线程的前提下，减少传统的重量级锁定使用操作系统互斥量产生的 `性能消耗`。
+
+#### 偏向锁
+- 偏向锁的思想是偏向于让第一个获取锁对象的线程，这个线程在之后获取该锁就不再需要进行同步操作，甚至连 CAS 操作也不再需要。
+- 当有另外一个线程去尝试获取这个锁对象时，偏向状态就宣告结束，此时撤销偏向 (Revoke Bias) 后恢复到未锁定状态或者轻量级锁状态。
+
 ### 多线程开发良好实践
+> 摘录自原文：[CyC2018. Java 并发-多线程开发良好的实践. cyc2018.github.io](https://cyc2018.github.io/CS-Notes/#/notes/Java%20并发?id=十三、多线程开发良好的实践)
+
+- 定义线程，起个有意义的名字，便于识别，且方便找 BUG。
+
+- 缩小同步范围，从而减少锁争用。例如对于 synchronized，应该尽量使用同步块而不是同步方法。
+
+- 多用同步工具，少用 wait() 和 notify()。
+	- 例如，CountDownLatch, CyclicBarrier, Semaphore 和 Exchanger 这些同步类简化了编码操作，而用 wait() 和 notify() 很难实现复杂控制流；
+	- 其次，这些同步类是由最好的企业编写和维护，在后续的 JDK 中还会不断优化和完善。
+
+- 使用 BlockingQueue 实现 `生产者-消费者` 架构模式。
+- 多用并发集合，少用同步集合。 例如应该使用 ConcurrentHashMap 而不是 HashMap。
+- 使用本地变量和不可变类来保证线程安全。
+- 使用线程池，而不是直接创建线程，这是因为创建线程代价很高，线程池可以有效地利用有限的线程来启动任务。
 
 ## Java 虚拟机
+
+### 参考资料 
+- [周志明. 深入理解 Java 虚拟机 [M]. 第二版. 机械工业出版社, 2013](https://book.douban.com/subject/24722612/)
+- [归去来兮. HotSpot的安全区和安全点. cnblogs.com](https://www.cnblogs.com/mazhimazhi/p/11337660.html)
+
 ### JVM 运行时数据区域
 - Java 虚拟机 (Java Virtual Machine, JVM) 在执行 Java 程序的过程中会把它所管理的内存划分为若干不同的数据区域。
 - 这些区域各有用途，以及各自创建和销毁的时间。比如有的区域随着虚拟机进程的启动而存在，有些区域以来用户线程的启动而创建，结束而销毁。
 
-|     ![运行时数据区域](img/Cys2018-CS-Notes-Java_4-1.png)     |
-| :----------------------------------------------------------: |
-| 图 4-1 Java 虚拟机运行时数据区域 / JVM 内存模型 (来自 [CyC2018.CS-Notes](https://cyc2018.github.io/CS-Notes/#/notes/Java%20虚拟机?id=一、运行时数据区域) ) |
+	| ![运行时数据区域](img/Cys2018-CS-Notes-Java_4-1.png) |
+	| :-: |
+	| 图 4-1 Java 虚拟机运行时数据区域 / JVM 内存模型 (来自 [CyC2018.CS-Notes](https://cyc2018.github.io/CS-Notes/#/notes/Java%20虚拟机?id=一、运行时数据区域) ) |
 
 ##### 程序计数器
 - 程序计数器：记录正在执行的虚拟机字节码指令的地址 (如果正在执行的是本地方法则为空)。
@@ -1303,7 +1624,7 @@
 - 垃圾收集 (Garbage Collection, GC) 主要是针对 `堆` 和 `方法区` 进行。
 - 程序计数器、虚拟机栈和本地方法栈这三个区域属于线程私有的，只存在于线程的生命周期内，随线程结束就会消失，因此不需要对这三个区域进行垃圾回收。
 
-#### 判断对象是否可被回收
+#### 对象存活判定算法
 ##### 引用计数算法
 - 为对象添加一个引用计数器，当对象增加一个引用时计数器加 1，引用失效时计数器减 1。引用计数为 0 的对象可被回收。
 
@@ -1362,7 +1683,7 @@
 
 	> 自救只能进行一次，若回收的对象之前调用了 finalize() 方法自救，后面回收时不会再调用该方法。
 
-#### 引用类型
+#### 再谈引用类型
 - 无论是通过引用计数算法判断对象的引用数量，还是通过可达性分析算法判断对象引用链是否可达，判定对象是否存活都与 `引用` 有关。
 - 四种 `引用强度` 依次逐渐减弱：
 	- 强引用：被强引用关联的对象不会被回收。
@@ -1400,7 +1721,7 @@
 		PhantomReference<Object> pf = new PhantomReference<Object>(obj, null);
 		obj = null;
 		```
-	
+
 #### 垃圾收集算法
 ##### 标记-清除算法
 | ![标记-清除算法示意](img/Cys2018-CS-Notes-Java_4-2-1.png) |
@@ -1445,6 +1766,30 @@
 	- 新生代中对象存活率低，使用 `复制算法`。
 	- 老年代中对象存活率高、没有额外空间对它进行分配担保，使用 `标记-清除` 算法或者 `标记-整理` 算法。
 
+#### HotSpot 算法实现
+##### 根节点枚举
+- 使用可达性分析算法，从一系列 GCRoot 对象开始，向下搜索引用链，若一个对象没有与任何 GCRoot 对象关联，这个对象就会被判定为可回收对象。
+
+	这一过程称为 `根节点枚举`，也就是垃圾回收中的 `标记过程`。当前所有的垃圾收集器，在标记阶段都必须停止所有 Java 执行线程 (Stop the wrold, STW)，以保证对象引用状态不会发生变化。
+
+- HotSpot 虚拟机使用的是准确式 GC，当执行系统停顿下来后，并不需要一个不漏地检查完所有执行上下文和全局的引用位置，而是维护了一个专门的映射表 `OopMap` 记录哪些地方存放着对象引用，来快速完成根节点枚举过程。
+
+	在类加载完成时，HotSpot 就会把对象内某个偏移位置是否为对象引用记录下来，JIT 编译过程中，也会在特定的位置记录下栈和局部变量表中哪些位置是引用。
+
+##### 安全点 SafePoint
+- 在 OopMap 协助下，HotSpot 可快速且准确地完成 GC Roots 枚举。但是 OopMap 内容变化的指令非常多，如果为每一条指令都生成对应的 OopMap，那么将需要大量的额外空间。为每一个操作记录 OopMap 不现实，为此 HotSpot 虚拟机引入了安全点 (SafePoint) 的概念。
+
+- SafePoint 是程序中的某些位置，线程执行到这些位置时，线程中的某些状态是确定的，在 SafePoint 可以记录 OopMap 信息，线程在 SafePoint 停顿，虚拟机进行 GC。
+
+- 对于一个线程来说，可以处于 SafePoint 上，也可以不处 SafePoint 上。一个线程在 SafePoint 时，它的状态可以安全地被其他 JVM 线程所操作和观测。
+
+- SafePoint 如何在 GC 发生时让所有线程 (不包括执行 JNI 调用的线程) 能执行在最近的安全点上停顿下来，这里有两种方案可供选择：
+	- 抢先式中断 (Preemptive Suspension)：JVM 需要GC时，中断所有线程，让没有到达 SafePoint 的线程继续执行至 SafePoint 并中断。
+	- 主动式中断 (Voluntary Suspension)：在内存中设置标志位，各线程执行时主动式去轮询这个标志，发现中断标志为真时就自己中断挂起。
+
+##### 安全区 SafeRegion
+- SafePoint 无法解决线程未达到 SafePoint 并处于休眠或等待状态的情况，此时引入安全区域 (SafeRegion) 的概念。
+- SafeRegion 是代码中的一块区域或线程的状态。在 SafeRegion 中，线程执行与否不会影响对象引用的状态。线程进入 SafeRegion 会给自己加标记，告诉虚拟机可以进行GC；线程准备离开 SafeRegion 前会询问虚拟机 GC 是否完成。
 
 #### 垃圾收集器
 > 以下垃圾收集器是基于 JDK 1.7 展开介绍的。
