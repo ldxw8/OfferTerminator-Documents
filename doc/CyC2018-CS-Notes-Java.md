@@ -673,10 +673,10 @@
 	| LockSupport.parkNanos() 方法 | LockSupport.unpark(Thread) |
 	| LockSupport.parkUntil() 方法 | LockSupport.unpark(Thread) |
 	
-	- 调用 Thread.sleep() 方法使线程进入限期等待状态时，常常用“使一个线程睡眠”进行描述。
-	- 调用 Object.wait() 方法使线程进入限期等待或者无限期等待时，常常用“挂起一个线程”进行描述。
+	- 调用 Thread.sleep() 方法使线程进入限期等待状态时，常常用使一个线程 `睡眠` 进行描述。
+	- 调用 Object.wait() 方法使线程进入限期等待或者无限期等待时，常常用 `挂起` 一个线程进行描述。
 	- 睡眠和挂起是用来描述行为，而阻塞和等待用来描述状态。
-	- 阻塞和等待的区别在于，阻塞是被动的，它是在等待获取一个排它锁。而等待是主动的，通过调用 Thread.sleep() 和 Object.wait() 等方法进入。
+	- 阻塞和等待的区别在于，`阻塞` 是 `被动` 的，它是在等待获取一个排它锁。而 `等待` 是 `主动` 的，通过调用 Thread.sleep() 和 Object.wait() 等方法进入。
 	
 #### 死亡 / Terminated
 - 可以是线程结束任务之后自己结束，或者产生了异常而结束。
@@ -749,8 +749,310 @@
 	> 为此实现接口会更好一些。
 
 ### 基础线程机制
+#### Executor
+- Executor 管理 `多个异步任务` 的执行，而无需程序员显式地管理线程的生命周期。这里的异步是指多个任务的执行互不干扰，不需要进行同步操作。
+- 主要有三种 Executor：
+	- CachedThreadPool：一个任务创建一个线程；
+	- FixedThreadPool：所有任务只能使用固定大小的线程；
+	- SingleThreadExecutor：相当于大小为 1 的 FixedThreadPool。
+
+		```java
+		public static void main(String[] args) {
+		    ExecutorService executorService =
+                Executors.newCachedThreadPool();
+		    for (int i = 0; i < 5; i++) {
+		        executorService.execute(new MyRunnable());
+		    }
+		    executorService.shutdown();
+		}
+		```
+
+#### Daemon
+- `守护线程` 是程序运行时在 `后台` 提供服务的线程，不属于程序中不可或缺的部分。
+
+- 当所有非守护线程结束时，程序也就终止，同时会杀死所有守护线程。
+
+	> 其中 main() 属于非守护线程。
+
+- 在线程启动之前使用 setDaemon() 方法可以将一个线程设置为守护线程。
+
+	```java
+	public static void main(String[] args) {
+	    Thread thread = new Thread(new MyRunnable());
+	    thread.setDaemon(true);
+	}
+	```
+
+#### sleep()
+- `Thread.sleep(millisec)` 方法会 `休眠` 当前正在执行的线程，`millisec` 单位为毫秒。
+- sleep() 可能会抛出 InterruptedException，因为异常不能跨线程传播回 main() 中，因此必须在本地进行处理。线程中抛出的其它异常也同样需要在本地进行处理。
+
+	```java
+	public void run() {
+	    try {
+	        Thread.sleep(3000);
+	    } catch (InterruptedException e) {
+	        e.printStackTrace();
+	    }
+	}
+	```
+
+#### yield()
+- 对静态方法 `Thread.yield()` 的调用声明了当前线程已经完成了生命周期中最重要的部分，可以切换给其它线程来执行。该方法只是对线程调度器的一个 `建议`，而且也只是建议具有相同优先级的其它线程可以运行。
+
+	```java
+	public void run() {
+	    Thread.yield();
+	}
+	```
+
 ### 线程中断机制
+- 一个线程 `执行完毕` 之后会 `自动结束`，如果在运行过程中 `发生异常` 也会 `提前结束`。
+
+#### InterruptedException
+- 通过调用一个线程的 `interrupt()` 来中断该线程，如果该线程处于阻塞、限期等待或者无限期等待状态，那么就会抛出 InterruptedException，从而提前结束该线程。但是不能中断 I/O 阻塞和 synchronized 锁阻塞。
+- 对于以下代码，在 main() 中启动一个线程之后再中断它，由于线程中调用了 Thread.sleep() 方法，因此会抛出一个 InterruptedException，从而提前结束线程，不执行之后的语句。
+
+    ```java
+    public class InterruptExample {
+        private static class MyThread extends Thread {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(2000);
+                    System.out.println("Thread run");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+    
+    public static void main(String[] args) throws InterruptedException {
+	    Thread thread = new MyThread();
+	    thread.start();
+	    thread.interrupt();
+	    System.out.println("Main run");
+	}
+    ```
+    
+    抛出异常：
+    
+    ```html
+	Main run
+	java.lang.InterruptedException: sleep interrupted
+		at java.lang.Thread.sleep(Native Method)
+		at InterruptExample.lambda$main$0(InterruptExample.java:5)
+		at InterruptExample$$Lambda$1/713338599.run(Unknown Source)
+		at java.lang.Thread.run(Thread.java:745)
+    ```
+
+#### interrupted()
+- 如果一个线程的 run() 方法执行一个无限循环，并且没有执行 sleep() 等会抛出 InterruptedException 的操作，那么调用线程的 interrupt() 方法就无法使线程提前结束。
+- 但是调用 interrupt() 方法会设置线程的 `中断标记`，此时调用 interrupted() 方法会返回 true。因此可以在循环体中使用 interrupted() 方法来判断线程是否处于中断状态，从而提前结束线程。
+
+    ```java
+	public class InterruptExample {
+	    private static class MyThread extends Thread {
+	        @Override
+            public void run() {
+	            while (!interrupted()) {
+	                // 忽略代码细节
+	            }
+	            System.out.println("Thread end");
+	        }
+	    }
+	}
+
+    public static void main(String[] args) throws InterruptedException {
+        Thread thread = new MyThread();
+        thread.start();
+        thread.interrupt();
+    }
+
+    // Output: Thread end
+    ```
+
+#### Executor 的中断操作
+- 调用 Executor 的 shutdown() 方法会等待线程都执行完毕之后再关闭，但是如果调用的是 shutdownNow() 方法，则相当于调用每个线程的 interrupt() 方法。
+- 以下使用 Lambda 创建线程，相当于创建了一个匿名内部线程。
+
+    ```java
+	public static void main(String[] args) {
+	    ExecutorService executorService = 
+	        Executors.newCachedThreadPool();
+	    executorService.execute(() -> {
+	        try {
+	            Thread.sleep(2000);
+	            System.out.println("Thread run");
+	        } catch (InterruptedException e) {
+	            e.printStackTrace();
+	        }
+	    });
+	    executorService.shutdownNow();
+	    System.out.println("Main run");
+	}
+    ```
+
+    抛出异常：
+
+    ```html
+	Main run
+	java.lang.InterruptedException: sleep interrupted
+		at java.lang.Thread.sleep(Native Method)
+		at ExecutorInterruptExample.lambda$main$0(ExecutorInterruptExample.java:9)
+		at ExecutorInterruptExample$$Lambda$1/1160460865.run(Unknown Source)
+		at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+		at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+		at java.lang.Thread.run(Thread.java:745)
+    ```
+    
+- 如果只想中断 Executor 中的一个线程，可以通过使用 submit() 方法来提交一个线程，它会返回一个 Future<?> 对象，通过调用该对象的 cancel(true) 方法就可以中断线程。
+  
+	```java
+	Future<?> future = executorService.submit(() -> {
+	    // 忽略代码细节
+	});
+	future.cancel(true);
+	```
+
 ### 线程协作
+- 当多个线程可以一起工作去解决某个问题时，如果某些部分必须在其它部分之前完成，那么就需要对线程进行协调。
+
+#### join()
+- 在线程中调用另一个线程的 join() 方法，会将当前线程挂起，而不是忙等待，直到目标线程结束。
+- 对于以下代码，虽然 b 线程先启动，但是因为在 b 线程中调用了 a 线程的 join() 方法，b 线程会等待 a 线程结束才继续执行，因此最后能够保证 a 线程的输出先于 b 线程的输出。
+
+	```java
+	public class JoinExample {
+	    private class A extends Thread {
+	        @Override
+	        public void run() {
+	            System.out.println("A");
+	        }
+	    }
+
+	    private class B extends Thread {
+	        private A a;
+
+	        B(A a) {
+	            this.a = a;
+	        }
+
+	        @Override
+	        public void run() {
+	            try {
+	                a.join();
+	            } catch (InterruptedException e) {
+	                e.printStackTrace();
+	            }
+	            System.out.println("B");
+	        }
+	    }
+
+	    public void test() {
+	        A a = new A();
+	        B b = new B(a);
+	        b.start();
+	        a.start();
+	    }
+	}
+
+	public static void main(String[] args) {
+	    JoinExample example = new JoinExample();
+	    example.test();
+	}
+
+	// Output:
+	// A
+	// B
+	```
+
+#### wait() notify() notifyAll()
+- 调用 wait() 使得线程等待某个条件满足，线程在等待时会被挂起，当其他线程的运行使得这个条件满足时，其它线程会调用 notify() 或者 notifyAll() 来唤醒挂起的线程。
+- 它们都属于 Object 的一部分，而不属于 Thread。
+- 只能用在 `同步方法` 或者 `同步控制块` 中使用，否则会在运行时抛出 `IllegalMonitorStateException`。
+- 使用 wait() 挂起期间，线程会释放锁。这是因为没有释放锁，其它线程就无法进入对象的同步方法或者同步控制块中，那么就无法执行 notify() 或者 notifyAll() 来唤醒挂起的线程，造成死锁。
+
+	```java
+	public class WaitNotifyExample {
+	    public synchronized void before() {
+	        System.out.println("before");
+	        notifyAll();
+	    }
+
+	    public synchronized void after() {
+	        try {
+	            wait();
+	        } catch (InterruptedException e) {
+	            e.printStackTrace();
+	        }
+	        System.out.println("after");
+	    }
+	}
+
+	public static void main(String[] args) {
+	    ExecutorService executorService = 
+	        Executors.newCachedThreadPool();
+	    WaitNotifyExample example = new WaitNotifyExample();
+	    executorService.execute(() -> example.after());
+	    executorService.execute(() -> example.before());
+	}
+
+    // Output:
+    // before
+    // after
+  ```
+
+- wait() 和 sleep() 的区别：
+	- wait() 是 Object 的方法，而 sleep() 是 Thread 的静态方法；
+	- wait() 会释放锁，sleep() 不会。
+
+#### await() signal() signalAll()
+- `java.util.concurrent` 类库中提供了 Condition 类来实现线程之间的协调，可以在 Condition 上调用 await() 方法使线程等待，其它线程调用 signal() 或 signalAll() 方法唤醒等待的线程。
+- 相比于 wait() 这种等待方式，await() 可以指定等待的条件，因此更加灵活。
+- 使用 Lock 来获取一个 Condition 对象。
+
+	```java
+	public class AwaitSignalExample {
+	    private Lock lock = new ReentrantLock();
+	    private Condition condition = lock.newCondition();
+
+	    public void before() {
+	        lock.lock();
+	        try {
+	            System.out.println("before");
+	            condition.signalAll();
+	        } finally {
+	            lock.unlock();
+	        }
+	    }
+
+	    public void after() {
+	        lock.lock();
+	        try {
+	            condition.await();
+	            System.out.println("after");
+	        } catch (InterruptedException e) {
+	            e.printStackTrace();
+	        } finally {
+	            lock.unlock();
+	        }
+	    }
+	}
+
+	public static void main(String[] args) {
+	    ExecutorService executorService = 
+	        Executors.newCachedThreadPool();
+	    AwaitSignalExample example = new AwaitSignalExample();
+	    executorService.execute(() -> example.after());
+	    executorService.execute(() -> example.before());
+	}
+
+	// Output:
+	// before
+	// after
+	```
 
 ### 同步互斥
 - Java 提供了两种锁机制来控制 `多个线程` 对共享资源的 `互斥访问`，第一个是 JVM 实现的 `synchronized`，而另一个是 JDK 实现的 `ReentrantLock`。
@@ -1620,7 +1922,7 @@
 - 直接内存并不是虚拟机运行时数据区的一部分，也不是 JVM 规范中定义的内存区域。
 - 在 JDK 1.4 中新引入了 `NIO` (New Input/Output) 类，它可以使用 Native 函数库直接分配堆外内存，然后通过一个存储在 Java 堆里的 DirectByteBuffer 对象作为这块内存的引用进行操作。这样能在一些场景中显著提高性能，因为避免了在堆内存和堆外内存来回拷贝数据。
 
-### 垃圾收集
+### 垃圾收集算法与工具
 - 垃圾收集 (Garbage Collection, GC) 主要是针对 `堆` 和 `方法区` 进行。
 - 程序计数器、虚拟机栈和本地方法栈这三个区域属于线程私有的，只存在于线程的生命周期内，随线程结束就会消失，因此不需要对这三个区域进行垃圾回收。
 
