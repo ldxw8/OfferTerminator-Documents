@@ -1,13 +1,12 @@
 # 技术面试必备基础知识-Java-容器
 
-> 在线阅读：[CS-Notes-Java](https://cyc2018.github.io/CS-Notes/#/README?id=%e2%98%95%ef%b8%8f-java)
+> 原文：[CS-Notes-Java-容器](https://cyc2018.github.io/CS-Notes/#/notes/Java%20%E5%AE%B9%E5%99%A8)
 
-## Java 容器
-### 容器概览
+## 容器概览
 - 在另一则笔记 [Kofe | Java 技术手册 | 使用 Java 集合](https://www.kofes.cn/2017/09/Java-in-a-Nutshell.html#介绍集合-API) 中有对 Java 容器的概述，为建立宏观认识建议阅读。
 
-### 容器的设计模式
-#### 迭代器模式
+## 容器的设计模式
+### 迭代器模式
 - Collection 继承了 Iterable 接口，其中的 `iterator()` 方法能够产生一个 Iterator 对象，通过这个对象就可以迭代遍历 Collection 中的元素。
 - 从 JDK 1.5 之后可以使用 `foreach()` 方法来遍历实现了 Iterable 接口的聚合对象
 	
@@ -21,7 +20,7 @@
 	}
 	```
 
-#### 适配器模式
+### 适配器模式
 - `java.util.Arrays` 的 asList() 可以把数组类型转换为 List 类型。
 
 	```java
@@ -41,21 +40,20 @@
 	List list = Arrays.asList(1, 2, 3);
 	```
 
-
-### 容器的源码解析
-#### ArrayList
+## 容器的源码解析
+### ArrayList
 >  以下源码细节是基于 JDK 1.8 版本展开讨论的。
 
 | ![CyC2018-CS-Notes-Java-ArrayList_1-1](img/CyC2018-CS-Notes-Java-ArrayList_1-1.png)|
 | :---: |
 | 图 2-1 ArrayList 概述 |
 
-##### 参考资料
+#### 参考资料
 - [细雨蒙情. ArrayList (JDK1.8) 源码分析. jianshu.com](https://www.jianshu.com/p/ea4f943206ea)
 - [十二页. ArrayList (JDK1.8/JDK1.7/JDK1.6). csdn.net](https://blog.csdn.net/u011392897/article/details/57105709)
 - [YSOcean. ArrayList (JDK1.8). cnblogs.com](https://www.cnblogs.com/ysocean/p/8622264.html)
 
-##### 基本性质
+#### 基本性质
 - 因为底层数组 elementData 的容量是不能改变的，为此容量不够时需要把 elementData 换成一个更大的数组，这个过程叫作 `扩容`。
 -  ArrayList 所有方法都没有进行同步，它是 `线程不安全` 的。为此在多线程并发读写时需要外部同步。
 
@@ -67,7 +65,7 @@
 	
 - 对存储的元素无限制，允许 `null` 元素。
 
-##### 源码细节
+#### 源码细节
 - 通过 ArrayList 实现的接口可知，其支持快速随机访问、能被克隆以及支持序列化 (将对象转换为字节流的过程)。
 
 	且 ArrayList<E> 支持泛型，即支持构造任何类型的动态数组。
@@ -134,7 +132,7 @@
 	}
 	```
 
-##### 增删改查
+#### 增删改查
 - 增：
 	- 添加时先检查容量是否足够，否则就进行扩容；
 	- 添加元素到末尾。
@@ -148,7 +146,7 @@
 	- (将删除位置后面的元素向前挪动)，删除元素。
 - 查：直接返回指定下标的数组元素。
 
-##### 动态扩容
+#### 动态扩容
 - 扩容实际是新建一个容量更大 (原来数组长度 1.5 倍) 的数组。
 
 	```java
@@ -219,24 +217,24 @@
 
 	> Arrays.copyOf() 把原数组整个复制到新数组中，这个操作代价很高，因此最好在创建 ArrayList 对象时就指定大概的容量大小，减少扩容操作的次数。
 
-##### 总结
+#### 总结
 - 使用 ArrayList 时尽量指定大小，以减少扩容带来的 `数组复制操作` 。
 - 每次添加元素 --> 检查容量 --> 是否扩容 --> 扩大 1.5 倍。
 - 每次下标操作 --> 安全性检查 --> 数组越界就立即抛出异常。
 - ArrayList 所有方法都没有进行同步，因此它是线程不安全的。
 
-#### LinkedList
+### LinkedList
 >  以下源码细节是基于 JDK 1.8 版本展开讨论的。
 
 | ![CyC2018-CS-Notes-Java-LinkedList_1-1](img/CyC2018-CS-Notes-Java-LinkedList_1-1.png) |
 | :---: |
 | 图 2-2 LinkedList 概述 |
 
-##### 参考资料
+#### 参考资料
 - [十二页. LinkedList (JDK1.8/JDK1.7/JDK1.6). csdn.net](https://blog.csdn.net/u011392897/article/details/57115818)
 - [YSOcean. LinkedList (JDK1.8). cnblogs.com](https://www.cnblogs.com/ysocean/p/8657850.html)
 
-#####  基本性质
+####  基本性质
 - JDK 1.7 之后使用的是不带头结点的普通的双向链表，增加两个节点指针 first、last 分别指向首尾节点，示意图如下：
 
 	| ![CyC2018-CS-Notes-Java-LinkedList_1-2](img/CyC2018-CS-Notes-Java-LinkedList_1-2.png) |
@@ -255,7 +253,7 @@
 - 理论上无容量限制，只受虚拟机自身限制影响，所以没有扩容方法。
 - 对存储的元素无限制，允许 `null` 元素。
 
-##### 源码细节
+#### 源码细节
 - 通过 LinkedList 实现的接口可知，其支持随机访问、能被克隆以及支持序列化 (将对象转换为字节流的过程)。
 
 	且 LinkedList<E> 支持泛型，即支持构造任何类型的动态数组。
@@ -315,7 +313,7 @@
 	}
 	```
 	
-##### 增删改查
+#### 增删改查
 - 增：
 	- 添加：在链表尾部插入 -- `linkLast()`
 	- 插入：在链表中部插入 -- `linkBefore()`
@@ -350,29 +348,29 @@
 		System.out.println("\n迭代器: "+ (endTimeIte - beginTimeIte));		
 		```
 
-##### 单向队列/双向队列/栈
+#### 单向队列/双向队列/栈
 - 其实都是对链表的头结点和尾结点进行操作，它们都是基于以下方法实现操作：
 	- 对链表两端操作：addFirst()、addLast()、reoveFirst()、removeLast()
 	- 对链表中间操作：linkBefore()、unlink()
 
-##### 总结
+#### 总结
 - LinkedList 是基于 `双向链表` 实现的，不论是增删改方法，还是栈、队列的实现，都可通过 `操作结点` 实现。
 - 由于链表结构对内存要求低，LinkedList 不需要大块连续内存来满足扩容，能够自动地、动态地消耗内存；容量变小时会 `自动释放` 曾占用的内存。
 - LinkedList 的所有方法都没有进行同步，它是 `线程不安全` 的。
 
-#### HashMap
+### HashMap
 >  以下源码细节是基于 JDK 1.8 版本展开讨论的。
 
 | ![CyC2018-CS-Notes-Java-HashMap_1-1](img/CyC2018-CS-Notes-Java-HashMap_1-1.png) |
 | :---: |
 | 图 2-3 HashMap 概述 |
 
-##### 参考资料
+#### 参考资料
 - [十二页. HashMap JDK1.8 源码分析. csdn.net](https://blog.csdn.net/u011392897/article/details/60151323)
 - [多读书多看报. HashMap JDK1.8 实现原理. cnblogs.com](https://www.cnblogs.com/duodushuduokanbao/p/9492952.html)
 - [YSOcean. HashMap (JDK1.8). cnblogs.com](https://www.cnblogs.com/ysocean/p/8711071.html)
 
-##### 基本性质
+#### 基本性质
 - HashMap 存储的是 key-value 的键值对，允许 key 为 null，也允许 value 为null。
 - HashMap 内部为数组和链表的组合结构。若 Hash 冲突的概率比较高，就会导致同一个桶中的链表长度过长、遍历效率降低。
 
@@ -387,7 +385,7 @@
 - 链表添加时，新节点会放在链表末尾，而不是像 JDK 1.6/1.7 一样放在头部；
 - 扩容操作也会尽量保证扩容后还在同一条链表上的节点之间的 `相对顺序` 不变。
 
-##### 源码细节
+#### 源码细节
 - 关键成员变量与构造函数解析：
 
 	```java
@@ -475,7 +473,7 @@
 	
 	- 红黑树结点 TreeNode：篇幅缘故可参考内部类 `TreeNode` 中的源码。
 
-##### 增删改查
+#### 增删改查
 - 遍历元素：
 
 	```java
@@ -512,7 +510,7 @@
 	}
 	```
 
-##### 实现原理
+#### 实现原理
 > 以下将针对具体问题出发，去探究 HashMap 的原理。
 
 - HashMap 在构造器中做了哪些操作：
@@ -600,7 +598,7 @@
 	- 判断索引处第一个 key 与传入 key 是否相等，若相等直接返回 Node；
 	- 若不相等，判断链表是否为红黑树，若是则直接从树中取值；否则就遍历链表取值。
 
-##### 扩容机制
+#### 扩容机制
 - 使用的 2 的幂的扩容 (指长度扩为原来的 2 倍)，故元素的位置要么在原位置，要么在原位置再移到 2 的幂的位置。
 - 假设 `oldCapacity = 2^4 = 16` 与 `newCapacity = 2^5 = 32`。`x` 代表不用管，`?` 代表 0 或者 1 任意，二进制下标从最右边的第 0 位开始计算。
 
@@ -620,7 +618,7 @@
 	| :---: |
 	| 图 2-3-4 分布均匀的哈希桶 |
 
-##### 总结
+#### 总结
 - 基于 JDK 1.8 的 HashMap 是由 `数组+链表+红黑树` 组成，当链表长度超过 8 时会自动转换成红黑树，当红黑树节点个数小于 6 时，又会转化成链表。
 
 	相对于 HashMap 早期版本的 JDK 实现，新增 `红黑树` 作为底层数据结构，在数据量较大且哈希碰撞较多时，能够极大的增加检索的效率。
@@ -632,4 +630,4 @@
 - HashMap 的所有方法都没有进行同步，它是 `线程不安全` 的。
 - 遍历 HashMap 得到元素的顺序不是按照插入的顺序输出的。
 
-#### ConcurrentHashMap
+### ConcurrentHashMap
