@@ -2,13 +2,14 @@
 
 > 原文：[CS-Notes-Java-基础](https://cyc2018.github.io/CS-Notes/#/notes/Java%20%E5%9F%BA%E7%A1%80)  
 
-
 ## 反射
 
 > 本章内容适用于 JDK 1.8 版本。
 
 ### 参考资料
-- [sczyh30. 深入解析Java反射-基础. sczyh30.com](https://www.sczyh30.com/posts/Java/java-reflection-1/)
+- [sczyh30. 深入解析 Java 反射-基础. sczyh30.com](https://www.sczyh30.com/posts/Java/java-reflection-1/)
+- [伯特. Java 反射由浅入深. juejin.im](https://juejin.im/post/598ea9116fb9a03c335a99a4)
+- [知乎问答. 学习 Java 应该如何理解反射. zhihu.com](https://www.zhihu.com/question/24304289)
 
 ### 基本概念
 - 反射 (Reflection)：它允许运行中的 Java 程序获取自身的信息，并且可以操作类或对象的内部属性。
@@ -207,5 +208,19 @@
 	- `内部暴露`：由于反射允许代码执行一些在正常情况下不被允许的操作（比如访问私有的属性和方法），所以使用反射可能会导致意料之外的副作用，这可能导致代码功能失调并破坏可移植性。反射代码破坏了 `抽象性`，因此当平台发生改变的时候，代码的行为就有可能也随着变化。
 
 ## 异常
+### 参考资料
+- [欧阳思海. Java 异常的处理和设计及深入理解. juejin.im](https://juejin.im/post/5ae66791f265da0b92655c5d)
+- [知乎问答. Java 中如何优雅的处理异常. zhihu.com](https://www.zhihu.com/question/28254987)
+
+### 基本概念
+| ![Java异常的体系结构](img/Cys2018-CS-Notes-Java-Foundation-Exception_1-1.png) |
+| :-: |
+| 图 2-1 Java 异常的体系结构 |
+
+- Throwable 可以用来表示任何可以作为异常抛出的类，分 `Error` 和 `Exception` 两种。
+	- 其中 Error 用来表示 JVM 无法处理的错误。
+	- Exception 分为两种：
+		- 受检异常：需要用 `try...catch...` 语句捕获并进行处理，并且可以从异常中恢复；
+		- 非受检异常：是程序运行时错误，例如除 0 会引发 Arithmetic Exception，此时程序崩溃并且无法恢复。
 
 ## 泛型
