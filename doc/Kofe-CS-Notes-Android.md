@@ -49,9 +49,56 @@
 | :-: |
 | 图 1-2 Service 的完整生命周期 |
 
+#### 生命周期常用方法
+- 4 个手动调用的方法：
+
+| 手动调用方法 | 作用 |
+| :--- | :--- |
+| startService()  | 启动服务 |
+| stopService()   | 关闭服务 |
+| bindService()   | 绑定服务 |
+| unbindService() | 解绑服务 |
+
+- 5 个自动调用的方法：
+
+| 内部自动调用的方法 | 作用 |
+| :--- | :--- |
+| onCreate()         | 创建服务 |
+| onStartCommand()   | 开始服务 |
+| onDestroy()        | 销毁服务 |
+| onBind()           | 绑定服务 |
+| onUnbind()         | 解绑服务 |
+
+#### 生命周期方法介绍
+| 手动调用方法 | 活动图 | 作用 | 自动调用方法 | 备注 |
+| :-: | :-: | :-: | :--- | :--- |
+| startService() | 图 1-2-1 | 手动启动 Service | onCreate()<br>onStartCommand() | onStartCommand() 等于 onStartService() 的次数 |
+| stopService() | 图 1-2-2 | 手动关闭 Service | onDestory() | 若 Service 被启动且绑定，在没有解绑前提下是无法使用 stopService() 停止服务的 |
+| bindService() | 图 1-2-4 | 手动绑定 Service | onCreate()<br>onBind() | -- |
+| unbindService() | 图 1-2-3 | 手动解绑 Service | oUnbind()<br>onDestory() | -- |
+
+| ![手动启动服务](img/Kofe-CS-Notes-Android_1-2-1.png) | ![手动启动服务](img/Kofe-CS-Notes-Android_1-2-2.png) |
+| :-: | :-: |
+| 图 1-2-1 手动启动服务 startService() | 图 1-2-2 手动关闭服务 stopService() |
+| ![手动绑定服务](img/Kofe-CS-Notes-Android_1-2-4.png) | ![手动解绑服务](img/Kofe-CS-Notes-Android_1-2-3.png) |
+| 图 1-2-4 手动解绑服务 unbindService()  | 图 1-2-3 手动绑定服务 bindService() |
+
+#### 常见生命周期使用
+- 只使用 startService() 启动服务以及只使用 bindService() 绑定服务的生命周期，如图 1-2 所示。
+- 同时使用 startService() 启动服务和 BindService() 绑定服务的生命周期，如图 1-2-5 所示。
+
+	| ![启动服务和绑定服务](img/Kofe-CS-Notes-Android_1-2-5.png) |
+	| :-: |
+	| 图 1-2-5 启动服务和绑定服务 |
+
+- 需要注意的是：
+	- startService() 和 stopService() 只能开启和关闭 Service，无法操作 Service； bindService() 和 unbindService() 可以操作 Service。
+	- startService() 开启的 Service，调用者退出后 Service `仍然存在`；bindService() 开启的 Service，调用者退出后，Service `随着调用者销毁`。
+	
+
 ### Fragment 的生命周期
 
-| ![图1-Fragment的完整生命周期](img/Kofe-CS-Notes-Android_1-3.png) |
+| ![图1-3Fragment的完整生命周期](img/Kofe-CS-Notes-Android_1-3.png) |
 | :-: |
 | 图 1-3 Fragment 的完整生命周期 |
 
@@ -65,9 +112,9 @@
 
 - Fragment 的生命周期与 Activity 相仿：
 
-	| ![图1-4Fragment与Activity生命周期的交互关系与顺序](img/Kofe-CS-Notes-Android_1-4.png) |
+	| ![图1-3-1Fragment与Activity生命周期的交互关系与顺序](img/Kofe-CS-Notes-Android_1-3-1.png) |
 	| :-: |
-	| 图 1-4 Fragment 与 Activity 生命周期的交互关系与顺序 |
+	| 图 1-3-1 Fragment 与 Activity 生命周期的交互关系与顺序 |
 
 	- onAttach()：在 Fragment 和 Activity 关联时调用，仅且调用一次。可以通过该方法获取 Activity 引用，还可以通过 getArguments() 获取参数。
 
@@ -98,5 +145,6 @@
 	- 使用 Support 库的 Fragment，Activity 必须要继承 FragmentActivity (AppCompatActivity 是 FragmentActivity 的子类)。
 
 ### 参考资料
+- [Carson_Ho. Service生命周期最全面解析. csdn.net](https://cloud.tencent.com/developer/article/1394219)
 - [晕菜一员. Fragment生命周期及其正确使用 (建议使用自定义View替换Fragment). cnblogs.com](https://www.cnblogs.com/CharlesGrant/p/4876135.html)
 - [JYGod. Android Fragment 非常详细的一篇. jianshu.com](https://www.jianshu.com/p/11c8ced79193)
