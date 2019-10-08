@@ -32,7 +32,7 @@
 - [AppStore -- Daily Code -- Leetcode 客户端](https://apps.apple.com/cn/app/leetcode-%E6%AF%8F%E6%97%A5%E5%8A%9B%E6%89%A3/id1475606624)
 
 ## 阅读工具
-- 本项目的笔记资料均由 Markdown 排版、编写，注重知识模块间的联系性，以及获得良好阅读体验，推荐使用 [Typera](https://www.typora.io/) 工具进行阅读。
+- 本项目的笔记资料均由 [Markdown](https://zh.wikipedia.org/wiki/Markdown) 进行排版、编写，注重知识模块间的联系性，以及获得良好阅读体验，推荐使用 [Typera](https://www.typora.io/) 工具进行阅读。
 - 本项目支持 Gitbook 生成离线电子书 (pdf、epub、html 等)。
 
 ## 核心内容
