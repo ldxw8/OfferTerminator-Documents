@@ -91,8 +91,13 @@
 #### 解题源码整理
 - [ldxw8. OfferTerminator-Solutions. github.com](https://github.com/ldxw8/OfferTerminator-Solutions)
 
-	> 题目集中于剑指 Offer、Leetcode 的经典题目。且参考另一位兄弟的开源项目，可直接复用他的题目命名和题目描述。 [Jchanghong. CodingInterviewChinese2. github.com](https://github.com/jchanghong/CodingInterviewChinese2)
+	> 题目集中于剑指 Offer、Leetcode 的经典题目。特别说明的是，剑指 Offer 参考另一位兄弟的开源项目，可直接复用他的题目命名和题目描述。 [Jchanghong. CodingInterviewChinese2. github.com](https://github.com/jchanghong/CodingInterviewChinese2)
 	
-	- JzOffer-03-DuplicationInArray：数组中重复的数字
-	- JzOffer-20-NumericString：表示数值的字符串
-	- JzOffer-67-Str2Int：字符串转整数
+##### 剑指 Offer
+- JzOffer-03-DuplicationInArray：数组中重复的数字
+- JzOffer-20-NumericString：表示数值的字符串
+- JzOffer-67-Str2Int：字符串转整数
+
+##### Leetcode
+- Leetcode-01-TwoSum：两数之和
+
