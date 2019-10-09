@@ -100,4 +100,7 @@
 
 ##### Leetcode
 - Leetcode-01-TwoSum：两数之和
+- Leetcode-03-LongestSubStrLength：无重复字符的最长子串
+- Leetcode-05-LongestPalindrome：最长回文子串
+- Leetcode-09-PalindromeNum：回文数
 
