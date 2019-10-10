@@ -11,6 +11,339 @@
 ## 图
 
 ## 排序
+### 参考资料
+- [1] [严蔚敏, 吴伟民. 数据结构:C语言版 [M]. 清华出版社, 2007](https://book.douban.com/subject/24699581/)
+- [2] [CyC2018. CS-Notes-排序 [OL]. github.com](https://cyc2018.github.io/CS-Notes/#/notes/%E7%AE%97%E6%B3%95%20-%20%E6%8E%92%E5%BA%8F)
+
+### 排序概述
+-  在排序过程中所涉及的存储器不同，排序可分为 `内部排序` 和 `外部排序` $^{[1]}$。
+	- 内部排序：待排序记录存放在计算机的随机存储器中进行的排序过程。
+	- 外部排序：待排序记录的数量、规模很大，以致内存一次不能容纳全部记录，在排序过程中尚需对外存进行访问。
+- `稳定排序` 与 `不稳定排序`：
+	- 假设 $K_i = K_j (1 \leq i \leq n, 1 \leq j \leq n, i \neq j)$，且在执行排序算法前的序列中 $R_i$ 领先于 $R_j$。
+	- 若在排序后的序列中 $R_i$ 仍然领先于 $R_j$，称所用的排序算法是稳定的。相反，则是不稳定的排序算法。
+	- 算法是否具有稳定性，并不能衡量一个算法的优劣 $^{[1]}$。
+
+		> 不稳定算法快速记忆：`快希选堆` (快速排序、希尔排序、选择排序和堆排序)。
+		
+### 内部排序
+| ![内部排序分类](img/Kofe-CS-Notes-DataStruct-Sort_1-1.png) |
+| :-: |
+| 图 6-1 内部排序分类 |
+
+#### 约定俗成
+- 待排序的元素须实现 Java 的 `Comparable` 接口，该接口有 `compareTo()` 方法，可用于判断两元素的大小。
+- 辅助函数 less() 和 swap() 用来进行比较和交换的操作。
+
+	> 排序算法的成本模型是 `比较` 和 `交换`。
+	
+	```java
+	public abstract class Sort<T extends Comparable<T>> {
+	    public abstract void Sort(T[] nums);
+
+	    protect boolean less(T v, T w) {
+	        return v.compareTo(w) > 0; // 升序排序
+	    }
+	    
+	    protect void swap(T[] a, int i, int j) {
+	        a[i] = a[i] ^ a[j];
+	        a[j] = a[i] ^ a[j];
+	        a[i] = a[i] ^ a[j];
+	    }
+	}
+	```
+
+#### 选择排序
+- 第一趟排序：从数据中选择最小元素，将它与数组的第一个元素交换位置。
+- 第二趟排序：再从数组中选择次小元素，将它与数组中第二个元素交换位置。
+- 以此类推，直至整个数组有序。
+	
+	```java
+	public class SelectionSort<T extends Comparable<T>> extends Sort<T> {
+	    @Override
+	    public void sort(T[] nums) {
+	        for (int i = 0; i < nums.length - 1; i++) {
+	            int min = i;
+	            for (int j = i + 1; j < nums.length; j++) {
+	                if ( less(nums[j], nums[min]) ) {
+	                    min = j;
+	                }
+	            }
+	            
+	            // 本趟排序的位置 i 为最小元素，则不发生交换
+	            if ( i != min ) { 
+	                swap(nums, i, min);
+	            }
+	        } 
+	    }
+	}
+	```
+
+#### 冒泡排序
+- 从左到右边不断交换相邻逆序的元素，在每一轮循环后，让未排序序列中的最大元素上浮到右侧。
+- 若在某一轮循环中，没有发生交换行为，那么说明数组已经是有序的，此时即可直接退出排序。
+
+	```java
+	public class BubbleSort<T extends Comparable<T>> extends Sort<T> {
+	    @Override
+	    public void sort(T[] nums) {
+	        boolean isSorted = false;
+	        for (int i = nums.length - 1; i > 0 && isSorted; i--) {
+	            // 假设本趟排序是有序的 (若发生交换行为则破环该条件)
+	            isSorted = true;
+	            for (int j = 0; j < i; j++) {
+	                if ( less(nums[j + 1], nums[j]) ) {
+	                    isSorted = false;
+	                    swap(nums, j, j + 1);
+	                }
+	            }
+	        }
+	    }
+	}
+	```
+
+#### 插入排序
+- 每次将当前元素插入左侧已经有序序列中，且插入元素后左侧序列依然有序。
+
+	```java
+	/* 直接插入排序 */
+	 public class InsertionSort <T extends Comparable<T>> extends Sort<T> {
+	     @Override
+	     public void sort(T[] nums) {
+	         for (int i = 1; i < nums.length; i++) {
+	             // 每次纳入新元素，在左侧有序序列中寻找合适位置插入
+	             for (int j = i; j > 0 && less(nums[j], nums[j - 1]); j--) {
+	                 swap(nums, j, j - 1);
+	             }
+	         }
+	     }
+	 }
+	 
+	 /* 折半插入排序 (Beta) */
+	 public class InsertionSort <T extends Comparable<T>> extends Sort<T> {
+	     @Override
+	     public void sort(T[] nums) {
+	         for (int i = 1; i < nums.length; i++) {
+	             // 每次纳入新元素，在左侧有序序列中寻找合适位置插入
+	             // 融合折半查找的思想 (待运行验证有效性)
+	             int insert = i, low = 0, high = i;
+	             int tmp = nums[insert];
+	             while ( 1 != hight - low ) {
+	                 int mid = (low + high) >> 1;
+	                 if ( less(nums[insert], nums[mid]) ) {
+	                     high = mid;
+	                 } else {
+	                     low = mid;
+	                 }
+	             }
+
+	             // 右移动元素腾出插入位置
+	             for (int j = insert; j > high; j--) { 
+	                 swap(nums, j, j-1);
+	             }
+	             nums[hight] = tmp;
+	          
+	         }
+	     }
+	 }
+	```
+	
+#### 希尔排序
+
+#### 快速排序
+##### 基本算法
+- 快速排序通过一个切分元素将数组分为两个子数组，左子数组小于等于切分元素，右子数组大于等于切分元素，将这两个子数组排序也就将整个数组排序了。
+
+	> 归并排序将数组分为两个子数组分别排序，并将有序的子数组归并使得整个数组排序；
+	
+	```java
+	public class QuickSort<T extends Comparable<T>> extends Sort<T> {
+	
+	    @Override
+	    public void sort(T[] nums) {
+	        sort(nums, 0, nums.length - 1);
+	    }
+	
+	    private void sort(T[] nums, int l, int h) {
+	        if (h <= l)
+	            return;
+	        int j = partition(nums, l, h);
+	        sort(nums, l, j - 1);
+	        sort(nums, j + 1, h);
+	    }
+	}
+	```
+
+##### 切分
+- 取 $a[l]$ 作为切分元素 (枢纽元素)，然后从数组的左端向右扫描直到找到第一个大于等于它的元素，再从数组的右端向左扫描找到第一个小于它的元素，交换这两个元素。不断进行这个过程，就可以保证左指针 i 的左侧元素都不大于切分元素，右指针 j 的右侧元素都不小于切分元素。当两个指针相遇时，将切分元素 $a[l]$ 和 $a[j]$ 交换位置。
+
+	```java
+	private int partition(T[] nums, int l, int h) {
+	    int i = l, j = h + 1;
+	    T v = nums[l]; // 取表中第一个元素为枢纽元素
+	    while (true) {
+	        while (less(nums[++i], v) && i != h) ;
+	        while (less(v, nums[--j]) && j != l) ;
+	        if (i >= j)
+	            break;
+	        swap(nums, i, j);
+	    }
+	    swap(nums, l, j);
+	    return j;
+	}
+	```
+
+##### 基于切分的快速选择算法
+- 快速排序的 partition() 方法，会返回一个整数 j 使得 $a[l..j-1]$ 小于等于 $a[j]$，且 $a[j+1..h]$ 大于等于 $a[j]$，此时 $a[j]$ 就是数组的第 j 大元素。
+- 可以利用这个特性找出数组的第 k 个元素。该算法是线性级别的，假设每次能将数组二分，那么比较的总次数为 (N+N/2+N/4+..)，直到找到第 k 个元素，这个和显然小于 2N。
+
+	```java
+	public T select(T[] nums, int k) {
+	    int l = 0, h = nums.length - 1;
+	    while (h > l) {
+	        int j = partition(nums, l, h);
+		
+	        if (j == k) {
+	            return nums[k];		
+	        } else if (j > k) {
+	            h = j - 1;	
+	        } else {
+	            l = j + 1;
+	        }
+	    }
+	    return nums[k];
+	}
+	```
+
+##### 性能分析
+- 快速排序是 `原地排序`，不需要辅助数组，但是递归调用需要 `辅助栈`。
+- 快速排序最好的情况下是每次都正好将数组对半分，这样递归调用次数才是最少的。这种情况下比较次数为 CN=2CN/2+N，复杂度为 O(NlogN)。
+
+	> `枢纽元素` 选得好，让左、右子序列被均匀划分，所需要的递归调用次数将减少。
+
+- 最坏的情况下，第一次从最小的元素切分，第二次从第二小的元素切分......因此最坏的情况下需要比较 $\frac{N^2}{2}$。
+
+	> 为了防止数组最开始就是有序的，在进行快速排序时需要随机打乱数组。
+
+##### 算法改进
+###### 退阶插入排序
+- 小规模数据的处理：因为快速排序在小数组中也会递归调用自己，对于小数组，插入排序比快速排序的性能更好，因此在小数组中可以切换到插入排序。
+
+###### 三数取中位数
+- 从 [性能分析](#性能分析) 中可知，`枢纽元素` 决定了左、右子序列的划分均匀情况。
+- 最好的情况下是每次都能取数组的中位数作为切分元素，但是计算中位数的代价很高。一种折中方法是随机抽取 3 个元素，并将大小居中的元素作为切分元素。
+
+#### 归并排序
+- 归并排序的思想是将数组分成两部分，分别进行排序，然后归并起来。
+
+##### 归并方法
+##### 自顶向下归并排序
+##### 自底向上归并排序
+
+#### 堆排序
+- 堆中某个节点的值总是大于等于其子节点的值，并且堆是一颗 `完全二叉树`。
+- 堆可以用 `数组` 来表示，这是因为堆是完全二叉树，而完全二叉树很容易就存储在数组中。位置 `k` 的节点的 `父节点` 位置为 `k/2`，而它的两个 `子节点` 的位置分别为 `2k` 和 `2k+1`。
+
+	> 这里不使用数组索引为 0 的位置，是为了更清晰地描述节点的位置关系。
+
+	```java
+	public class Heap<T extends Comparable<T>> {
+	    private T[] heap;
+	    private int N = 0;
+	
+	    public Heap(int maxN) {
+	        // 不使用数组索引为 0 的位置，因此需多预留一位置
+	        this.heap = (T[]) new Comparable[maxN + 1];
+	    }
+	
+	    public boolean isEmpty() {
+	        return N == 0;
+	    }
+	
+	    public int size() {
+	        return N;
+	    }
+	
+	    private boolean less(int i, int j) {
+	        return heap[i].compareTo(heap[j]) < 0;
+	    }
+	
+	    private void swap(int i, int j) {
+	        heap[i] = heap[i] ^ heap[j];
+	        heap[j] = heap[i] ^ heap[j];
+	        heap[i] = heap[i] ^ heap[j];
+	    }
+	}
+	```
+
+##### 上浮和下沉
+- 在堆中，当一个节点比父节点大，那么需要交换这个两个节点。交换后还可能比它新的父节点大，因此需要不断地进行比较和交换操作，把这种操作称为 `上浮`。
+
+	```java
+	private void swim(int k) {
+	    while (k > 1 && less(k / 2, k)) {
+	        swap(k / 2, k);
+	        k = k / 2;
+	    }
+	}
+	```
+
+- 类似地，当一个节点比子节点来得小，也需要不断地向下进行比较和交换操作，把这种操作称为 `下沉`。一个节点如果有两个子节点，应当与两个子节点中 `最大节点` 进行交换。
+
+	```java
+	private void sink(int k) {
+	    while (2 * k <= N) {
+	        int j = 2 * k;
+	        if (j < N && less(j, j + 1)) {
+	            j++; // 取子结点中最大的结点
+	        }
+	        if (!less(k, j))
+	            break;
+	        swap(k, j);
+	        k = j;
+	    }
+	}
+	```
+	
+##### 插入元素
+- 将新元素放到数组末尾，然后上浮到合适的位置。
+
+	```java
+	public void insert(Comparable v) {
+	    heap[++N] = v;
+	    swim(N);
+	}
+	```
+	
+##### 删除最大元素
+- 从数组顶端删除最大的元素，并将数组的最后一个元素放到顶端，并让这个元素下沉到合适的位置。
+
+	```java
+	public T delMax() {
+	    T max = heap[1];
+	    swap(1, N--);
+	    heap[N + 1] = null;
+	    sink(1);
+	    return max;
+	}
+	```
+
+### 排序总结
+- 排序算法的性能比较：
+
+  | 算法 | 稳定性 | 时间复杂度 (平均) | 空间复杂度 | 备注 |
+  | :-: | :-: | :-: | :-: | :-: |
+  | 选择排序 | × | $O(N^2)$ | O(1) | -- |
+  | 冒泡排序 | √ | $O(N^2)$ | O(1) | -- |
+  | 插入排序 | √ | $O(N^2)$ | O(1) | 时间复杂度和初始顺序有关 |
+  | 希尔排序 | × | N 的若干倍乘于递增序列的长度 | O(1) | 改进版插入排序 |
+  | 快速排序 | × | $O(NlogN)$ | $O(logN)$ | 空间的消耗是递归栈 |
+  | 归并排序 | √ | $O(NlogN)$ | O(N) | 需要等量辅助空间 |
+  | 堆排序 | × | $O(NlogN)$ | O(1) | 无法利用局部性原理 |
+
+- Java 中通过 java.util.Arrays.sort() 实现排序方法：
+  - 对于 `原始数据类型` 使用 `三向切分的快速排序`;
+  - 对于 `引用类型` 使用 `归并排序`。
 
 ## 查找
 ### 查找概述
@@ -177,7 +510,7 @@
 
 		> `对策`：将当前结点的父结点和叔叔结点涂黑，祖父结点涂红；以当前结点开始计算。
 		
-		| ![红黑树的插入修复情况一](img/Kofe-CS-Notes-DataStruct-Tree_1-3-2.png) |
+		| ![红黑树插入修复1](img/Kofe-CS-Notes-DataStruct-Tree_1-3-2.png) |
 		| :-: |
 		| 图 7-3-2 红黑树的插入修复情况一 |
 	
@@ -185,7 +518,7 @@
 
 		> `对策`：将当前结点的父结点作为新的当前结点；以新的当前结点为支点左旋。
 		
-		| ![红黑树的插入修复情况二](img/Kofe-CS-Notes-DataStruct-Tree_1-3-3.png) |
+		| ![红黑树插入修复2](img/Kofe-CS-Notes-DataStruct-Tree_1-3-3.png) |
 		| :-: |
 		| 图 7-3-3 红黑树的插入修复情况二 |
 
@@ -193,7 +526,7 @@
 
 		> `对策`：将当前结点的父结点涂为黑色，祖父结点涂为红色；以祖父结点为支点右旋。
 		
-		| ![红黑树的插入修复情况三](img/Kofe-CS-Notes-DataStruct-Tree_1-3-4.png) |
+		| ![红黑树插入修复3](img/Kofe-CS-Notes-DataStruct-Tree_1-3-4.png) |
 		| :-: |
 		| 图 7-3-4 红黑树的插入修复情况三 |
 
