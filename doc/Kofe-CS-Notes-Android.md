@@ -1,8 +1,21 @@
 # 技术面试必备基础知识-Android
 
 ## Android 系统架构
+### 参考资料
+- [Gityuan. Android系统架构开篇. gityuan.com](http://gityuan.com/android/)
+
+| ![图1-1Android系统分层架构](img/Kofe-CS-Notes-Android_1-1.png) |
+| :-: |
+| 图 1-1 Android 系统分层架构 |
 
 ## Android 生命周期
+
+### 参考资料
+
+- [Carson_Ho. Service生命周期最全面解析. csdn.net](https://cloud.tencent.com/developer/article/1394219)
+- [晕菜一员. Fragment生命周期及其正确使用 (建议使用自定义View替换Fragment). cnblogs.com](https://www.cnblogs.com/CharlesGrant/p/4876135.html)
+- [JYGod. Android Fragment 非常详细的一篇. jianshu.com](https://www.jianshu.com/p/11c8ced79193)
+
 ### Activity 的生命周期
 
 | ![图1-1Activity的完整生命周期](img/Kofe-CS-Notes-Android_1-1.png) |
@@ -145,8 +158,3 @@
 - 关于 Fragment 的依赖库版本选择问题： 
 	- 建议使用 Support 库中的 `android.support.v4.app.Fragment`，而不要用系统自带的 `android.app.Fragment`。
 	- 使用 Support 库的 Fragment，Activity 必须要继承 FragmentActivity (AppCompatActivity 是 FragmentActivity 的子类)。
-
-### 参考资料
-- [Carson_Ho. Service生命周期最全面解析. csdn.net](https://cloud.tencent.com/developer/article/1394219)
-- [晕菜一员. Fragment生命周期及其正确使用 (建议使用自定义View替换Fragment). cnblogs.com](https://www.cnblogs.com/CharlesGrant/p/4876135.html)
-- [JYGod. Android Fragment 非常详细的一篇. jianshu.com](https://www.jianshu.com/p/11c8ced79193)
