@@ -1,17 +1,56 @@
 # 技术面试必备基础知识-Android
 
-## Android 系统架构
+## 平台架构
 ### 参考资料
 - [Gityuan. Android系统架构开篇. gityuan.com](http://gityuan.com/android/)
+- [Deveplopers. Android 平台架构. developer.android.com](https://developer.android.com/guide/platform?hl=zh-cn)
 
-| ![图1-1Android系统分层架构](img/Kofe-CS-Notes-Android_1-1.png) |
+| ![图1-1Android平台架构](img/Kofe-CS-Notes-Android-Stack_1-1.png) |
 | :-: |
-| 图 1-1 Android 系统分层架构 |
+| 图 1-1 Android 平台架构 |
 
-## Android 生命周期
+#### Linux Kernel
+- Android 平台的基础是 Linux 内核。例如 Android Runtime (ART) 依靠 Linux 内核来执行底层功能，比如 `线程` 和 `底层内存管理`。
+- Linux 内核的安全机制为 Android 提供相应的保障，也允许设备制造商为内核开发硬件驱动程序。
+
+#### Hardware Abstraction Layer
+- 硬件抽象层 (HAL) 提供标准接口，HAL包含多个库模块，其中每个模块都为特定类型的硬件组件实现一组接口，比如 WIFI / 蓝牙模块，当框架 API 请求访问设备硬件时，Android 系统将为该硬件加载相应的库模块。
+
+#### Android Runtime
+- 对于运行 Android 5.0（API 级别 21）或更高版本的设备，每个应用都在其自己的进程中运行，并且有其自己的 Android Runtime (ART) 实例。ART 通过执行 DEX 文件在低内存设备上可运行多个 `虚拟机`。
+
+	> DEX (Dalvik Executable，DEX) 文件是一种专为 Android 设计的字节码格式，经过优化使用内存很少。通常使用 Jack 编译器将 Java 源代码编译为 DEX 字节码。
+
+- ART 的部分主要功能包括：
+	- 预先 (AOT) 和即时 (JIT) 编译；
+	- 优化的垃圾回收 (Gabarge Collection，GC)；
+	- 支持将应用软件包中的 DEX 文件转换为更紧凑的机器代码；
+
+		> 需 Android 9 (API 级别 28) 及更高版本的系统支持。
+	
+	- 更好的调试支持，包括专用采样分析器、详细的诊断异常和崩溃报告，并且能够设置观察点以监控特定字段。
+- Android 还包含一套 `核心运行时库`，可提供 [Java API 框架](#Java-API-框架) 所使用的 Java 编程语言中的大部分功能，包括一些 Java 8 语言功能。
+
+#### Nactive C/C++ Libraries
+- 许多核心 Android 系统组件和服务（例如 ART 和 HAL）构建自原生代码，需要以 C / C++ 编写的原生库。
+
+	> 例如，通过 Android 框架的 Java OpenGL API 访问 OpenGL ES，以支持在应用中绘制和操作 2D 和 3D 图形。
+
+- 若开发需要 C / C++ 代码支持的应用，可使用 `Android NDK` 直接从原生代码访问某些原生平台库。
+
+#### Java API Framework
+- 您可通过以 Java 语言编写的 API 使用 Android OS 的整个功能集。这些 API 形成创建 Android 应用所需的构建块，它们可简化核心模块化系统组件和服务的重复使用，包括以下组件和服务：
+	- `视图系统`：View System，用以构建应用的 UI，包括列表、网格、文本框、按钮甚至可嵌入的网络浏览器等。
+	- `内容提供程序`：Content Provider，可让应用访问其他应用（例如“联系人”应用）中的数据或者共享其自己的数据。
+	- `资源管理器`：Resource Manager，用于访问非代码资源，例如本地化的字符串、图形和布局文件。
+	- `通知管理器`：Notification Manager，可让所有应用在状态栏中显示自定义提醒。
+	- `活动管理器`：Activity Manager，用于管理应用的生命周期，提供常见的导航返回栈。
+
+- 开发者可以完全访问 Android 系统应用使用的框架 [API](https://developer.android.com/reference/packages.html?hl=zh-cn)。
+
+## 生命周期
 
 ### 参考资料
-
 - [Carson_Ho. Service生命周期最全面解析. csdn.net](https://cloud.tencent.com/developer/article/1394219)
 - [晕菜一员. Fragment生命周期及其正确使用 (建议使用自定义View替换Fragment). cnblogs.com](https://www.cnblogs.com/CharlesGrant/p/4876135.html)
 - [JYGod. Android Fragment 非常详细的一篇. jianshu.com](https://www.jianshu.com/p/11c8ced79193)
@@ -158,3 +197,5 @@
 - 关于 Fragment 的依赖库版本选择问题： 
 	- 建议使用 Support 库中的 `android.support.v4.app.Fragment`，而不要用系统自带的 `android.app.Fragment`。
 	- 使用 Support 库的 Fragment，Activity 必须要继承 FragmentActivity (AppCompatActivity 是 FragmentActivity 的子类)。
+
+## 通信方式
