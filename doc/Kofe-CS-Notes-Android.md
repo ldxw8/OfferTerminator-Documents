@@ -199,3 +199,8 @@
 	- 使用 Support 库的 Fragment，Activity 必须要继承 FragmentActivity (AppCompatActivity 是 FragmentActivity 的子类)。
 
 ## 通信方式
+### Handler
+
+### Socket
+
+### Binder
