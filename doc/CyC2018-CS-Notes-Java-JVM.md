@@ -12,7 +12,7 @@
 
 	| ![运行时数据区域](img/Cys2018-CS-Notes-Java_4-1.png) |
 	| :-: |
-	| 图 1-1 Java 虚拟机运行时数据区域 / JVM 内存模型 (来自 [CyC2018.CS-Notes](https://cyc2018.github.io/CS-Notes/#/notes/Java%20虚拟机?id=一、运行时数据区域) ) |
+	| 图 1-1 Java 虚拟机运行时数据区域 (来自 [CyC2018.CS-Notes](https://cyc2018.github.io/CS-Notes/#/notes/Java%20虚拟机?id=一、运行时数据区域) ) |
 
 ### 程序计数器
 - 程序计数器：记录正在执行的虚拟机字节码指令的地址 (如果正在执行的是本地方法则为空)。
