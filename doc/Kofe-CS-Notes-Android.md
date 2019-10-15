@@ -200,7 +200,17 @@
 
 ## 通信方式
 ### Handler
+- 内容框架：
+	- `背景`：在 Android 应用中，为了 UI 操作是线程安全的，规定了只允许 UI 线程 (主线程) 更新 Activity 里的组件。
+	- `冲突`：多个线程并发操作 UI 组件，造成线程不安全。
+	- `解决`：Handler 消息传递机制。即工作线程更新 UI 时，通过 Handler 通知主线程才执行更新 UI 操作。
+- Handler 消息机制用于同进程 (共享内存地址空间) <--> Binder / Socket 用于进程间通信。
+- Handler 消息机制是指由一组 MessageQueue、Message、Looper、Handler 共同组成。
+
+	> 例如，Android 应用中，只有主线程能更新 UI，其他工作线程往往是完成相应工作后，通过 Handler 分发相应的消息给 UI 主线程去完成 UI 更新。
 
 ### Socket
+
+- Socket 通信方式也是 C/S 架构，多用于 Android Framework 层与 Native 层之间的通信。
 
 ### Binder
