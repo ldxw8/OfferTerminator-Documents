@@ -46,9 +46,15 @@
 	    }
 	    
 	    protect void swap(T[] a, int i, int j) {
-	        a[i] = a[i] ^ a[j];
-	        a[j] = a[i] ^ a[j];
-	        a[i] = a[i] ^ a[j];
+	    	
+	        T t = a[i];
+	        a[i] = a[j];
+	        a[j] = t;
+	    
+	        // 整型可使用位运算替代
+	        // a[i] = a[i] ^ a[j];
+	        // a[j] = a[i] ^ a[j];
+	        // a[i] = a[i] ^ a[j];
 	    }
 	}
 	```
@@ -61,7 +67,7 @@
 	```java
 	public class SelectionSort<T extends Comparable<T>> extends Sort<T> {
 	    @Override
-	    public void sort(T[] nums) {
+	    public void Sort(T[] nums) {
 	        for (int i = 0; i < nums.length - 1; i++) {
 	            int min = i;
 	            for (int j = i + 1; j < nums.length; j++) {
@@ -86,7 +92,7 @@
 	```java
 	public class BubbleSort<T extends Comparable<T>> extends Sort<T> {
 	    @Override
-	    public void sort(T[] nums) {
+	    public void Sort(T[] nums) {
 	        boolean isSorted = false;
 	        for (int i = nums.length - 1; i > 0 && isSorted; i--) {
 	            // 假设本趟排序是有序的 (若发生交换行为则破环该条件)
@@ -109,7 +115,7 @@
 	/* 直接插入排序 */
 	 public class InsertionSort <T extends Comparable<T>> extends Sort<T> {
 	     @Override
-	     public void sort(T[] nums) {
+	     public void Sort(T[] nums) {
 	         for (int i = 1; i < nums.length; i++) {
 	             // 每次纳入新元素，在左侧有序序列中寻找合适位置插入
 	             for (int j = i; j > 0 && less(nums[j], nums[j - 1]); j--) {
@@ -122,7 +128,7 @@
 	 /* 折半插入排序 (Beta) */
 	 public class InsertionSort <T extends Comparable<T>> extends Sort<T> {
 	     @Override
-	     public void sort(T[] nums) {
+	     public void Sort(T[] nums) {
 	         for (int i = 1; i < nums.length; i++) {
 	             // 每次纳入新元素，在左侧有序序列中寻找合适位置插入
 	             // 融合折半查找的思想 (待运行验证有效性)
@@ -160,7 +166,7 @@
 	public class QuickSort<T extends Comparable<T>> extends Sort<T> {
 	
 	    @Override
-	    public void sort(T[] nums) {
+	    public void Sort(T[] nums) {
 	        sort(nums, 0, nums.length - 1);
 	    }
 	
@@ -182,6 +188,7 @@
 	    int i = l, j = h + 1;
 	    T v = nums[l]; // 取表中第一个元素为枢纽元素
 	    while (true) {
+	        // 以 v 为中轴调整元素位置 (左边比 v 小，右边比 v 大)
 	        while (less(nums[++i], v) && i != h) ;
 	        while (less(v, nums[--j]) && j != l) ;
 	        if (i >= j)
