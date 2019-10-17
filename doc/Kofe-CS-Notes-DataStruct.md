@@ -39,7 +39,7 @@
 	
 	```java
 	public abstract class Sort<T extends Comparable<T>> {
-	    public abstract void Sort(T[] nums);
+	    public abstract void sort(T[] nums);
 
 	    protect boolean less(T v, T w) {
 	        return v.compareTo(w) > 0; // 升序排序
@@ -60,6 +60,7 @@
 	```
 
 #### 选择排序
+
 - 第一趟排序：从数据中选择最小元素，将它与数组的第一个元素交换位置。
 - 第二趟排序：再从数组中选择次小元素，将它与数组中第二个元素交换位置。
 - 以此类推，直至整个数组有序。
@@ -67,7 +68,7 @@
 	```java
 	public class SelectionSort<T extends Comparable<T>> extends Sort<T> {
 	    @Override
-	    public void Sort(T[] nums) {
+	    public void sort(T[] nums) {
 	        for (int i = 0; i < nums.length - 1; i++) {
 	            int min = i;
 	            for (int j = i + 1; j < nums.length; j++) {
@@ -92,7 +93,7 @@
 	```java
 	public class BubbleSort<T extends Comparable<T>> extends Sort<T> {
 	    @Override
-	    public void Sort(T[] nums) {
+	    public void sort(T[] nums) {
 	        boolean isSorted = false;
 	        for (int i = nums.length - 1; i > 0 && isSorted; i--) {
 	            // 假设本趟排序是有序的 (若发生交换行为则破环该条件)
@@ -115,7 +116,7 @@
 	/* 直接插入排序 */
 	 public class InsertionSort <T extends Comparable<T>> extends Sort<T> {
 	     @Override
-	     public void Sort(T[] nums) {
+	     public void sort(T[] nums) {
 	         for (int i = 1; i < nums.length; i++) {
 	             // 每次纳入新元素，在左侧有序序列中寻找合适位置插入
 	             for (int j = i; j > 0 && less(nums[j], nums[j - 1]); j--) {
@@ -166,14 +167,14 @@
 	public class QuickSort<T extends Comparable<T>> extends Sort<T> {
 	
 	    @Override
-	    public void Sort(T[] nums) {
+	    public void sort(T[] nums) {
 	        sort(nums, 0, nums.length - 1);
 	    }
 	
 	    private void sort(T[] nums, int l, int h) {
 	        if (h <= l)
 	            return;
-	        int j = partition(nums, l, h);
+	        int pivot = partition(nums, l, h);
 	        sort(nums, l, j - 1);
 	        sort(nums, j + 1, h);
 	    }
@@ -192,7 +193,7 @@
 	        while (less(nums[++i], v) && i != h) ;
 	        while (less(v, nums[--j]) && j != l) ;
 	        if (i >= j)
-	            break;
+	            break; // 注意中断条件
 	        swap(nums, i, j);
 	    }
 	    swap(nums, l, j);
