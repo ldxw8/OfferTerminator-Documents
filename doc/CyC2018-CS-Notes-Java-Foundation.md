@@ -10,6 +10,7 @@
 - [sczyh30. 深入解析 Java 反射-基础. sczyh30.com](https://www.sczyh30.com/posts/Java/java-reflection-1/)
 - [伯特. Java 反射由浅入深. juejin.im](https://juejin.im/post/598ea9116fb9a03c335a99a4)
 - [知乎问答. 学习 Java 应该如何理解反射. zhihu.com](https://www.zhihu.com/question/24304289)
+- [Carson_Ho. Java反射机制学习指南. jianshu.com](https://www.jianshu.com/p/356e1d7a9d11)
 
 ### 基本概念
 - 反射 (Reflection)：它允许运行中的 Java 程序获取自身的信息，并且可以操作类或对象的内部属性。
