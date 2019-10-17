@@ -204,10 +204,21 @@
 	- `背景`：在 Android 应用中，为了 UI 操作是线程安全的，规定了只允许 UI 线程 (主线程) 更新 Activity 里的组件。
 	- `冲突`：多个线程并发操作 UI 组件，造成线程不安全。
 	- `解决`：Handler 消息传递机制。即工作线程更新 UI 时，通过 Handler 通知主线程才执行更新 UI 操作。
-- Handler 消息机制用于同进程 (共享内存地址空间) <--> Binder / Socket 用于进程间通信。
+- Handler 消息机制用于同进程 (共享内存地址空间)，而 Binder / Socket 用于进程间通信。
 - Handler 消息机制是指由一组 MessageQueue、Message、Looper、Handler 共同组成。
 
 	> 例如，Android 应用中，只有主线程能更新 UI，其他工作线程往往是完成相应工作后，通过 Handler 分发相应的消息给 UI 主线程去完成 UI 更新。
+
+- 具体实例：
+	- 隶属于同一进程的工作线程与主线程共享地址空间，即 Handler 实例对象 mHandler 位于线程间共享的内存堆上，工作线程与主线程都能直接使用该对象 (需要注意多线程的同步问题)。
+	- 工作线程通过 mHandler 向其成员变量 MessageQueue 中添加新 Message，主线程一直处于 loop() 方法内，当收到新的 Message 时按照一定规则分发给相应的 handleMessage() 方法来处理。
+	- Handler 消息机制用于同进程的线程间通信，其核心是线程间共享内存空间，而不同进程拥有不同的地址空间，也就不能用 Handler 来实现进程间通信。
+
+		| ![](img/Kofe-CS-Notes-Android-Handler_1-1.png) |
+		| :-: |
+		| 图 1-1 Handler 消息机制 |
+
+		> 上图只是 Handler 消息机制的一种处理流程，即不限制于工作线程向 UI 线程发送消息，也可以让隶属于同一进程的 `多个工作线程` 间通过 handler 互相发送消息。
 
 ### Socket
 
