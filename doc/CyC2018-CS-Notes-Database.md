@@ -453,7 +453,7 @@
 	SELECT
 	DISTINCT
 	UNION
-	ORDER BY
+	ORDER BY # 排序是最后执行的
 	```
 
 

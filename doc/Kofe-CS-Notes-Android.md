@@ -225,3 +225,119 @@
 - Socket 通信方式也是 C/S 架构，多用于 Android Framework 层与 Native 层之间的通信。
 
 ### Binder
+
+## 进程线程
+### 线程池 ThreadPool 
+#### 章节导读
+
+| ![](img/Kofe-CS-Notes-Android-ThreadPool_1-1.png) |
+| :-: |
+| 图 1-1 线程池的基本概念 |
+
+#### 参考资料
+- [Carson_Ho. Android多线程：线程池ThreadPool 全面解析. jianshu.com](https://www.jianshu.com/p/0e4a5e70bf0e) 
+- [CrossoverJie. 如何优雅的使用和理解线程池. crossoverjie.top](https://crossoverjie.top/2018/07/29/java-senior/ThreadPool/)
+- [CrossoverJie. 线程池没你想的那么简单(一). crossoverjie.top](https://crossoverjie.top/2019/05/20/concurrent/threadpool-01/)
+- [CrossoverJie. 线程池没你想的那么简单(二). crossoverjie.top](https://crossoverjie.top/2019/06/06/concurrent/threadpool-02/)
+- [Mr_OOO. 通俗易懂的 Java 线程池. csdn.net](https://blog.csdn.net/Mr_OOO/article/details/84345963)
+
+#### 使用线程池流程
+- ThreadPoolExecutor 创建线程池：
+
+	```java
+	/**
+	 * 1. 创建线程池：配置线程池的参数，从而实现自己所需的线程池
+	 * ThreadPoolExecutor(
+	 *   int corePoolSize, 		// 核心线程数
+	 *   int maximumPoolSize, // 线程池所容纳的最大线程数
+	 *   long keepAliveTime, 	// 线程空闲后的存活时间
+	 *   TimeUnit unit, 			// 指定 keepAliveTime 参数的时间单位
+	 *   BlockingQueue<Runnable> workQueue, 	// 用于存放任务的阻塞队列
+	 *   RejectedExecutionHandler handler)		// 队列和最大线程池都满了之后的饱和策略
+	 */
+	Executor threadPool = new ThreadPoolExecutor(
+		CORE_POOL_SIZE,		
+		MAXIMUM_POOL_SIZE,
+		KEEP_ALIVE,			
+		TimeUnit.SECONDS,
+		sPoolWorkQueue,
+		sThreadFactory	
+	);
+
+	// 2. 向线程池提交任务
+	threadPool.execute(new Runnable() {
+		@Override
+		public void run() {
+		    // 线程执行任务
+		}
+	});
+
+	// 3. 关闭线程池
+	threadPool.shutdown();
+  ```
+
+- 核心参数说明：
+
+	```java
+	public ThreadPoolExecutor(
+		int corePoolSize,			// 核心线程数
+		int maximumPoolSize,	// 线程池所容纳的最大线程数
+		long keepAliveTime,		// 线程空闲后的存活时间
+		TimeUnit unit,				// 指定 keepAliveTime 参数的时间单位
+		BlockingQueue<Runnable> workQueue, 	// 用于存放任务的阻塞队列
+		RejectedExecutionHandler handler		// 队列和最大线程池都满了之后的饱和策略
+	) {
+		// 忽略构造函数的赋值细节...
+	}
+	```
+
+	> 在 Java 中，已内置四种常见功能线程池的实现方式，即预设的核心参数。
+
+- 关闭线程的原理：遍历线程池中的所有工作线程，逐个调用线程的 interrupt() 中断线程，注意无法响应中断的任务可能永远无法终止。也可调用 threadPool.shutdownNow() 关闭线程。
+
+	>  使用建议：一般调用 shutdown() 关闭线程池；若任务不一定要执行完则调用 shutdownNow()。
+
+	- `shutdown()`：设置线程池的状态为 SHUTDOWN，然后中断所有 `没有正在执行任务` 的线程。
+	- `shutdownNow()`：设置线程池的状态为 STOP，然后尝试停止所有的 `正在执行` 或 `暂停任务` 的线程，并返回等待执行任务的列表。
+
+#### 常见功能线程池
+- 在 `java.util.concurrent` 包下，Executors 利用 `工厂模式` 提供了四种常见功能线程池的实现方式：
+	- Executors.newFixedThreadPool(nThreads)：定长线程池，用于控制最大并发量。
+	- Executors.newScheduledTHreadPool()：定时线程池，用于执行定时、周期性任务。
+  - Executors.newCachedThreadPool()：可缓存线程池，用于执行数量多、耗时少的任务。
+  - Executors.newSingleThreadExecutor()：单线程化线程池，不适合并发任务，但会引起 I/O 阻塞的任务，例如访问数据库。
+
+- 通过解析 Executors 源码分析可知，它们都是通过 `ThreadPoolExecutor` 类来创建线程池，只是默认传递了部分参数，简化了创建线程池的步骤。
+
+	```java
+	// 创建 newFixedThreadPool
+	public static ExecutorService newFixedThreadPool(int nThreads) {
+	    return new ThreadPoolExecutor(nThreads, nThreads,
+	        0L, TimeUnit.MILLISECONDS,
+	        new LinkedBlockingQueue<Runnable>());
+	}
+
+	// 创建 newCachedThreadPool
+	public static ExecutorService newCachedThreadPool() {
+	    return new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+	        60L, TimeUnit.SECONDS,
+	        new SynchronousQueue<Runnable>());
+	}
+	
+	// 创建 newSingleThreadExecutor
+	public static ExecutorService newSingleThreadExecutor() {
+	    return new FinalizableDelegatedExecutorService(
+	        new ThreadPoolExecutor(1, 1,
+	            0L, TimeUnit.MILLISECONDS,
+	            new LinkedBlockingQueue<Runnable>()));
+	}
+	```
+	
+##### 定长线程池
+##### 定时线程池
+##### 可缓存线程池
+##### 单线程化线程池
+
+#### 工作原理
+
+## 四大组件
