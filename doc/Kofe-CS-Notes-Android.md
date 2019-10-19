@@ -248,10 +248,10 @@
 	/**
 	 * 1. 创建线程池：配置线程池的参数，从而实现自己所需的线程池
 	 * ThreadPoolExecutor(
-	 *   int corePoolSize, 		// 核心线程数
-	 *   int maximumPoolSize, // 线程池所容纳的最大线程数
+	 *   int corePoolSize,		// 核心线程数
+	 *   int maximumPoolSize,	// 线程池所容纳的最大线程数
 	 *   long keepAliveTime, 	// 线程空闲后的存活时间
-	 *   TimeUnit unit, 			// 指定 keepAliveTime 参数的时间单位
+	 *   TimeUnit unit, 		// 指定 keepAliveTime 参数的时间单位
 	 *   BlockingQueue<Runnable> workQueue, 	// 用于存放任务的阻塞队列
 	 *   RejectedExecutionHandler handler)		// 队列和最大线程池都满了之后的饱和策略
 	 */
@@ -280,12 +280,12 @@
 
 	```java
 	public ThreadPoolExecutor(
-		int corePoolSize,			// 核心线程数
+		int corePoolSize,		// 核心线程数
 		int maximumPoolSize,	// 线程池所容纳的最大线程数
 		long keepAliveTime,		// 线程空闲后的存活时间
-		TimeUnit unit,				// 指定 keepAliveTime 参数的时间单位
+		TimeUnit unit,			// 指定 keepAliveTime 参数的时间单位
 		BlockingQueue<Runnable> workQueue, 	// 用于存放任务的阻塞队列
-		RejectedExecutionHandler handler		// 队列和最大线程池都满了之后的饱和策略
+		RejectedExecutionHandler handler	// 队列和最大线程池都满了之后的饱和策略
 	) {
 		// 忽略构造函数的赋值细节...
 	}
@@ -294,13 +294,12 @@
 	> 在 Java 中，已内置四种常见功能线程池的实现方式，即预设的核心参数。
 
 - 关闭线程的原理：遍历线程池中的所有工作线程，逐个调用线程的 interrupt() 中断线程，注意无法响应中断的任务可能永远无法终止。也可调用 threadPool.shutdownNow() 关闭线程。
-
-	>  使用建议：一般调用 shutdown() 关闭线程池；若任务不一定要执行完则调用 shutdownNow()。
-
+- 一般调用 shutdown() 关闭线程池；若任务不一定要执行完则调用 shutdownNow()。
 	- `shutdown()`：设置线程池的状态为 SHUTDOWN，然后中断所有 `没有正在执行任务` 的线程。
-	- `shutdownNow()`：设置线程池的状态为 STOP，然后尝试停止所有的 `正在执行` 或 `暂停任务` 的线程，并返回等待执行任务的列表。
+	- `shutdownNow()`：设置线程池的状态为 STOP，然后尝试停止所有 `正在执行` 或 `暂停任务` 的线程，并返回等待执行任务的列表。
 
 #### 常见功能线程池
+
 - 在 `java.util.concurrent` 包下，Executors 利用 `工厂模式` 提供了四种常见功能线程池的实现方式：
 	- Executors.newFixedThreadPool(nThreads)：定长线程池，用于控制最大并发量。
 	- Executors.newScheduledTHreadPool()：定时线程池，用于执行定时、周期性任务。
@@ -339,5 +338,21 @@
 ##### 单线程化线程池
 
 #### 工作原理
+
+| ![](img/Kofe-CS-Notes-Android-ThreadPool_1-2.png) |
+| :-: |
+| 图 1-1-1 线程池的处理流程 |
+
+- 提交一个任务到线程池中，核心的逻辑是 execute() 函数，而它内部处理逻辑是 ( 如图  1-1-1 所示 )：
+	- 获取当前线程池的状态。
+	- 当前线程数量小于 coreSize 时创建一个新的线程运行。
+	- 如果当前线程处于运行状态，并且写入阻塞队列成功。
+	- 双重检查，再次获取线程状态；如果线程状态变了（非运行状态）就需要从阻塞队列移除任务，并尝试判断线程是否全部执行完毕。同时执行拒绝策略。
+	- 如果当前线程池为空就新创建一个线程并执行。
+	- 如果在第三步的判断为非运行状态，尝试新建线程，如果失败则执行拒绝策略。
+
+- 处理任务的优先级：核心线程 > 任务队列 >  最大线程
+
+
 
 ## 四大组件
