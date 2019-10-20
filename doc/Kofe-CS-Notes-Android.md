@@ -17,6 +17,7 @@
 - 硬件抽象层 (HAL) 提供标准接口，HAL包含多个库模块，其中每个模块都为特定类型的硬件组件实现一组接口，比如 WIFI / 蓝牙模块，当框架 API 请求访问设备硬件时，Android 系统将为该硬件加载相应的库模块。
 
 #### Android Runtime
+
 - 对于运行 Android 5.0（API 级别 21）或更高版本的设备，每个应用都在其自己的进程中运行，并且有其自己的 Android Runtime (ART) 实例。ART 通过执行 DEX 文件在低内存设备上可运行多个 `虚拟机`。
 
 	> DEX (Dalvik Executable，DEX) 文件是一种专为 Android 设计的字节码格式，经过优化使用内存很少。通常使用 Jack 编译器将 Java 源代码编译为 DEX 字节码。
@@ -227,34 +228,98 @@
 ### Binder
 
 ## 进程线程
-### 线程池 ThreadPool 
-#### 章节导读
+### 线程池 ThreadPool
+#### 概念简述
 
 | ![](img/Kofe-CS-Notes-Android-ThreadPool_1-1.png) |
 | :-: |
 | 图 1-1 线程池的基本概念 |
 
 #### 参考资料
+
 - [Carson_Ho. Android多线程：线程池ThreadPool 全面解析. jianshu.com](https://www.jianshu.com/p/0e4a5e70bf0e) 
 - [CrossoverJie. 如何优雅的使用和理解线程池. crossoverjie.top](https://crossoverjie.top/2018/07/29/java-senior/ThreadPool/)
 - [CrossoverJie. 线程池没你想的那么简单(一). crossoverjie.top](https://crossoverjie.top/2019/05/20/concurrent/threadpool-01/)
 - [CrossoverJie. 线程池没你想的那么简单(二). crossoverjie.top](https://crossoverjie.top/2019/06/06/concurrent/threadpool-02/)
 - [Mr_OOO. 通俗易懂的 Java 线程池. csdn.net](https://blog.csdn.net/Mr_OOO/article/details/84345963)
 
+#### 工作原理
+
+##### 线程池的状态定义
+
+- 了解线程池的工作原理，首先得了解线程池中所定义的状态，它们与线程的执行有着密切关联。
+
+	| ![](img/Kofe-CS-Notes-Android-ThreadPool_1-2.png) |
+	| :-: |
+	| 图 1-1-1 线程池中所定义的状态 |
+	
+	- `RUNNING`：运行状态，指可以接受任务执行队列里的任务。
+	- `SHUTDOWN`：指调用了 shutdown() 方法，不再接受新任务，但队列的任务得执行完毕。
+	- `STOP`：指调用了 shutdownNow() 方法，不再接受新任务，同时抛弃阻塞队列里的所有任务并中断所有正在执行任务。
+	- `TIDYING`：所有任务都执行完毕，在调用 shutdown() / shutdownNow() 中都会尝试更新为这个状态。
+	- `TERMINATED`：终止状态，当执行 terminated() 后会更新为这个状态。
+
+##### 线程池的工作流程
+
+- 提交一个任务到线程池中，核心的逻辑是 execute() 函数：
+
+    ```java
+    public void execute(Runnable command) {
+        if (command == null)
+            throw new NullPointerException();
+        int c = ctl.get(); // 读取 ctl
+        
+        // 当前任务数量小于核心线程数
+        if ( workerCountOf(c) < corePoolSize ) {
+            if ( addWorker(command, true) )
+                return;
+            c = ctl.get();
+        }
+        
+        // 线程池状态是 Running / Shutdown，并且任务数大于核心线程数
+        if ( isRunning(c) && workQueue.offer(command) ) {
+            int recheck = ctl.get(); // 再次读取 ctl，防止并发
+            // 若线程池的状态已发生变化，需把刚放入阻塞队列中的任务移除
+            // 且使用拒绝策略
+            if ( !isRunning(recheck) && remove(command) ) {
+                reject(command);
+            } else if ( workerCountOf(recheck) == 0 ) {
+                // 到了这里表示线程池里面已经没有可执行任务的线程，
+                // 但是刚又给阻塞队列中加了个任务，还不符合使用拒绝策略的条件，
+                // 追加一个 Thread 执行任务，初始化任务为 null,
+                // 因为要调用 getTask() 方法从阻塞队列中获取 task
+                addWorker(null, false);
+            }
+        } else if ( !addWorker(command, false) ) {
+            reject(command);
+        }
+    }
+    ```
+    
+- 更通俗理解，线程池的工作流程如图 1-1-2 所示：
+
+	| ![](img/Kofe-CS-Notes-Android-ThreadPool_1-3.png) |
+	| :-: |
+	| 图 1-1-2 线程池的处理流程 |
+	
+	> `核心线程` ：固定线程数，可闲置且不会被销毁。<br>
+	> `非核心线程`：拥有闲置时的超时时长，超过这个时长非核心线程就会被回收。
+
+	- 获取当前线程池的状态。
+	- 当前线程数量小于 corePoolSize 时创建一个新的线程运行。
+	- 如果当前线程处于运行状态，并且写入阻塞队列成功。
+	- 双重检查，再次获取线程状态；如果线程状态变了（非运行状态）就需要从阻塞队列移除任务，并尝试判断线程是否全部执行完毕。同时执行拒绝策略。
+	- 如果当前线程池为空就新创建一个线程并执行。
+	- 如果在第三步的判断为非运行状态，尝试新建线程，如果失败则执行拒绝策略。
+	
+- 处理任务的优先级：核心线程 > 任务队列 >  最大线程
+
 #### 使用线程池流程
-- ThreadPoolExecutor 创建线程池：
+##### 创建线程池
+- 使用 ThreadPoolExecutor 创建线程池:
 
 	```java
-	/**
-	 * 1. 创建线程池：配置线程池的参数，从而实现自己所需的线程池
-	 * ThreadPoolExecutor(
-	 *   int corePoolSize,		// 核心线程数
-	 *   int maximumPoolSize,	// 线程池所容纳的最大线程数
-	 *   long keepAliveTime, 	// 线程空闲后的存活时间
-	 *   TimeUnit unit, 		// 指定 keepAliveTime 参数的时间单位
-	 *   BlockingQueue<Runnable> workQueue, 	// 用于存放任务的阻塞队列
-	 *   RejectedExecutionHandler handler)		// 队列和最大线程池都满了之后的饱和策略
-	 */
+	// 1. 创建线程池：配置线程池的参数，从而实现自己所需的线程池
 	Executor threadPool = new ThreadPoolExecutor(
 		CORE_POOL_SIZE,		
 		MAXIMUM_POOL_SIZE,
@@ -263,7 +328,7 @@
 		sPoolWorkQueue,
 		sThreadFactory	
 	);
-
+	
 	// 2. 向线程池提交任务
 	threadPool.execute(new Runnable() {
 		@Override
@@ -274,8 +339,8 @@
 
 	// 3. 关闭线程池
 	threadPool.shutdown();
-  ```
-
+	```
+	
 - 核心参数说明：
 
 	```java
@@ -291,9 +356,10 @@
 	}
 	```
 
-	> 在 Java 中，已内置四种常见功能线程池的实现方式，即预设的核心参数。
+- 在 Java 中，已内置四种常见功能线程池的实现方式，即预设的核心参数。
 
-- 关闭线程的原理：遍历线程池中的所有工作线程，逐个调用线程的 interrupt() 中断线程，注意无法响应中断的任务可能永远无法终止。也可调用 threadPool.shutdownNow() 关闭线程。
+##### 关闭线程池
+- 关闭线程池原理：遍历线程池中的所有工作线程，逐个调用线程的 interrupt() 中断线程，注意无法响应中断的任务可能永远无法终止。也可调用 threadPool.shutdownNow() 关闭线程。
 - 一般调用 shutdown() 关闭线程池；若任务不一定要执行完则调用 shutdownNow()。
 	- `shutdown()`：设置线程池的状态为 SHUTDOWN，然后中断所有 `没有正在执行任务` 的线程。
 	- `shutdownNow()`：设置线程池的状态为 STOP，然后尝试停止所有 `正在执行` 或 `暂停任务` 的线程，并返回等待执行任务的列表。
@@ -313,14 +379,16 @@
 	public static ExecutorService newFixedThreadPool(int nThreads) {
 	    return new ThreadPoolExecutor(nThreads, nThreads,
 	        0L, TimeUnit.MILLISECONDS,
-	        new LinkedBlockingQueue<Runnable>());
+	        new LinkedBlockingQueue<Runnable>()
+	    );
 	}
 
 	// 创建 newCachedThreadPool
 	public static ExecutorService newCachedThreadPool() {
 	    return new ThreadPoolExecutor(0, Integer.MAX_VALUE,
 	        60L, TimeUnit.SECONDS,
-	        new SynchronousQueue<Runnable>());
+	        new SynchronousQueue<Runnable>()
+	    );
 	}
 	
 	// 创建 newSingleThreadExecutor
@@ -328,31 +396,112 @@
 	    return new FinalizableDelegatedExecutorService(
 	        new ThreadPoolExecutor(1, 1,
 	            0L, TimeUnit.MILLISECONDS,
-	            new LinkedBlockingQueue<Runnable>()));
+	            new LinkedBlockingQueue<Runnable>())
+	    );
 	}
 	```
 	
 ##### 定长线程池
+- 特点：
+	- 只有核心线程，线程数固定，任务队列无大小限制 (超出的线程任务会在队列中等待)。
+	- 不会被回收。
+- 应用场景：控制 `线程最大并发数`。
+
+	```java
+	// 1. 创建定长线程池对象 & 设置线程池线程数量固定为 3
+	ExecutorService fixedThreadPool = Executors.newFixedThreadPool(3);
+
+	// 2. 创建 Runnable 类线程对象
+	Runnable task = new Runnable(){
+	    public void run(){
+	        System.out.println("Running...");
+	    }
+	};
+        
+	// 3. 向线程池提交任务
+	fixedThreadPool.execute(task);
+        
+	// 4. 关闭线程池
+	fixedThreadPool.shutdown();
+	```
+
 ##### 定时线程池
+- 特点：核心线程数固定，非核心线程数无限制。闲置时马上回收。
+- 应用场景：执行 `定时`、`周期性` 任务。
+
+	```java
+	// 1. 创建定时线程池对象 & 设置线程池线程数量固定为 5
+	ScheduledExecutorService scheduledThreadPool =
+	    Executors.newScheduledThreadPool(5);
+
+	// 2. 创建 Runnable 类线程对象
+	Runnable task = new Runnable(){
+	    public void run(){
+	        System.out.println("Running...");
+	    }
+	};
+
+	// 3. 向线程池提交任务：延迟 1s 后执行任务
+	scheduledThreadPool.schedule(task, 1, TimeUnit.SECONDS);
+	
+	// 延迟 10ms 后、每隔 1000ms 执行任务
+	scheduledThreadPool
+	    .scheduleAtFixedRate(task,10,1000,TimeUnit.MILLISECONDS);
+
+	// 4. 关闭线程池
+	scheduledThreadPool.shutdown();
+	```
+
 ##### 可缓存线程池
+- 特点：
+    - 只有非核心线程，线程数不固定。
+    - 灵活回收空闲线程；具备超时机制，全部回收时几乎不占系统资源。
+- 应用场景：执行 `数量多`、`耗时少` 的线程任务。
+
+	```java
+	// 1. 创建可缓存线程池对象
+	ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
+
+	// 2. 创建 Runnable 类线程对象
+	Runnable task = new Runnable(){
+	    public void run(){
+	        System.out.println("Running...");
+	    }
+	};
+
+	// 3. 向线程池提交任务：execute（）
+	cachedThreadPool.execute(task);
+
+	// 4. 关闭线程池
+	cachedThreadPool.shutdown();
+
+	/**
+	 * 当执行第二个任务时第一个任务已经完成，
+	 * 那么会复用执行第一个任务的线程，而不用每次新建线程。
+	 */
+	```
+
 ##### 单线程化线程池
+- 特点：只有一个核心线程。即保证所有任务按照指定顺序在一个线程中执行，不需要处理线程同步问题。
+- 应用场景：不适合并发，但适用于可能引起 I/O 阻塞以及影响 UI 线程响应操作的场景。
 
-#### 工作原理
+	```java
+	// 1. 创建单线程化线程池
+	ExecutorService singleThreadExecutor =
+	    Executors.newSingleThreadExecutor();
 
-| ![](img/Kofe-CS-Notes-Android-ThreadPool_1-2.png) |
-| :-: |
-| 图 1-1-1 线程池的处理流程 |
+	// 2. 创建好Runnable类线程对象 & 需执行的任务
+	Runnable task =new Runnable(){
+	    public void run(){
+	        System.out.println("执行任务啦");
+	    }
+	};
 
-- 提交一个任务到线程池中，核心的逻辑是 execute() 函数，而它内部处理逻辑是 ( 如图  1-1-1 所示 )：
-	- 获取当前线程池的状态。
-	- 当前线程数量小于 coreSize 时创建一个新的线程运行。
-	- 如果当前线程处于运行状态，并且写入阻塞队列成功。
-	- 双重检查，再次获取线程状态；如果线程状态变了（非运行状态）就需要从阻塞队列移除任务，并尝试判断线程是否全部执行完毕。同时执行拒绝策略。
-	- 如果当前线程池为空就新创建一个线程并执行。
-	- 如果在第三步的判断为非运行状态，尝试新建线程，如果失败则执行拒绝策略。
+	// 3. 向线程池提交任务：execute（）
+	singleThreadExecutor.execute(task);
 
-- 处理任务的优先级：核心线程 > 任务队列 >  最大线程
-
-
+	// 4. 关闭线程池
+	singleThreadExecutor.shutdown();
+	```
 
 ## 四大组件
