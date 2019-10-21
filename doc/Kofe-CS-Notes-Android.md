@@ -345,12 +345,12 @@
 
 	```java
 	public ThreadPoolExecutor(
-		int corePoolSize,		// 核心线程数
+		int corePoolSize,			// 核心线程数
 		int maximumPoolSize,	// 线程池所容纳的最大线程数
 		long keepAliveTime,		// 线程空闲后的存活时间
-		TimeUnit unit,			// 指定 keepAliveTime 参数的时间单位
+		TimeUnit unit,				// 指定 keepAliveTime 参数的时间单位
 		BlockingQueue<Runnable> workQueue, 	// 用于存放任务的阻塞队列
-		RejectedExecutionHandler handler	// 队列和最大线程池都满了之后的饱和策略
+		RejectedExecutionHandler handler		// 队列和最大线程池都满了之后的饱和策略
 	) {
 		// 忽略构造函数的赋值细节...
 	}
@@ -401,107 +401,102 @@
 	}
 	```
 	
+- 常见线程池总结：
+
+	| 类型 | 池内线程类型 | 池内线程数量 | 处理特点 | 应用场景 |
+	| :-: | :-: | :-: | :--- | :--- |
+	| 定长线程池 | 核心线程 | 固定 | 1. 不回收核心线程<br>2. 任务队列无大小限制 (超出的线程任务会在队列中等待) | 控制线程 `最大并发数` |
+	| 定时线程池 | 核心线程<br>非核心线程 | 核心固定<br>非核心无固定 | 非核心线程闲置时会被立即回收 | 执行 `定时`、`周期` 任务 |
+	| 可缓存线程池 | 非核心线程 | 无固定 | 1. 优先利用闲置线程处理任务<br>2. 无线程可用时新建线程<br>3. 灵活回收空闲线程 | 执行 `数量多`、`耗时少` 的线程任务 |
+	| 单线程化线程池 | 核心线程 | 1 | 保证所有任务按照指定顺序在一个线程中执行<br>不需要处理线程同步问题 | 不适合并发，但适用于可能引起 `I/O` 阻塞以及影响 `UI` 线程响应操作的场景 |
+	
 ##### 定长线程池
-- 特点：
-	- 只有核心线程，线程数固定，任务队列无大小限制 (超出的线程任务会在队列中等待)。
-	- 不会被回收。
-- 应用场景：控制 `线程最大并发数`。
 
-	```java
-	// 1. 创建定长线程池对象 & 设置线程池线程数量固定为 3
-	ExecutorService fixedThreadPool = Executors.newFixedThreadPool(3);
+```java
+// 1. 创建定长线程池对象 & 设置线程池线程数量固定为 3
+ExecutorService fixedThreadPool = Executors.newFixedThreadPool(3);
 
-	// 2. 创建 Runnable 类线程对象
-	Runnable task = new Runnable(){
-	    public void run(){
-	        System.out.println("Running...");
-	    }
-	};
+// 2. 创建 Runnable 类线程对象
+Runnable task = new Runnable(){
+    public void run(){
+        System.out.println("Running...");
+    }
+};
         
-	// 3. 向线程池提交任务
-	fixedThreadPool.execute(task);
+// 3. 向线程池提交任务
+fixedThreadPool.execute(task);
         
-	// 4. 关闭线程池
-	fixedThreadPool.shutdown();
-	```
+// 4. 关闭线程池
+fixedThreadPool.shutdown();
+```
 
 ##### 定时线程池
-- 特点：核心线程数固定，非核心线程数无限制。闲置时马上回收。
-- 应用场景：执行 `定时`、`周期性` 任务。
+```java
+// 1. 创建定时线程池对象 & 设置线程池线程数量固定为 5
+ScheduledExecutorService scheduledThreadPool =
+    Executors.newScheduledThreadPool(5);
 
-	```java
-	// 1. 创建定时线程池对象 & 设置线程池线程数量固定为 5
-	ScheduledExecutorService scheduledThreadPool =
-	    Executors.newScheduledThreadPool(5);
+// 2. 创建 Runnable 类线程对象
+Runnable task = new Runnable(){
+    public void run(){
+        System.out.println("Running...");
+    }
+};
 
-	// 2. 创建 Runnable 类线程对象
-	Runnable task = new Runnable(){
-	    public void run(){
-	        System.out.println("Running...");
-	    }
-	};
-
-	// 3. 向线程池提交任务：延迟 1s 后执行任务
-	scheduledThreadPool.schedule(task, 1, TimeUnit.SECONDS);
+// 3. 向线程池提交任务：延迟 1s 后执行任务
+scheduledThreadPool.schedule(task, 1, TimeUnit.SECONDS);
 	
-	// 延迟 10ms 后、每隔 1000ms 执行任务
-	scheduledThreadPool
-	    .scheduleAtFixedRate(task,10,1000,TimeUnit.MILLISECONDS);
+// 延迟 10ms 后、每隔 1000ms 执行任务
+scheduledThreadPool
+    .scheduleAtFixedRate(task,10,1000,TimeUnit.MILLISECONDS);
 
-	// 4. 关闭线程池
-	scheduledThreadPool.shutdown();
-	```
+// 4. 关闭线程池
+scheduledThreadPool.shutdown();
+```
 
 ##### 可缓存线程池
-- 特点：
-    - 只有非核心线程，线程数不固定。
-    - 灵活回收空闲线程；具备超时机制，全部回收时几乎不占系统资源。
-- 应用场景：执行 `数量多`、`耗时少` 的线程任务。
+```java
+// 1. 创建可缓存线程池对象
+ExecutorService cachedThreadPool = 
+    Executors.newCachedThreadPool();
 
-	```java
-	// 1. 创建可缓存线程池对象
-	ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
+// 2. 创建 Runnable 类线程对象
+Runnable task = new Runnable(){
+    public void run(){
+        System.out.println("Running...");
+    }
+};
 
-	// 2. 创建 Runnable 类线程对象
-	Runnable task = new Runnable(){
-	    public void run(){
-	        System.out.println("Running...");
-	    }
-	};
+// 3. 向线程池提交任务：execute（）
+cachedThreadPool.execute(task);
 
-	// 3. 向线程池提交任务：execute（）
-	cachedThreadPool.execute(task);
+// 4. 关闭线程池
+cachedThreadPool.shutdown();
 
-	// 4. 关闭线程池
-	cachedThreadPool.shutdown();
-
-	/**
-	 * 当执行第二个任务时第一个任务已经完成，
-	 * 那么会复用执行第一个任务的线程，而不用每次新建线程。
-	 */
-	```
+/**
+ * 当执行第二个任务时第一个任务已经完成，
+ * 那么会复用执行第一个任务的线程，而不用每次新建线程。
+ */
+```
 
 ##### 单线程化线程池
-- 特点：只有一个核心线程。即保证所有任务按照指定顺序在一个线程中执行，不需要处理线程同步问题。
-- 应用场景：不适合并发，但适用于可能引起 I/O 阻塞以及影响 UI 线程响应操作的场景。
+```java
+// 1. 创建单线程化线程池
+ExecutorService singleThreadExecutor =
+    Executors.newSingleThreadExecutor();
 
-	```java
-	// 1. 创建单线程化线程池
-	ExecutorService singleThreadExecutor =
-	    Executors.newSingleThreadExecutor();
+// 2. 创建好Runnable类线程对象 & 需执行的任务
+Runnable task =new Runnable(){
+    public void run(){
+        System.out.println("执行任务啦");
+    }
+};
 
-	// 2. 创建好Runnable类线程对象 & 需执行的任务
-	Runnable task =new Runnable(){
-	    public void run(){
-	        System.out.println("执行任务啦");
-	    }
-	};
+// 3. 向线程池提交任务：execute（）
+singleThreadExecutor.execute(task);
 
-	// 3. 向线程池提交任务：execute（）
-	singleThreadExecutor.execute(task);
-
-	// 4. 关闭线程池
-	singleThreadExecutor.shutdown();
-	```
+// 4. 关闭线程池
+singleThreadExecutor.shutdown();
+```
 
 ## 四大组件
