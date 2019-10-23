@@ -632,3 +632,8 @@
 - 遍历 HashMap 得到元素的顺序不是按照插入的顺序输出的。
 
 ### ConcurrentHashMap
+
+#### 参考资料
+
+- [Single_Yam. 为并发而生的 ConcurrentHashMap. cnblogs.com](https://www.cnblogs.com/yangming1996/p/8031199.html)
+- [明志健致远. ConcurrentHashMap 原理分析 (1.7与1.8) 前言. cnblogs.com](https://www.cnblogs.com/study-everyday/p/6430462.html)
