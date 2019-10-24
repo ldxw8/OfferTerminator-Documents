@@ -82,13 +82,13 @@
 	```
 
 #### 获取方法
-- getDeclaredMethods() 方法返回类或接口声明的所有方法，包括公共、保护、默认 (包) 访问和私有方法，但不包括继承的方法。
+- getDeclaredMethods() 方法返回类或接口声明的 `所有方法`，包括公共、保护、默认 (包) 访问和私有方法，但不包括继承的方法。
 
 	```java
 	public Method[] getDeclaredMethods() throws SecurityException
 	```
 	
-- getMethods() 方法返回某个类的所有公用 (public) 方法，包括其继承类的公用方法。
+- getMethods() 方法返回某个类的所有 `公用方法` (public)，包括其继承类的公用方法。
 
 	```java
 	public Method[] getMethods() throws SecurityException
@@ -189,8 +189,9 @@
 	```
 
 #### 获取类的成员变量
-- getFiled()：访问公有的成员变量。
-- getDeclaredField()：所有已声明的成员变量，但不能得到其父类的成员变量。
+
+- getFiled()：访问 `公有` 的成员变量。
+- getDeclaredField()：所有已声明的成员变量，包括公共、保护、默认 (包) 访问和私有成员变量，但不能得到其父类的成员变量。
 
 	> getFileds() 和 getDeclaredFields() 方法用法和意义同上。
 
