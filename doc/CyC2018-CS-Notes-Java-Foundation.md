@@ -21,12 +21,16 @@
 
 - 每个类都有一个 Class 对象，包含了与类有关的信息。当编译一个新类时，会产生一个同名的 `.class` 文件。该文件内容保存着 Class 对象。
 
+### 反射的用途
+- 在使用 IDE (如 Eclipse，IntelliJ IDEA) 时，当输入一个对象或类并想调用它的属性或方法时，只需按 “.” 号，编译器就会自动罗列它的属性或方法，实际这里就利用了反射的特性。
+- 反射最重要的用途就是开发各种通用框架。很多框架 (比如 Spring) 都是配置化的 (比如通过 XML 文件配置 Bean)。为了保证框架的通用性，它们可能需要根据配置文件加载不同的对象或类，调用不同的方法，即运行时动态加载需要加载的对象。
+
 ### 实现与使用
 - `类加载` 相当于 `Class` 对象的加载。也可以使用 `Class.forName("com.mysql.jdbc.Driver")` 这种方式来控制类的加载，该方法会返回一个 Class 对象。
 - `Class` 和 `java.lang.reflect` 都对反射提供了支持。java.lang.reflect 类库主要包含了以下三个类：
+	- `Constructor`：可以用 Constructor 的 newInstance() 创建新的对象。
 	- `Field`：可以使用 get() 和 set() 方法读取和修改 Field 对象关联的字段；
 	- `Method`：可以使用 invoke() 方法调用与 Method 对象关联的方法；
-	- `Constructor`：可以用 Constructor 的 newInstance() 创建新的对象。
 
 #### 获得 Class 对象
 - 使用 Class 类的 forName() 静态方法：
@@ -40,14 +44,14 @@
 	Class.forName(driver);
 	```
 	
-- 直接获取某一个对象的 class：
+- 直接获取某一个 `对象` 的 class：
 
 	```java
 	Class<?> klass = int.class;
 	Class<?> classInt = Integer.TYPE;
 	```
 
-- 调用某个对象的 getClass() 方法：
+- 调用某个 `对象` 的 getClass() 方法：
 
 	```java
 	StringBuilder str = new StringBuilder("123");
@@ -72,11 +76,11 @@
 - 先通过 Class 对象获取指定的 Constructor 对象，再调用 Constructor 对象的newInstance() 方法来创建实例。这种方法可以用指定的构造器构造类的实例。
 
 	```java
-	//获取String所对应的Class对象
+	// 获取 String 所对应的 Class 对象
 	Class<?> c = String.class;
-	//获取String类带一个String参数的构造器
+	// 获取 String 类带一个 String 参数的构造器
 	Constructor constructor = c.getConstructor(String.class);
-	//根据构造器创建实例
+	// 根据构造器创建实例
 	Object obj = constructor.newInstance("23333");
 	System.out.println(obj);
 	```
@@ -165,15 +169,26 @@
 	            NoSuchMethodException, InvocationTargetException {
 	        Class<?> clz = Calculator.class;
 
-	        //创建 SubClass 的实例
+	        // 创建 SubClass 的实例
 	        Object obj = clz.newInstance();
 	        
-	        //获取 SubClass 类的 add 方法
+	        // 获取 SubClass 类的 add 方法
 	        Method method = clz.getMethod("add",int.class,int.class);
 	        
-	        //调用 method 对应的方法 => add(1,4)
+	        // 调用 method 对应的方法 => add(1,4)
 	        Object result = method.invoke(obj,1,4);
 	        System.out.println(result);
+	              
+	        // 获取私有方法：
+	        // 第一个参数为要获取的私有方法的名称
+    			// 第二个为要获取方法的参数的类型：参数为 Class，没有参数就是 null
+    			// 方法参数也可写成：new Class[]{String.class , int.class}
+	        Method privateMethod = clz.getDeclaredMethod("getCount", null);
+	        if ( null != privateMethod ) {
+	            // 获取私有方法的访问权，否则会报异常 IllegalAccessException
+	            privateMethod.setAccessible(true);
+	        }
+	        privateMethod.invoke(obj, null);
 	    }
 	}
 	
@@ -184,6 +199,9 @@
 	    }
 	    public int sub(int a,int b) {
 	        return a+b;
+	    }
+	    private int getCount() {
+	        return this.count;
 	    }
 	}
 	```
