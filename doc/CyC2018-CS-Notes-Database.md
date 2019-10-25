@@ -576,6 +576,8 @@
 - 计算字段通常需要使用 `AS` 来取别名，否则输出的时候字段名为计算表达式。
 
 	```sql
+	# col1、col2 若为数值型，则为四则运算
+	# col1、col2 若为字符型，相乘结果为 0
 	SELECT col1 * col2 AS alias
 	FROM mytable;
 	```
