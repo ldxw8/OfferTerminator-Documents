@@ -175,8 +175,8 @@
 	        if (h <= l)
 	            return;
 	        int pivot = partition(nums, l, h);
-	        sort(nums, l, j - 1);
-	        sort(nums, j + 1, h);
+	        sort(nums, l, pivot - 1);
+	        sort(nums, pivot + 1, h);
 	    }
 	}
 	```
