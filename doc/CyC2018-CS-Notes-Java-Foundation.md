@@ -6,14 +6,22 @@
 
 > 本章内容适用于 JDK 1.8 版本。
 
+### 章节导读
+
+| ![](img/Cys2018-CS-Notes-Java-Reflection_1-1.png) |
+| :-: |
+| 图 1-1 Java 反射的实现过程 |
+
 ### 参考资料
+
 - [sczyh30. 深入解析 Java 反射-基础. sczyh30.com](https://www.sczyh30.com/posts/Java/java-reflection-1/)
 - [伯特. Java 反射由浅入深. juejin.im](https://juejin.im/post/598ea9116fb9a03c335a99a4)
 - [知乎问答. 学习 Java 应该如何理解反射. zhihu.com](https://www.zhihu.com/question/24304289)
 - [Carson_Ho. Java反射机制学习指南. jianshu.com](https://www.jianshu.com/p/356e1d7a9d11)
 
 ### 基本概念
-- 反射 (Reflection)：它允许运行中的 Java 程序获取自身的信息，并且可以操作类或对象的内部属性。
+
+- 反射 (Reflection)：它允许 `运行中` 的 Java 程序获取自身的信息，并且可以操作 `类或对象` 的`内部属性`。
 
 - 在 Java 程序中，对象的类型都是在编译期就确定下来的，而 Java 反射机制可以动态地创建对象并调用其属性，这样的对象的类型在编译期是未知的。
 
@@ -22,6 +30,7 @@
 - 每个类都有一个 Class 对象，包含了与类有关的信息。当编译一个新类时，会产生一个同名的 `.class` 文件。该文件内容保存着 Class 对象。
 
 ### 反射的用途
+
 - 在使用 IDE (如 Eclipse，IntelliJ IDEA) 时，当输入一个对象或类并想调用它的属性或方法时，只需按 “.” 号，编译器就会自动罗列它的属性或方法，实际这里就利用了反射的特性。
 - 反射最重要的用途就是开发各种通用框架。很多框架 (比如 Spring) 都是配置化的 (比如通过 XML 文件配置 Bean)。为了保证框架的通用性，它们可能需要根据配置文件加载不同的对象或类，调用不同的方法，即运行时动态加载需要加载的对象。
 
@@ -73,7 +82,7 @@
 	Object str = c.newInstance();
 	```
 	
-- 先通过 Class 对象获取指定的 Constructor 对象，再调用 Constructor 对象的newInstance() 方法来创建实例。这种方法可以用指定的构造器构造类的实例。
+- 先通过 Class 对象获取指定的 Constructor 对象，再调用 Constructor 对象的newInstance() 方法来创建实例。这种方法可以用 `指定的构造器` 构造类的实例。
 
 	```java
 	// 获取 String 所对应的 Class 对象
@@ -228,7 +237,9 @@
 	- `内部暴露`：由于反射允许代码执行一些在正常情况下不被允许的操作（比如访问私有的属性和方法），所以使用反射可能会导致意料之外的副作用，这可能导致代码功能失调并破坏可移植性。反射代码破坏了 `封装性`，因此当平台发生改变的时候，代码的行为就有可能也随着变化。
 
 ## 异常
+
 ### 参考资料
+
 - [欧阳思海. Java 异常的处理和设计及深入理解. juejin.im](https://juejin.im/post/5ae66791f265da0b92655c5d)
 - [知乎问答. Java 中如何优雅的处理异常. zhihu.com](https://www.zhihu.com/question/28254987)
 
