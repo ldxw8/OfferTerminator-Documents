@@ -242,18 +242,18 @@
 
 - [欧阳思海. Java 异常的处理和设计及深入理解. juejin.im](https://juejin.im/post/5ae66791f265da0b92655c5d)
 - [知乎问答. Java 中如何优雅的处理异常. zhihu.com](https://www.zhihu.com/question/28254987)
+- [Joshua Bloch. Effective Java (3rd Edition) [M]. Addison-Wesley Professional, 2018](https://book.douban.com/subject/27047716/)
 
 ### 基本概念
-| ![Java异常的体系结构](img/Cys2018-CS-Notes-Java-Foundation-Exception_1-1.png) |
-| :-: |
-| 图 2-1 Java 异常的体系结构 |
+| ![Java异常的体系结构](img/Cys2018-CS-Notes-Java-Foundation-Throwable_1-1.png) |
+| :----------------------------------------------------------: |
+|                  图 2-1 Java 异常的体系结构                  |
 
 - Throwable 可以用来表示任何可以作为异常抛出的类，分 `Error` 和 `Exception` 两种。
-	- 其中 Error 用来表示 JVM 无法处理的错误。
+	- 其中 Error 用来表示程序无法处理的错误，交由  JVM 处理。
 	- Exception 分为两种：
 		- 受检异常：需要用 `try...catch...` 语句捕获并进行处理，并且可以从异常中恢复；
 		- 非受检异常：是程序运行时错误 (RuntimeException)，例如除 0 会引发 Arithmetic Exception，此时程序崩溃并且无法恢复。
-
 - Java 中进行异常处理：对于可能会发生异常的代码，可选择三种方法来进行异常处理：
 	- 对代码块用 `try..catch` 进行异常捕获处理；
 	- 在该代码的方法体外用 `throws` 进行抛出声明；
@@ -265,6 +265,8 @@
 	- 一夫当关万夫莫开：避免使用一个 Throwable / Exception 来捕捉所有的异常。
 	- 必要使用异常：只在必要使用异常的地方才使用异常，不要用异常去控制程序的流程。
 	- 切忌使用空 catch 块：即捕获了异常后什么都不做，相当于忽略了这个异常。
-	- 受检和非受检异常的选择：尽量将检查异常转变为非检查异常交给上层处理。
+	- 受检和非受检异常的选择：在《Effective java》中指出，对于 `可恢复` 的条件使用受检异常，对于 `程序错误` (言外之意不可恢复) 使用非受检异常，也即运行时异常。
+
+		> 尽量将检查异常转变为非检查异常交给上层处理。
 
 ## 泛型
