@@ -632,8 +632,32 @@
 - 遍历 HashMap 得到元素的顺序不是按照插入的顺序输出的。
 
 ### ConcurrentHashMap
+| ![](img/CyC2018-CS-Notes-Java-ConcurrentHashMap_1-1.png) |
+| :-: |
+| 图 2-4 ConcurrentHashMap 引入背景 |
 
 #### 参考资料
-
 - [Single_Yam. 为并发而生的 ConcurrentHashMap. cnblogs.com](https://www.cnblogs.com/yangming1996/p/8031199.html)
 - [明志健致远. ConcurrentHashMap 原理分析 (1.7与1.8) 前言. cnblogs.com](https://www.cnblogs.com/study-everyday/p/6430462.html)
+
+#### 内容概述
+##### 历史版本
+| ![](img/CyC2018-CS-Notes-Java-ConcurrentHashMap_1-2.png) | ![](img/CyC2018-CS-Notes-Java-ConcurrentHashMap_1-3.png) |
+| :-: | :-: |
+| 图 2-4-1 JDK 1.7 ConcurrentHashMap | 图 2-4-2 JDK 1.8 ConcurrentHashMap |
+
+- JDK 1.7：每个分段锁 Segment 维护着几个桶 HashEntry，多线程可同时访问不同分段锁上的桶 (并发量就是 Segment 的个数)。
+
+	> 版本特征：ReentrantLock + Segment + HashEntry
+
+- JDK 1.8：没有 Hash 冲突时，CAS 式插入 / 删除数据；当发生 Hash 冲突时，使用 synchronized 进行并发控制 (锁住链表或者红黑树的头结点)。
+
+	> 版本特征：sychronized + CAS + HashEntry / 红黑树
+
+##### 并发控制
+
+- put()：并发添加
+- size()：并发统计
+
+##### 其他操作
+- get()：获取元素
