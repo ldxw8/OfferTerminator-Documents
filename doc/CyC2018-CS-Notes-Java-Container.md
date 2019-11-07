@@ -655,9 +655,70 @@
 	> 版本特征：sychronized + CAS + HashEntry / 红黑树
 
 ##### 并发控制
-
 - put()：并发添加
-- size()：并发统计
 
 ##### 其他操作
 - get()：获取元素
+
+#### 源码细节
+##### 重要成员属性
+```java
+// 代表整个哈希表
+transient volatile Node<K,V>[] table;
+// 连接表，用于哈希表扩容。扩容完成后会被重置为 null
+private transient volatile Node<K,V>[] nextTable;
+// 保存整个哈希表中存储的所有结点的个数总和
+private transient volatile long baseCount;
+
+/**
+ * 标记量：
+ * 等于 0: 默认值
+ * 等于 -1: 代表哈希表正在进行初始化
+ * 大于 1: 相当于 HashMap 的阈值 threshold
+ * 小于 -1: 代表有多个线程正在扩容
+ */
+private transient volatile int sizeCtl;
+```
+
+##### JDK 1.8
+######  put() 方法实现并发添加
+- 对当前 table 进行循环迭代，直至 put() 成功：
+	- 1) 如果没有初始化，则先调用 initTable() 进行初始化；
+	- 2) 如果没有 hash 冲突就直接 CAS 无锁式添加结点；
+	- 3) 如果在进行扩容操作，则先完成扩容；
+	- 4) 如果发生 hash 冲突，就需要 `加锁` 以保证线程安全，分两种情况讨论：
+	
+		> 加锁即锁住链表或者红黑树的头结点。
+		
+		- 链表形式：直接遍历到尾端再插入。
+		- 红黑树形式：红黑树结构插入。
+
+	- 如果链表长度大于阈值 8，则需要转换为红黑树结构，break 再一次进入循环；
+	- 最后添加成功后，调用 addCount() 方法统计 size，并检查是否需要扩容。
+
+###### get() 方法实现获取元素
+- 1) 计算 hash(key)，定位到 table 索引位置，若首结点符合就返回该结点。
+- 2) 若遇到扩容时，会调用标记正在扩容结点 ForwardingNode 的 find() 方法，查找到则返回该结点。
+- 3) 以上都不符合，即不是首节点也不是 ForwardingNode，就往下遍历。成功匹配就返回，否则最后返回 null。
+
+##### JDK 1.7
+######  put() 方法实现并发添加
+- 引入：对于 HashMap 来说，多线程并发添加元素会导致数据丢失等并发问题。
+- 操作：两次 Hash 去定位数据的存储位置。
+	- Segment 实现了 ReentrantLock，即自带锁功能。
+
+		```java
+		static class Segment<K, V> extends ReentrantLock 
+			implements Serializable {
+			// ......
+		}
+		```
+		
+	- 第一次 hash(key) 来定位 Segment 的位置，若 Segment 还没初始化，即通过 CAS 操作进行赋值。
+	- 第二次 hash(key) 操作，找到相应的 HashEntry 位置。这里会利用继承 ReentrantLock 的 tryLock() 获取锁。
+		- 成功获取则直接插入相应位置 (链表的尾端)；
+		- 如果已有线程获取该 Segment 锁，当前线程会以自旋方式继续调用 tryLock() 获取锁，超过指定次数则挂起，等待唤醒。
+
+###### get() 方法实现获取元素
+- 第一次 hash 定位 Segment 的位置，第二次 hash 定位指定 HashEntry；
+- 通过遍历对比该 HashEntry 的链表，成功则返回目标元素，否者返回 null。
