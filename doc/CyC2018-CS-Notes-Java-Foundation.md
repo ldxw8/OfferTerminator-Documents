@@ -82,7 +82,7 @@
 	Object str = c.newInstance();
 	```
 	
-- 先通过 Class 对象获取指定的 Constructor 对象，再调用 Constructor 对象的newInstance() 方法来创建实例。这种方法可以用 `指定的构造器` 构造类的实例。
+- 先通过 Class 对象获取指定的 Constructor 对象，再调用 Constructor 对象的 newInstance() 方法来创建实例。这种方法可以用 `指定的构造器` 构造类的实例。
 
 	```java
 	// 获取 String 所对应的 Class 对象
