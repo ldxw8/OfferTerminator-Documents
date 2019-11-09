@@ -243,14 +243,19 @@
 - [欧阳思海. Java 异常的处理和设计及深入理解. juejin.im](https://juejin.im/post/5ae66791f265da0b92655c5d)
 - [知乎问答. Java 中如何优雅的处理异常. zhihu.com](https://www.zhihu.com/question/28254987)
 - [Joshua Bloch. Effective Java (3rd Edition) [M]. Addison-Wesley Professional, 2018](https://book.douban.com/subject/27047716/)
+- [唐尤华. 修复 Java 中的 VirtualMachineError. sohu.com](http://www.sohu.com/a/291738826_355142)
 
 ### 基本概念
+
 | ![Java异常的体系结构](img/Cys2018-CS-Notes-Java-Foundation-Throwable_1-1.png) |
 | :----------------------------------------------------------: |
 |                  图 2-1 Java 异常的体系结构                  |
 
 - Throwable 可以用来表示任何可以作为异常抛出的类，分 `Error` 和 `Exception` 两种。
 	- 其中 Error 用来表示程序无法处理的错误，交由  JVM 处理。
+
+		> 通过调试去发现问题、解决问题，在应用程序不崩溃的前提下恢复正常状态。
+
 	- Exception 分为两种：
 		- 受检异常：需要用 `try...catch...` 语句捕获并进行处理，并且可以从异常中恢复；
 		- 非受检异常：是程序运行时错误 (RuntimeException)，例如除 0 会引发 Arithmetic Exception，此时程序崩溃并且无法恢复。
