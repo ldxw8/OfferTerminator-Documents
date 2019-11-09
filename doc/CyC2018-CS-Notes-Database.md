@@ -410,7 +410,7 @@
 ## SQL
 ### 基础
 - 模式定义了数据如何存储、存储什么样的数据以及数据如何分解等信息，数据库和表都有模式。
-- 主键的值不允许修改，也不允许复用；(不能将已经删除的主键值赋给新数据行的主键。
+- 主键的值不允许修改，也不允许复用；不能将已经删除的主键值赋给新数据行的主键。
 - 结构化查询语言 (Structured Query Language, SQL)，标准 SQL 由 ANSI 标准委员会管理，从而称为 ANSI SQL。各个 DBMS 都有自己的实现，如 PL/SQL、Transact-SQL 等。
 - SQL 语句不区分大小写，但是数据库表名、列名和值是否区分依赖于具体的 DBMS 以及配置。
 - SQL 支持以下三种注释：
@@ -430,6 +430,12 @@
 	USE test;
 	```
 	
+### 结构
+- 数据定义语言 (DDL)：Create、Alter 和 Drop
+- 数据操作语言 (DML)：Insert、Update 和 Delete
+- 数据查询语言 (DQL)：Where，Order By，Group By 和 Having
+- 数据控制语言 (DCL)：Grant、Revoke
+
 ### 顺序
 - SQL 中语法顺序和执行顺序是不一致的：
 
@@ -445,7 +451,7 @@
 	UNION
 	ORDER BY
 	
-	# 执行顺序
+	# 执行顺序：先过滤，再分组，后投影，排序收尾
 	FROM
 	WHERE
 	GROUP BY
@@ -453,7 +459,7 @@
 	SELECT
 	DISTINCT
 	UNION
-	ORDER BY # 排序是最后执行的
+	ORDER BY
 	```
 
 
@@ -465,10 +471,11 @@
 	CREATE TABLE mytable (
 		# int 类型，不为空，自增
 		id INT NOT NULL AUTO_INCREMENT,
-		# int 类型，不可为空，默认值为 1，不为空
-		col1 INT NOT NULL DEFAULT 1,
+		# decimal 类型，不可为空，默认值为 1.0
+		# 前一个代表整数的位数，后一个代表小数的位数
+		col1 DECIMAL(10,6) NOT NULL DEFAULT 1.0,
 		# 变长字符串类型，最长为 45 个字符，可以为空
-		col2 Varchar(45) NULL,
+		col2 VARCHAR(45) NULL,
 		# 日期类型，可为空
 		col3 DATE NULL,
 		# 设置主键为 id
@@ -481,7 +488,7 @@
 
 	```sql
 	ALTER TABLE mytable
-	ADD col Char(20);
+	ADD col VARCHAR(20);
 	```
 
 - 删除列：
@@ -601,6 +608,8 @@
 | MIN() | 返回某列的最小值 |
 | SUM() | 返回某列值之和 |
 
+> 以上聚合函数会忽略 NULL 行，考虑哪些运算不能包含 NULL 即可。
+
 ```sql
 # AVG() 会忽略 NULL 行
 # 使用 DISTINCT 可以汇总不同的值
@@ -698,7 +707,7 @@ WHERE SOUNDEX(col1) = SOUNDEX('apple')
 - 分组规定：
 	- GROUP BY 子句需出现在 WHERE 子句之后，ORDER BY 子句之前；
 	- 除了汇总字段外，SELECT 语句中的每一字段都必须在 GROUP BY 子句中给出；
-	- NULL 的行会单独分为一组；
+	- NULL 的行会单独分组；
 	- 大多数 SQL 实现不支持 GROUP BY 列具有可变长度的数据类型。
 	
 
