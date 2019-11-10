@@ -902,7 +902,7 @@ WHERE SOUNDEX(col1) = SOUNDEX('apple')
 #### 索引的数理基础
 
 ##### 索引的数据结构
-> 在 数据结构 篇章有详细介绍：[B-Tree 与 B+Tree](Kofe-CS-Notes-DataStruct.md#-B-Tree-与-B+Tree)
+> 在 数据结构篇章有详细介绍：[B-Tree 与 B+Tree](Kofe-CS-Notes-DataStruct.md#b-tree-与-btree)
 
 - B-Tree (平衡树, Balance Tree)：也称为 `多路平衡查找树`，并且所有叶子节点位于同一层。
 - B+Tree：
