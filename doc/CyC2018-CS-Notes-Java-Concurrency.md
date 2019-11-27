@@ -1071,7 +1071,7 @@
 		        thread2.start();
 		    }
 		}
-	```
+		```
 	
 	- 为了理解 ThreadLocal，先看以下代码：
 
