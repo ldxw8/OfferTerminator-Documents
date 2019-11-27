@@ -42,7 +42,7 @@
 	- 调用 Object.wait() 方法使线程进入限期等待或者无限期等待时，常常用 `挂起` 一个线程进行描述。
 	- 睡眠和挂起是用来描述行为，而阻塞和等待用来描述状态。
 	- 阻塞和等待的区别在于，`阻塞` 是 `被动` 的，它是在等待获取一个排它锁。而 `等待` 是 `主动` 的，通过调用 Thread.sleep() 和 Object.wait() 等方法进入。
-	
+
 ### 死亡 / Terminated
 - 可以是线程结束任务之后自己结束，或者产生了异常而结束。
 
@@ -52,7 +52,6 @@
 	> 实现 Runnable 和 Callable 接口的类只能当做一个可以在线程中运行的任务，不是真正意义上的线程。因此最后还需要通过 Thread 来调用，可以说任务是通过线程驱动从而执行的。
 
 ### 实现 Runnable 接口
-
 - 需要实现 run() 方法；通过 Thread 调用 start() 方法来启动线程。
 
 	```java
@@ -78,7 +77,7 @@
 	        return 123;
 	    }
 	}
-
+	
 	public static void main(String[] args) 
 	    throws ExecutionException, InterruptedException {
 	    MyCallable mc = new MyCallable();
@@ -93,7 +92,7 @@
 - 同样也是需要实现 run() 方法，因为 Thread 类也实现了 Runable 接口。
 
 	当调用 start() 方法启动一个线程时，虚拟机会将该线程放入就绪队列中等待被调度，当一个线程被调度时会执行该线程的 run() 方法。
-
+	
 	```java	
 	public class MyThread extends Thread {
 	    public void run() {
@@ -124,7 +123,7 @@
 		```java
 		public static void main(String[] args) {
 		    ExecutorService executorService =
-                Executors.newCachedThreadPool();
+    	        Executors.newCachedThreadPool();
 		    for (int i = 0; i < 5; i++) {
 		        executorService.execute(new MyRunnable());
 		    }
@@ -274,6 +273,7 @@
     
 - 如果只想中断 Executor 中的一个线程，可以通过使用 submit() 方法来提交一个线程，它会返回一个 Future<?> 对象，通过调用该对象的 cancel(true) 方法就可以中断线程。
   
+
 	```java
 	Future<?> future = executorService.submit(() -> {
 	    // 忽略代码细节
@@ -296,14 +296,14 @@
 	            System.out.println("A");
 	        }
 	    }
-
+	
 	    private class B extends Thread {
 	        private A a;
-
+	
 	        B(A a) {
 	            this.a = a;
 	        }
-
+	
 	        @Override
 	        public void run() {
 	            try {
@@ -314,7 +314,7 @@
 	            System.out.println("B");
 	        }
 	    }
-
+	
 	    public void test() {
 	        A a = new A();
 	        B b = new B(a);
@@ -322,12 +322,12 @@
 	        a.start();
 	    }
 	}
-
+	
 	public static void main(String[] args) {
 	    JoinExample example = new JoinExample();
 	    example.test();
 	}
-
+	
 	// Output:
 	// A
 	// B
@@ -345,7 +345,7 @@
 	        System.out.println("before");
 	        notifyAll();
 	    }
-
+	
 	    public synchronized void after() {
 	        try {
 	            wait();
@@ -355,7 +355,7 @@
 	        System.out.println("after");
 	    }
 	}
-
+	
 	public static void main(String[] args) {
 	    ExecutorService executorService = 
 	        Executors.newCachedThreadPool();
@@ -363,10 +363,10 @@
 	    executorService.execute(() -> example.after());
 	    executorService.execute(() -> example.before());
 	}
-
-    // Output:
-    // before
-    // after
+	
+	// Output:
+	// before
+	// after
   ```
 
 - wait() 和 sleep() 的区别：
@@ -417,7 +417,7 @@
 	// Output:
 	// before
 	// after
-	```
+  ```
 
 ## 同步互斥
 - Java 提供了两种锁机制来控制 `多个线程` 对共享资源的 `互斥访问`，第一个是 JVM 实现的 `synchronized`，而另一个是 JDK 实现的 `ReentrantLock`。
@@ -432,7 +432,7 @@
 
 	我们这边重点看如下几种：`可重入锁`、`读写锁`、`可中断锁`、`公平锁`。
 	
-	|  | Synchronized | ReentranLock | ReentrantReadWirteLock |
+	|  | Synchronized | ReentrantLock | ReentrantReadWirteLock |
 	| :-: | :-: | :-: | :-: |
 	| 可重入锁 | ✓ | ✓ | - |
 	| 读写锁 | - | - | ✓ |
@@ -444,7 +444,7 @@
 - `可重入锁`：可重入性表明了锁的分配机制，即基于线程的分配，而不是基于方法调用的分配。若锁具备可重入性则称其为可重入锁。
 
 	`synchronized` 和 `ReentrantLock` 都是可重入锁。
-
+	
 	> 例如：一个线程执行到 method1 的 synchronized 方法时，而在 method1中会调用另外一个 synchronized 方法 method2，此时该线程不必重新去申请锁，而是可以直接执行方法 method2。
 
 - `读写锁`：读写锁将对一个资源的访问分成了 2 个锁。比如文件，一个读锁 (共享锁) 和一个写锁 (排它锁)。正因为有了读写锁，才使得多个线程之间的读操作不会发生冲突。
@@ -473,8 +473,8 @@
 				//...
 			}
 		}
-		```
-		
+	```
+	
 	- `方法声明`：它和同步代码块一样，作用于同一个对象。即一次只能一个线程进入该方法，其他线程想在此时调用该方法只能排队等候。
 
 		```java
@@ -487,7 +487,7 @@
 	- `同步一个对象`：synchronized 后面括号里是对象，此时线程获得的是对象锁。由于调用的是同一个对象的同步代码块，因此这两个线程会进行同步。当一个线程进入同步语句块时，另一个线程就必须等待。
 
 		> 同一对象需同步，不同对象不同步。
-
+		
 		```java
 		public class SynchronizedExample {
 			public void func1() {
@@ -522,7 +522,7 @@
 	- `同步一个类`：作用于整个类，也就是说两个线程调用同一个类的不同对象上的这种同步语句，也会进行同步。
 
 		> 同一个类，不同一对象需同步。
-
+		
 		```java
 		public class SynchronizedExample {
 			public void func2() {
@@ -611,9 +611,9 @@
 		Lock writeLock();	// 获取写锁  
 	}
 	```
-	
+
 - ReentrantReadWirteLock 实现了 ReadWirteLock 接口，并未实现 Lock 接口。
-	
+
 	```java
 	private ReadWriteLock rwl = new ReentrantReadWriteLock();
 	
@@ -643,7 +643,7 @@
 	```
 	
 	- 若一个线程已经占用了读锁，其他线程可以马上获得读锁，但需要等待才能获取写锁，则申请写锁的线程会一直等待释放读锁。
-
+	
 	- 若一个线程已经占用了写锁，其他线程要获取读锁或写锁都需要等待，则申请的线程会一直等待释放写锁。
 
 ###  锁的比较
@@ -670,18 +670,18 @@
 	以下代码演示了 1000 个线程同时对 cnt 执行自增操作，操作结束之后它的值有可能小于 1000。
 	
 	```java
-    public class ThreadUnsafeExample {
+	public class ThreadUnsafeExample {
 	    private int cnt = 0;
 	    
 	    public void add() {
 	        cnt++;
-        }
-
+	    }
+	
 	    public int get() {
 	        return cnt;
 	    }
-    }
-    
+	}
+	
 	public static void main(String[] args) throws InterruptedException {
 	    final int threadSize = 1000;
 	    
@@ -704,7 +704,7 @@
 	    executorService.shutdown();
 	    System.out.println(example.get());
 	}
-
+	
 	// Output: 997
 	```
 
@@ -715,15 +715,15 @@
 - 处理器上的寄存器的读写的速度比内存快几个数量级，为了解决这种 `速度矛盾`，在它们之间加入了 `高速缓存`。
 
 	加入高速缓存带来了一个新的问题：`缓存一致性`。如果多个缓存共享同一块主内存区域，那么多个缓存的数据可能会不一致，需要一些 `协议` 来解决这个问题。
-
+	
 	| ![P、C、M的交互关系](img/Cys2018-CS-Notes-Java_3-7.png) |
 	| :-: |
 	| 图 8-1 处理器、高速缓存、主内存间的交互关系 |
-	
+
 - 所有的变量都存储在主内存中，每个线程还有自己的工作内存，工作内存存储在高速缓存或者寄存器中，保存了该线程使用的变量的主内存副本拷贝。
 
 	线程只能直接操作工作内存中的变量，不同线程之间的变量值传递需要通过主内存来完成。
-
+	
 	| ![P、C、M的交互关系](img/Cys2018-CS-Notes-Java_3-7-1.png) |
 	| :-: |
 	| 图 8-2 线程、工作内存、主内存间的交互关系 (对比图 3-7) |
@@ -752,13 +752,13 @@
 - Java 内存模型保证了 read、load、assign、use、store、write、lock 和 unlock 操作具有原子性，例如对一个 int 类型的变量执行 assign 赋值操作，这个操作就是原子性的。
 
 	> long 和 double 的非原子性协定：Java 内存模型允许虚拟机将没有被 `volatile` 修饰的 64 位数据 (long，double) 的读写操作划分为两次 32 位的操作来进行，即 load、store、read 和 write 操作可以不具备原子性。
-	
+
 - 有一个错误认识就是，int 等原子性的类型在多线程环境中不会出现线程安全问题。前面的 [线程不安全示例](线程不安全示例) 代码中，cnt 属于 int 类型变量，1000 个线程对它进行自增操作之后，得到的值为 997 而不是 1000。
 
 	下图演示了两个线程同时对 cnt 进行操作，load、assign、store 这一系列操作整体上看不具备原子性，那么在 T1 修改 cnt 并且还没有将修改后的值写入主内存，T2 依然可以读入旧值。可以看出，这两个线程虽然执行了两次自增运算，但是主内存中 cnt 的值最后为 1 而不是 2。因此对 int 类型读写操作满足原子性只是说明 load、assign、store 这些单个操作具备原子性。
 	
 	> 为了方便讨论，将内存间的交互操作简化为 3 个：load、assign、store。
-
+	
 	| ![两个线程同时对cnt进行操作示意](img/Cys2018-CS-Notes-Java_3-7-3.png) | ![AtomicInteger对cnt进行操作示意](img/Cys2018-CS-Notes-Java_3-7-4.png) |
 	| :-: | :-: |
 	| 图 8-4 两个线程同时对 cnt 进行操作示意 | 图 8-5 AtomicInteger 对 cnt 进行操作示意 |
@@ -770,11 +770,11 @@
 	```java
 	public class AtomicExample {
 	    private AtomicInteger cnt = new AtomicInteger();
-
+	
 	    public void add() {
 		    cnt.incrementAndGet();
 	    }
-
+	
 	    public int get() {
 		    return cnt.get();
 	    }
@@ -866,7 +866,7 @@
 - 管程锁定规则 (Monitor Lock Rulu)：一个 unlock 操作先行发生于后面对同一个锁的 lock 操作。如图 8-7 所示。
 
 	> 必须是同一个锁；“后面” 指时间上的先后顺序。
-
+	
 	| ![程序次序原则](img/Cys2018-CS-Notes-Java_3-7-6.png) |
 	| :-: |
 	| 图 8-7 管程锁定规则 |
@@ -875,7 +875,7 @@
 - volatile 变量规则 (Volatile Variable Rule)：对一个 volatile 变量的写操作先行发生于后面对这个变量的读操作。如图 8-8 所示。
 
 	> “后面” 指时间上的先后顺序。
-
+	
 	| ![程序次序原则](img/Cys2018-CS-Notes-Java_3-7-7.png) |
 	| :-: |
 	| 图 8-8 Volatile 变量规则 |
@@ -982,8 +982,8 @@
 		public void add() {
 		    cnt.incrementAndGet();
 		}
-		```
-		
+	```
+	
 	- 以下代码是 incrementAndGet() 的源码，它调用了 Unsafe 的 getAndAddInt() 。
 
 		```java
@@ -991,13 +991,13 @@
 		    return unsafe.getAndAddInt(this, valueOffset, 1) + 1;
 		}
 		```
-		
+	
 	- 以下代码是 getAndAddInt() 源码，var1 指示对象内存地址，var2 指示该字段相对对象内存地址的偏移，var4 指示操作需要加的数值，这里为 1。
 
 		通过 getIntVolatile(var1, var2) 得到旧的预期值，通过调用 compareAndSwapInt() 来进行 CAS 比较，如果该字段内存地址中的值等于 var5，那么就更新内存地址为 var1+var2 的变量为 var5+var4。
-
+		
 		可以看到 getAndAddInt() 在一个循环中进行，发生冲突的做法是不断的进行重试。
-	
+		
 		```java
 		public final int getAndAddInt(Object var1, long var2, int var4) {
 		    int var5;
@@ -1071,8 +1071,8 @@
 		        thread2.start();
 		    }
 		}
-		```
-		
+	```
+	
 	- 为了理解 ThreadLocal，先看以下代码：
 
 		```java
@@ -1109,11 +1109,11 @@
 		 */
 		ThreadLocal.ThreadLocalMap threadLocals = null;
 		```
-		
+	
 	- 当调用一个 ThreadLocal 的 set(T value) 方法时，先得到当前线程的 ThreadLocalMap 对象，然后将 ThreadLocal->value 键值对插入到该 Map 中。
 
 		> get() 方法类似。
-
+		
 		```java
 		public void set(T value) {
 		    Thread t = Thread.currentThread();
@@ -1152,11 +1152,11 @@
 	    return s1 + s2 + s3;
 	}
 	```
-	
+
 - String 是一个不可变的类，编译器会对 String 的拼接自动优化。在 JDK 1.5 之前，会转化为 StringBuffer 对象的连续 append() 操作：
 
 	每个 append() 方法中都有一个同步块。虚拟机观察变量 sb，很快就会发现它的动态作用域被限制在 concatString() 方法内部。也就是说，sb 的所有引用永远不会逃逸到 concatString() 方法之外，其他线程无法访问到它，因此可以进行消除。
-
+	
 	```java
 	public static String concatString(String s1, String s2, String s3) {
 	    StringBuffer sb = new StringBuffer();
