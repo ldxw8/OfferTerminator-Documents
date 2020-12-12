@@ -712,7 +712,7 @@ WHERE SOUNDEX(col1) = SOUNDEX('apple')
 	
 - 分组规定：
 	- GROUP BY 子句需出现在 WHERE 子句之后，ORDER BY 子句之前；
-	- 除了汇总字段外，SELECT 语句中的每一字段都必须在 GROUP BY 子句中给出；
+	- 除了汇总字段外，GROUP BY 子句中必须给出 SELECT 语句中的字段名称；
 	- NULL 的行会单独分组；
 	- 大多数 SQL 实现不支持 GROUP BY 列具有可变长度的数据类型。
 	
