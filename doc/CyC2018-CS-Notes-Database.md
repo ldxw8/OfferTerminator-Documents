@@ -617,8 +617,8 @@
 > 以上聚合函数会忽略 NULL 行，考虑哪些运算不能包含 NULL 即可。
 
 ```sql
-# AVG() 会忽略 NULL 行
-# 使用 DISTINCT 可以汇总不同的值
+-- AVG() 会忽略 NULL 行
+-- 使用 DISTINCT 可以汇总不同的值
 SELECT AVG(DISTINCT col1) AS avg_col
 FROM mytable;
 ```
@@ -1093,7 +1093,7 @@ WHERE SOUNDEX(col1) = SOUNDEX('apple')
 		字段名1 数据类型 [完整性约束条件…],
 		字段名2 数据类型 [完整性约束条件…],
 		[UNIQUE | FULLTEXT | SPATIAL] INDEX | KEY
-		[索引名] (字段名[(长度)] [ASC | DESC]) ddd
+		[索引名] (字段名[(长度)] [ASC | DESC])
 	);
 	```
 
