@@ -1,22 +1,26 @@
 # 技术面试必备基础知识-Android
 
 ## 平台架构
+
 ### 参考资料
+
 - [Gityuan. Android系统架构开篇. gityuan.com](http://gityuan.com/android/)
 - [Deveplopers. Android 平台架构. developer.android.com](https://developer.android.com/guide/platform?hl=zh-cn)
 
-| ![图1-1Android平台架构](img/Kofe-CS-Notes-Android-Stack_1-1.png) |
+| ![Android平台架构](img/Kofe-CS-Notes-Android-Stack_1-1.png) |
 | :-: |
-| 图 1-1 Android 平台架构 |
+|  Android 平台架构 |
 
-#### Linux Kernel
+### Linux Kernel
+
 - Android 平台的基础是 Linux 内核。例如 Android Runtime (ART) 依靠 Linux 内核来执行底层功能，比如 `线程` 和 `底层内存管理`。
 - Linux 内核的安全机制为 Android 提供相应的保障，也允许设备制造商为内核开发硬件驱动程序。
 
-#### Hardware Abstraction Layer
+### Hardware Abstraction Layer
+
 - 硬件抽象层 (HAL) 提供标准接口，HAL包含多个库模块，其中每个模块都为特定类型的硬件组件实现一组接口，比如 WIFI / 蓝牙模块，当框架 API 请求访问设备硬件时，Android 系统将为该硬件加载相应的库模块。
 
-#### Android Runtime
+### Android Runtime
 
 - 对于运行 Android 5.0（API 级别 21）或更高版本的设备，每个应用都在其自己的进程中运行，并且有其自己的 Android Runtime (ART) 实例。ART 通过执行 DEX 文件在低内存设备上可运行多个 `虚拟机`。
 
@@ -32,14 +36,16 @@
 	- 更好的调试支持，包括专用采样分析器、详细的诊断异常和崩溃报告，并且能够设置观察点以监控特定字段。
 - Android 还包含一套 `核心运行时库`，可提供 [Java API 框架](#Java-API-框架) 所使用的 Java 编程语言中的大部分功能，包括一些 Java 8 语言功能。
 
-#### Nactive C/C++ Libraries
+### Nactive C/C++ Libraries
+
 - 许多核心 Android 系统组件和服务（例如 ART 和 HAL）构建自原生代码，需要以 C / C++ 编写的原生库。
 
 	> 例如，通过 Android 框架的 Java OpenGL API 访问 OpenGL ES，以支持在应用中绘制和操作 2D 和 3D 图形。
 
 - 若开发需要 C / C++ 代码支持的应用，可使用 `Android NDK` 直接从原生代码访问某些原生平台库。
 
-#### Java API Framework
+### Java API Framework
+
 - 您可通过以 Java 语言编写的 API 使用 Android OS 的整个功能集。这些 API 形成创建 Android 应用所需的构建块，它们可简化核心模块化系统组件和服务的重复使用，包括以下组件和服务：
 	- `视图系统`：View System，用以构建应用的 UI，包括列表、网格、文本框、按钮甚至可嵌入的网络浏览器等。
 	- `内容提供程序`：Content Provider，可让应用访问其他应用（例如“联系人”应用）中的数据或者共享其自己的数据。
@@ -48,6 +54,12 @@
 	- `活动管理器`：Activity Manager，用于管理应用的生命周期，提供常见的导航返回栈。
 
 - 开发者可以完全访问 Android 系统应用使用的框架 [API](https://developer.android.com/reference/packages.html?hl=zh-cn)。
+
+## 系统启动
+
+| ![](img/Kofe-CS-Notes-Android-SysLaunch.svg) |
+| :---: |
+|  Android 系统启动流程 |
 
 ## 生命周期
 
@@ -58,9 +70,9 @@
 
 ### Activity 的生命周期
 
-| ![图1-1Activity的完整生命周期](img/Kofe-CS-Notes-Android_1-1.png) |
+| ![](img/Kofe-CS-Notes-Android-ActivityLifetime.svg) |
 | :-: |
-| 图 1-1 Activity 的完整生命周期 |
+| Activity 的完整生命周期 |
 
 - 在系统中，触发 Activity 生命周期改变的方式：
 	- 有用户参与的生命周期改变；
@@ -100,9 +112,9 @@
 
 ### Service 的生命周期
 
-| ![图1-Service的完整生命周期](img/Kofe-CS-Notes-Android_1-2.png) |
-| :-: |
-| 图 1-2 Service 的完整生命周期 |
+| ![](img/Kofe-CS-Notes-Android-ServiceLifeTime.svg) |
+| :---: |
+| Service 的完整生命周期 |
 
 #### 生命周期常用方法
 - 4 个手动调用的方法：
@@ -127,24 +139,24 @@
 #### 生命周期方法介绍
 | 手动调用方法 | 活动图 | 作用 | 自动调用方法 | 备注 |
 | :-: | :-: | :-: | :--- | :--- |
-| startService() | 图 1-2-1 | 手动启动 Service | onCreate()<br>onStartCommand() | onStartCommand() 等于 onStartService() 的次数 |
-| stopService() | 图 1-2-2 | 手动关闭 Service | onDestory() | 若 Service 被启动且绑定，在没有解绑前提下是无法使用 stopService() 停止服务的 |
-| bindService() | 图 1-2-4 | 手动绑定 Service | onCreate()<br>onBind() | -- |
-| unbindService() | 图 1-2-3 | 手动解绑 Service | oUnbind()<br>onDestory() | -- |
+| startService() | 图 1 | 手动启动 Service | onCreate()<br>onStartCommand() | onStartCommand() 等于 onStartService() 的次数 |
+| stopService() | 图 2 | 手动关闭 Service | onDestory() | 若 Service 被启动且绑定，在没有解绑前提下是无法使用 stopService() 停止服务的 |
+| unbindService() | 图 3 | 手动解绑 Service | oUnbind()<br>onDestory() | -- |
+| bindService() | 图 4 | 手动绑定 Service | onCreate()<br>onBind() | -- |
 
-| ![手动启动服务](img/Kofe-CS-Notes-Android_1-2-1.png) | ![手动启动服务](img/Kofe-CS-Notes-Android_1-2-2.png) |
+| ![](img/Kofe-CS-Notes-Android-ServiceLifeTime-startService.svg) | ![](img/Kofe-CS-Notes-Android-ServiceLifeTime-stopService.svg) |
 | :-: | :-: |
-| 图 1-2-1 手动启动服务 startService() | 图 1-2-2 手动关闭服务 stopService() |
-| ![手动绑定服务](img/Kofe-CS-Notes-Android_1-2-4.png) | ![手动解绑服务](img/Kofe-CS-Notes-Android_1-2-3.png) |
-| 图 1-2-4 手动解绑服务 unbindService()  | 图 1-2-3 手动绑定服务 bindService() |
+| 手动启动服务 startService() | 手动关闭服务 stopService() |
+| ![](img/Kofe-CS-Notes-Android-ServiceLifeTime-unbindService.svg) | ![](img/Kofe-CS-Notes-Android-ServiceLifeTime-bindService.svg) |
+| 手动解绑服务 unbindService() | 手动绑定服务 bindService() |
 
 #### 常见生命周期使用
 - 只使用 startService() 启动服务以及只使用 bindService() 绑定服务的生命周期，如图 1-2 所示。
 - 同时使用 startService() 启动服务和 BindService() 绑定服务的生命周期，如图 1-2-5 所示。
 
-	| ![启动服务和绑定服务](img/Kofe-CS-Notes-Android_1-2-5.png) |
+	| ![](img/Kofe-CS-Notes-Android-ServiceLifeTime-start&bind.svg) |
 	| :-: |
-	| 图 1-2-5 启动服务和绑定服务 |
+	| 启动服务和绑定服务 |
 
 - 需要注意的是：
 	- startService() 和 stopService() 只能开启和关闭 Service，无法操作 Service； bindService() 和 unbindService() 可以操作 Service。
@@ -153,9 +165,9 @@
 
 ### Fragment 的生命周期
 
-| ![图1-3Fragment的完整生命周期](img/Kofe-CS-Notes-Android_1-3.png) |
+| ![](img/Kofe-CS-Notes-Android-FragmentLifeTime.svg) |
 | :-: |
-| 图 1-3 Fragment 的完整生命周期 |
+| Fragment 的完整生命周期 |
 
 - Fragment 的基本概念：
 	- Fragment 拥有自己的生命周期，且依赖于 Activity 而不能独立存在的。
@@ -167,9 +179,9 @@
 
 - Fragment 的生命周期与 Activity 相仿：
 
-	| ![图1-3-1Fragment与Activity生命周期的交互关系与顺序](img/Kofe-CS-Notes-Android_1-3-1.png) |
+	| ![Fragment与Activity生命周期的交互关系与顺序](img/Kofe-CS-Notes-Android-Activity&FragmentLifetime.svg) |
 	| :-: |
-	| 图 1-3-1 Fragment 与 Activity 生命周期的交互关系与顺序 |
+	| Fragment 与 Activity 生命周期的交互关系与顺序 |
 
 	- onAttach()：在 Fragment 和 Activity 关联时调用，仅且调用一次。可以通过该方法获取 Activity 引用，还可以通过 getArguments() 获取参数。
 
@@ -215,9 +227,9 @@
 	- 工作线程通过 mHandler 向其成员变量 MessageQueue 中添加新 Message，主线程一直处于 loop() 方法内，当收到新的 Message 时按照一定规则分发给相应的 handleMessage() 方法来处理。
 	- Handler 消息机制用于同进程的线程间通信，其核心是线程间共享内存空间，而不同进程拥有不同的地址空间，也就不能用 Handler 来实现进程间通信。
 
-		| ![](img/Kofe-CS-Notes-Android-Handler_1-1.png) |
+		| ![](img/Kofe-CS-Notes-Android-Handler.svg) |
 		| :-: |
-		| 图 1-1 Handler 消息机制 |
+		| Handler 消息机制 |
 
 		> 上图只是 Handler 消息机制的一种处理流程，即不限制于工作线程向 UI 线程发送消息，也可以让隶属于同一进程的 `多个工作线程` 间通过 handler 互相发送消息。
 
@@ -233,7 +245,7 @@
 
 | ![](img/Kofe-CS-Notes-Android-ThreadPool_1-1.png) |
 | :-: |
-| 图 1-1 线程池的基本概念 |
+| 线程池的基本概念 |
 
 #### 参考资料
 
@@ -249,9 +261,9 @@
 
 - 了解线程池的工作原理，首先得了解线程池中所定义的状态，它们与线程的执行有着密切关联。
 
-	| ![](img/Kofe-CS-Notes-Android-ThreadPool_1-2.png) |
+	| ![](img/Kofe-CS-Notes-Android-ThreadPool-Status.svg) |
 	| :-: |
-	| 图 1-1-1 线程池中所定义的状态 |
+	| 线程池中所定义的状态 |
 	
 	- `RUNNING`：运行状态，指可以接受任务执行队列里的任务。
 	- `SHUTDOWN`：指调用了 shutdown() 方法，不再接受新任务，但队列的任务得执行完毕。
@@ -263,58 +275,67 @@
 
 - 提交一个任务到线程池中，核心的逻辑是 execute() 函数：
 
-    ```java
-    public void execute(Runnable command) {
-        if (command == null)
-            throw new NullPointerException();
-        int c = ctl.get(); // 读取 ctl
-        
-        // 当前任务数量小于核心线程数
-        if ( workerCountOf(c) < corePoolSize ) {
-            if ( addWorker(command, true) )
-                return;
-            c = ctl.get();
-        }
-        
-        // 线程池状态是 Running / Shutdown，并且任务数大于核心线程数
-        if ( isRunning(c) && workQueue.offer(command) ) {
-            int recheck = ctl.get(); // 再次读取 ctl，防止并发
-            // 若线程池的状态已发生变化，需把刚放入阻塞队列中的任务移除
-            // 且使用拒绝策略
-            if ( !isRunning(recheck) && remove(command) ) {
-                reject(command);
-            } else if ( workerCountOf(recheck) == 0 ) {
-                // 到了这里表示线程池里面已经没有可执行任务的线程，
-                // 但是刚又给阻塞队列中加了个任务，还不符合使用拒绝策略的条件，
-                // 追加一个 Thread 执行任务，初始化任务为 null,
-                // 因为要调用 getTask() 方法从阻塞队列中获取 task
-                addWorker(null, false);
-            }
-        } else if ( !addWorker(command, false) ) {
-            reject(command);
-        }
-    }
-    ```
-    
+	```java
+	public void execute(Runnable command) {
+		if (command == null) {
+			throw new NullPointerException();
+		}
+		
+		// 线程池控制状态（原子整型），记录线程池生命周期状态 runState 和当前工作线程数 wrokerCount
+		// 将 runState 与 wrokerCount 打包进一个 32 位 Integer 数值（位运算效率更高）
+		// 高03位：表示线程池生命周期状态
+		// 低29位：表示当前工作线程数
+		int c = ctl.get(); 
+
+		// 1. 当前任务数量小于核心线程数
+		if ( workerCountOf(c) < corePoolSize ) {
+			if ( addWorker(command, true) ) {
+				return;
+			}
+			c = ctl.get();
+		}
+	
+		// 2. 线程池状态是 Running / Shutdown，并且任务数大于核心线程数
+		if ( isRunning(c) && workQueue.offer(command) ) {
+			int recheck = ctl.get(); // 再次读取 ctl，防止并发
+			// 若线程池的状态已发生变化，需把刚放入阻塞队列中的任务移除
+			// 且使用拒绝策略
+			if ( !isRunning(recheck) && remove(command) ) {
+				reject(command);
+			} else if ( workerCountOf(recheck) == 0 ) {
+	            // 3.
+				// 到了这里表示线程池里面已经没有可执行任务的线程，
+				// 但刚刚又给阻塞队列中加了任务，此时还不符合使用拒绝策略的条件，
+				// 追加一个 Thread 执行任务，初始化任务为 null,
+				// 因为要调用 getTask() 方法从阻塞队列中获取任务
+				addWorker(null, false);
+			}
+		} else if ( !addWorker(command, false) ) {
+			reject(command);
+		}
+	}
+	```
+
 - 更通俗理解，线程池的工作流程如图 1-1-2 所示：
 
-	| ![](img/Kofe-CS-Notes-Android-ThreadPool_1-3.png) |
+	| ![](img/Kofe-CS-Notes-Android-ThreadPool-Principle.svg) |
 	| :-: |
-	| 图 1-1-2 线程池的处理流程 |
+	| 线程池的处理流程 |
 	
-	> `核心线程` ：固定线程数，可闲置且不会被销毁。<br>
-	> `非核心线程`：拥有闲置时的超时时长，超过这个时长非核心线程就会被回收。
+	> 核心线程 ：固定线程数，可闲置且不会被销毁。<br>
+	> 非核心线程：拥有闲置时的超时时长限制，超过这个时长非核心线程就会被回收。
 
-	- 获取当前线程池的状态。
-	- 当前线程数量小于 corePoolSize 时创建一个新的线程运行。
-	- 如果当前线程处于运行状态，并且写入阻塞队列成功。
-	- 双重检查，再次获取线程状态；如果线程状态变了（非运行状态）就需要从阻塞队列移除任务，并尝试判断线程是否全部执行完毕。同时执行拒绝策略。
-	- 如果当前线程池为空就新创建一个线程并执行。
-	- 如果在第三步的判断为非运行状态，尝试新建线程，如果失败则执行拒绝策略。
-	
+	- Step.01：获取当前线程池的状态。
+	- Step.02：当前工作线程数 < 核心线程数 corePoolSize，创建新线程来执行任务。
+	- Step.03：当前工作线程数 >= 核心线程数 corePoolSize 时：
+		- 等待队列未满，将任务插入阻塞队列等待。
+		- 等待队列已满，工作线程数 < maximumPoolSize，创建新线程来执行任务。
+		- 等待队列已满，工作线程数 = maximumPoolSize，执行拒绝策略。
+
 - 处理任务的优先级：核心线程 > 任务队列 >  最大线程
 
 #### 使用线程池流程
+
 ##### 创建线程池
 - 使用 ThreadPoolExecutor 创建线程池:
 
@@ -336,7 +357,7 @@
 		    // 线程执行任务
 		}
 	});
-
+	
 	// 3. 关闭线程池
 	threadPool.shutdown();
 	```
@@ -345,12 +366,12 @@
 
 	```java
 	public ThreadPoolExecutor(
-		int corePoolSize,			// 核心线程数
+		int corePoolSize,		// 核心线程数
 		int maximumPoolSize,	// 线程池所容纳的最大线程数
 		long keepAliveTime,		// 线程空闲后的存活时间
-		TimeUnit unit,				// 指定 keepAliveTime 参数的时间单位
+		TimeUnit unit,			// 指定 keepAliveTime 参数的时间单位
 		BlockingQueue<Runnable> workQueue, 	// 用于存放任务的阻塞队列
-		RejectedExecutionHandler handler		// 队列和最大线程池都满了之后的饱和策略
+		RejectedExecutionHandler handler	// 队列和最大线程池最满时的饱和拒绝策略
 	) {
 		// 忽略构造函数的赋值细节...
 	}
@@ -365,7 +386,6 @@
 	- `shutdownNow()`：设置线程池的状态为 STOP，然后尝试停止所有 `正在执行` 或 `暂停任务` 的线程，并返回等待执行任务的列表。
 
 #### 常见功能线程池
-
 - 在 `java.util.concurrent` 包下，Executors 利用 `工厂模式` 提供了四种常见功能线程池的实现方式：
 	- Executors.newFixedThreadPool(nThreads)：定长线程池，用于控制最大并发量。
 	- Executors.newScheduledTHreadPool()：定时线程池，用于执行定时、周期性任务。
@@ -382,7 +402,7 @@
 	        new LinkedBlockingQueue<Runnable>()
 	    );
 	}
-
+	
 	// 创建 newCachedThreadPool
 	public static ExecutorService newCachedThreadPool() {
 	    return new ThreadPoolExecutor(0, Integer.MAX_VALUE,
@@ -405,11 +425,11 @@
 
 	| 类型 | 池内线程类型 | 池内线程数量 | 处理特点 | 应用场景 |
 	| :-: | :-: | :-: | :--- | :--- |
+	| 单线程线程池 | 核心线程 | 1 | 1. 保证所有任务按照指定顺序在一个线程中执行<br>2. 不需要处理线程同步问题 | 不适合并发，但适用于可能引起 `I/O` 阻塞以及影响 `UI` 线程响应操作的场景 |
 	| 定长线程池 | 核心线程 | 固定 | 1. 不回收核心线程<br>2. 任务队列无大小限制 (超出的线程任务会在队列中等待) | 控制线程 `最大并发数` |
 	| 定时线程池 | 核心线程<br>非核心线程 | 核心固定<br>非核心无固定 | 非核心线程闲置时会被立即回收 | 执行 `定时`、`周期` 任务 |
 	| 可缓存线程池 | 非核心线程 | 无固定 | 1. 优先利用闲置线程处理任务<br>2. 无线程可用时新建线程<br>3. 灵活回收空闲线程 | 执行 `数量多`、`耗时少` 的线程任务 |
-	| 单线程化线程池 | 核心线程 | 1 | 1. 保证所有任务按照指定顺序在一个线程中执行<br>2. 不需要处理线程同步问题 | 不适合并发，但适用于可能引起 `I/O` 阻塞以及影响 `UI` 线程响应操作的场景 |
-	
+
 ##### 定长线程池
 
 ```java
@@ -480,6 +500,7 @@ cachedThreadPool.shutdown();
 ```
 
 ##### 单线程化线程池
+
 ```java
 // 1. 创建单线程化线程池
 ExecutorService singleThreadExecutor =

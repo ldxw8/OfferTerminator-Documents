@@ -3,11 +3,11 @@
 > 原文：[CS-Notes-Java-并发](https://cyc2018.github.io/CS-Notes/#/notes/Java%20%E5%B9%B6%E5%8F%91)
 
 ## 线程状态
--  Java 语言定义了 5 种线程状态，在任意时间点，一个线程有且只能拥有一种状态。
+- Java 语言定义了 5 种线程状态，在任意时间点，一个线程有且只能拥有一种状态。
 
-	| ![线程状态转换](img/CyC2018-CS-Notes-Java-_3-1.png) |
-	| :-: |
-	| 图 1-1 线程状态转换 |
+	| ![](img/CyC2018-CS-Notes-Java_3-1.png) |
+	| :---: |
+	| 线程状态转换 |
 
 ### 新建 / New
 - 创建后尚未启动的线程。
@@ -21,11 +21,11 @@
 ### 无限期等待 / Waiting 
 - 处于这种状态的线程不会被分配 CPU 执行时间，需等待其它线程 `显式地` 唤醒，否则不会被分配 CPU 时间片。
 
-  | 进入方法 | 退出方法 |
-  | :--- | :--- |
-  | 没有设置 Timeout 参数的 Object.wait() 方法 | Object.notify() / Object.notifyAll() |
-  | 没有设置 Timeout 参数的 Thread.join() 方法 | 被调用的线程执行完毕 |
-  | LockSupport.park() 方法 | LockSupport.unpark(Thread) |
+	| 进入方法 | 退出方法 |
+	| :--- | :--- |
+	| 没有设置 Timeout 参数的 Object.wait() 方法 | Object.notify() / Object.notifyAll() |
+	| 没有设置 Timeout 参数的 Thread.join() 方法 | 被调用的线程执行完毕 |
+	| LockSupport.park() 方法 | LockSupport.unpark(Thread) |
 
 ### 限期等待 / Timed Waiting
 - 处于这种状态的线程不会被分配 CPU 执行时间，不过无需等待其它线程显式地唤醒，在一定时间之后会被 `系统自动唤醒`。
@@ -95,9 +95,9 @@
 	
 	```java	
 	public class MyThread extends Thread {
-	    public void run() {
-	        // ...
-	    }
+		public void run() {
+		// ...
+		}
 	}
 	
 	public static void main(String[] args) {
@@ -171,6 +171,7 @@
 	```
 
 ## 线程中断机制
+
 - 一个线程 `执行完毕` 之后会 `自动结束`，如果在运行过程中 `发生异常` 也会 `提前结束`。
 
 ### InterruptedException
@@ -201,7 +202,7 @@
     ```
     
     抛出异常：
-    
+
     ```html
 	Main run
 	java.lang.InterruptedException: sleep interrupted
@@ -227,13 +228,13 @@
 	        }
 	    }
 	}
-
+    
     public static void main(String[] args) throws InterruptedException {
         Thread thread = new MyThread();
         thread.start();
         thread.interrupt();
     }
-
+    
     // Output: Thread end
     ```
 
@@ -473,7 +474,7 @@
 				//...
 			}
 		}
-		```
+	```
 	
 	- `方法声明`：它和同步代码块一样，作用于同一个对象。即一次只能一个线程进入该方法，其他线程想在此时调用该方法只能排队等候。
 
@@ -982,7 +983,7 @@
 		public void add() {
 		    cnt.incrementAndGet();
 		}
-		```
+	```
 	
 	- 以下代码是 incrementAndGet() 的源码，它调用了 Unsafe 的 getAndAddInt() 。
 
@@ -1071,7 +1072,7 @@
 		        thread2.start();
 		    }
 		}
-		```
+	```
 	
 	- 为了理解 ThreadLocal，先看以下代码：
 
