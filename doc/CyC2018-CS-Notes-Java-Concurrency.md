@@ -1,15 +1,16 @@
 # 技术面试必备基础知识-Java-并发
 
-> 原文：[CS-Notes-Java-并发](https://cyc2018.github.io/CS-Notes/#/notes/Java%20%E5%B9%B6%E5%8F%91)
+> 原文：[CS-Notes-Java-并发](http://www.cyc2018.xyz/Java/Java%20%E5%B9%B6%E5%8F%91.html)
 
 ## 线程状态
 - Java 语言定义了 5 种线程状态，在任意时间点，一个线程有且只能拥有一种状态。
 
-	| ![](img/CyC2018-CS-Notes-Java_3-1.png) |
+	| ![线程状态转换](img/CyC2018-CS-Notes-Java_3-1.png) |
 	| :---: |
 	| 线程状态转换 |
 
 ### 新建 / New
+
 - 创建后尚未启动的线程。
 
 ### 运行 / Runable
@@ -91,8 +92,7 @@
 ### 继承 Thread 类
 - 同样也是需要实现 run() 方法，因为 Thread 类也实现了 Runable 接口。
 
-	当调用 start() 方法启动一个线程时，虚拟机会将该线程放入就绪队列中等待被调度，当一个线程被调度时会执行该线程的 run() 方法。
-	
+
 	```java	
 	public class MyThread extends Thread {
 		public void run() {
