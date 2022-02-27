@@ -383,7 +383,7 @@
 	public class AwaitSignalExample {
 	    private Lock lock = new ReentrantLock();
 	    private Condition condition = lock.newCondition();
-
+  
 	    public void before() {
 	        lock.lock();
 	        try {
@@ -393,7 +393,7 @@
 	            lock.unlock();
 	        }
 	    }
-
+  
 	    public void after() {
 	        lock.lock();
 	        try {
@@ -406,7 +406,7 @@
 	        }
 	    }
 	}
-
+  
 	public static void main(String[] args) {
 	    ExecutorService executorService = 
 	        Executors.newCachedThreadPool();
@@ -414,7 +414,7 @@
 	    executorService.execute(() -> example.after());
 	    executorService.execute(() -> example.before());
 	}
-
+  
 	// Output:
 	// before
 	// after
@@ -477,13 +477,13 @@
 	```
 	
 	- `方法声明`：它和同步代码块一样，作用于同一个对象。即一次只能一个线程进入该方法，其他线程想在此时调用该方法只能排队等候。
-
+	
 		```java
 		// 放在范围操作符之后，返回类型声明之前
 		public synchronized void func() {
 			// ...
 		}
-		```
+	```
 
 	- `同步一个对象`：synchronized 后面括号里是对象，此时线程获得的是对象锁。由于调用的是同一个对象的同步代码块，因此这两个线程会进行同步。当一个线程进入同步语句块时，另一个线程就必须等待。
 
@@ -979,14 +979,14 @@
 	
 		```java
 		private AtomicInteger cnt = new AtomicInteger();
-	
+		
 		public void add() {
 		    cnt.incrementAndGet();
 		}
-	```
+		```
 	
 	- 以下代码是 incrementAndGet() 的源码，它调用了 Unsafe 的 getAndAddInt() 。
-
+	
 		```java
 		public final int incrementAndGet() {
 		    return unsafe.getAndAddInt(this, valueOffset, 1) + 1;
@@ -994,7 +994,7 @@
 		```
 	
 	- 以下代码是 getAndAddInt() 源码，var1 指示对象内存地址，var2 指示该字段相对对象内存地址的偏移，var4 指示操作需要加的数值，这里为 1。
-
+	
 		通过 getIntVolatile(var1, var2) 得到旧的预期值，通过调用 compareAndSwapInt() 来进行 CAS 比较，如果该字段内存地址中的值等于 var5，那么就更新内存地址为 var1+var2 的变量为 var5+var4。
 		
 		可以看到 getAndAddInt() 在一个循环中进行，发生冲突的做法是不断的进行重试。
@@ -1075,7 +1075,7 @@
 	```
 	
 	- 为了理解 ThreadLocal，先看以下代码：
-
+	
 		```java
 		public class ThreadLocalExample1 {
 		    public static void main(String[] args) {
@@ -1093,8 +1093,8 @@
 		        thread2.start();
 		    }
 		}
-		```
-		
+	```
+	
 		它所对应的底层结构图为：
 		
 		| ![ThreadLocal底层结构图](img/Cys2018-CS-Notes-Java_3-8.png) |
