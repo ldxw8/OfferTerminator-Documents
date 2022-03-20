@@ -1,107 +1,123 @@
 # 技术面试必备基础知识-Java-并发
 
-> 原文：[CS-Notes-Java-并发](http://www.cyc2018.xyz/Java/Java%20%E5%B9%B6%E5%8F%91.html)
-
-## 线程状态
-
-| ![](img/Cys2018-CS-Notes-Java_ThreadLifeCycle.svg) |
-| :---: |
-| 线程状态转换关系 |
-
-- Java 语言定义了 5 种线程状态，在任意时间点一个线程有且只能拥有一种状态。
-	- 新建（New）：创建后尚未启动的线程。
-	- 运行（Runable）：正在运行或正在等待 CPU 时间片。包含了操作系统线程状态中的 Running 和 Ready。
-	- 阻塞（Blocked）：等待获取一个排它锁，如果该线程释放了锁就会结束此状态。
-	- 等待（Waiting）：无限期等待，处于这种状态的线程不会被分配 CPU 执行时间，需等待其它线程 `显式地` 唤醒，否则不会被分配 CPU 时间片。
-
-		| 进入方法 | 退出方法 |
-		| :--- | :--- |
-		| Object.wait() | Object.notify() / Object.notifyAll() |
-		| Thread.join() | 被调用线程执行完毕 |
-		| LockSupport.park() | LockSupport.unpark(Thread) |
-
-	- 休眠（Timed Waiting）：限期等待，处于这种状态的线程不会被分配 CPU 执行时间，不过无需等待其它线程显式地唤醒，在一定时间之后会被 `系统自动唤醒`。
-
-		| 进入方法 | 退出方法 |
-		| :--- | :--- |
-		| Thread.sleep() | 时间结束 |
-		| Object.wait(long timeout) | 时间结束 / Object.notify() / Object.notifyAll() |
-		| Thread.join(long timeout) | 时间结束 / 被调用线程执行完毕 |
-		| LockSupport.parkNanos() | LockSupport.unpark(Thread) |
-		| LockSupport.parkUntil() | LockSupport.unpark(Thread) |
-	
-	- 死亡（Terminated）：可以是线程结束任务之后自己结束，或者产生了异常而结束。
-
-- 术语描述
-	- Thread.sleep()：使线程进入限期等待状态时，常常用使一个线程 `睡眠` 进行描述。
-	- Object.wait()：使线程进入限期等待或者无限期等待时，常常用 `挂起` 一个线程进行描述。
-	- 睡眠和挂起是用来描述 `行为`，而阻塞和等待用来描述 `状态`。
-	- 阻塞和等待的区别
-		- `阻塞` 是 `被动` 的，它是在等待获取一个排它锁。
-		- `等待` 是 `主动` 的，通过调用 Thread.sleep() 和 Object.wait() 等方法进入。
-
 ## 使用线程
-- Java 中有三种使用线程的方法： 实现 `Runnable` 接口；实现 `Callable` 接口；继承 `Thread` 类。
 
-	> 实现 Runnable 和 Callable 接口的类只能当做一个可以在线程中运行的任务，不是真正意义上的线程。因此最后还需要通过 Thread 来调用，可以说任务是通过线程驱动从而执行的。
+### Thread
 
-- 使用线程方式比较： 实现接口 / 继承 Thread
-	- Java 不支持多重继承，为此继承 Thread 类就无法继承其它类，但可实现多个接口；
-	- 只要求类可执行就行，继承整个 Thread 类开销过大，为此实现接口会更好一些。
-
-### 实现 Runnable 接口
-- 需要实现 run() 方法；通过 Thread 调用 start() 方法来启动线程。
+- new Thread：继承 Thread 并重写 run 方法来定义使用线程。其次，是实现 Runnable / Callable 接口，但该接口实现类只能算在线程中运行的任务，并不是真正意义上的线程（任务是通过线程驱动从而执行的）。最后，它们都需要通过 Thread 来调用启动。
+	- 缺点：缺乏统一管理；无限制创建线程，相互竞争资源导致 OOM (Out Of Memory) 甚至死机。
+	- 比较： 选择实现 Runnable、Callable 接口 ，还是继承 Thread？
+		- Java 不支持多重继承，为此继承 Thread 类就无法继承其它类，但可实现多个接口。
+		- 只要求类可执行就行，继承整个 Thread 类开销过大，为此实现接口会更好一些。
 
 	```java
-	public class MyRunnable implements Runnable {
-	    public void run() {
-	        // ...
-	    }
-	}
-	
-	public static void main(String[] args) {
-	    MyRunnable instance = new MyRunnable();
-	    Thread thread = new Thread(instance);
-	    thread.start();
-	}
-	```
-
-### 实现 Callable 接口
-- 与 Runnable 相比，Callable 可以有返回值，返回值通过 FutureTask 进行封装。
-
-	```java
-	public class MyCallable implements Callable<Integer> {
-	    public Integer call() {
-	        return 123;
-	    }
-	}
-	
-	public static void main(String[] args) 
-	    throws ExecutionException, InterruptedException {
-	    MyCallable mc = new MyCallable();
-	    FutureTask<Integer> ft = new FutureTask<>(mc);
-	    Thread thread = new Thread(ft);
-	    thread.start();
-	    System.out.println(ft.get());
-	}
-	```
-
-### 继承 Thread 类
-- 同样也是需要实现 run() 方法，因为 Thread 类也实现了 Runable 接口。
-
-
-	```java	
-	public class MyThread extends Thread {
+	// Case.01 传递 Runnable 对象
+	new Thread( new Runnable() {
+		@Override
 		public void run() {
-		// ...
+			// Action
 		}
 	}
+	).start();
 	
-	public static void main(String[] args) {
-	    MyThread mt = new MyThread();
-	    mt.start();
+	// Case.02 传递 Callable 对象，通过 FutureTask 接收返回值
+	new FutureTask( new Callable() {
+		// Action
+		@Override
+		public String call() throws Exception {
+			// Action
+		}
+	}
+	).run();
+		
+	// Case.03 复写 Thread#run 方法
+	class Myhread extends Thread() {
+		@Override
+		public void run() {
+			// Action
+		}
+	}
+	new MyThread().start();
+	```
+
+### AsyncTask
+- AsyncTask：轻量级异步任务工具类，提供任务执行进度回调给 UI 进程。
+	- 缺点：生命周期与宿主生命周期不同步，有可能发生内存泄漏。
+
+	```java
+	class MyAsyncTask extends AsyncTask<String, Integer, String) {
+		private static final String TAG = “MyAsyncTask”；
+		@Override
+		protected String doInBackground(String... params) {
+			return params[0];
+		}
+		@Override
+		protected void onPostExecute(String result) {
+			Log.e(TAG, result);
+		}
+		@Override
+		protected void onProgressUpdate(Integer... values) {
+			Log.e(TAG, values[0]);
+		}
+	}
+		
+	// 1. 子类复写方法（所有任务默认串行执行）
+	AsyncTask asyncTask = new MyAsyncTask();
+	asyncTask.execute("Exec MyAsyncTask");
+	
+	// 2. 使用 execute 方法串行执行
+	AsyncTask.execute( new Runnable() {
+		@Override
+		public void run(){
+			// Action
+		}
+	});
+		
+	// 3. 使用内置线程池（THREAD_POOL_EXECUTOR）并发执行
+	AsyncTask.THRED_POOL_EXECUTOR.execute( new Runnable() {
+		@Override
+		public void run(){
+			// Action
+		}
+	})
+	```
+
+### HandlerThread
+- HandlerThread：主线程与子线程通信、适用于持续性轮询任务。
+	- 缺点：不会像普通线程一样主动销毁资源，会一直运行，为此会造成宿主内存泄漏。
+
+	```java
+	HandlerThread thread = new HandlerThread("Concurrent Thread");
+	thread.start();
+		
+	THandler tHandler = new THandler(thread.getLooper()) {
+		@Override
+		public void handleMessage(@NonNull Message msg) {
+			switch (msg.what) {
+				case MSG_WHAT_FLAG:
+					break;
+			}
+		}
+	};
+	tHandler.sentEmptyMessage(MSG_WHAT_FLAG);
+	thread.quitSafely();
+		
+	// 定义为静态以防止内存泄漏
+	static class THandler extends Handler {
+		// 构造方法
+		public ThreadHandler(looper looper) {
+			super(looper);
+		}
 	}
 	```
+
+### ThreadPoolExecutor
+- ThreadPoolExecutor：适用于快速处理大量耗时短的任务场景。
+	- Executors.newCachedThreadPool()：`可缓存` 线程池，用于执行数量多、耗时少的任务。
+	- Executors.newFixedThreadPool(nThreads)：`定长` 线程池，用于控制最大并发量。
+	- Executors.newScheduledThreadPool()：`定时` 线程池，用于执行定时、周期的任务。
+		
+	- Executors.newSingleThreadExecutor()：线程数量为 1 的线程池。
 
 ## 基础线程机制
 
@@ -140,6 +156,7 @@
 	```
 
 ### sleep()
+
 - `Thread.sleep(millisec)` 方法会 `休眠` 当前正在执行的线程，`millisec` 单位为毫秒。
 - sleep() 可能会抛出 InterruptedException，因为异常不能跨线程传播回 main() 中，因此必须在本地进行处理。线程中抛出的其它异常也同样需要在本地进行处理。
 
@@ -274,6 +291,44 @@
 	future.cancel(true);
 	```
 
+## 线程状态
+
+| ![](img/Cys2018-CS-Notes-Java_ThreadLifeCycle.svg) |
+| :---: |
+| 线程状态转换关系 |
+
+- Java 语言定义了 5 种线程状态，在任意时间点一个线程有且只能拥有一种状态。
+	- 新建（New）：创建后尚未启动的线程。
+	- 运行（Runable）：正在运行或正在等待 CPU 时间片。包含了操作系统线程状态中的 Running 和 Ready。
+	- 阻塞（Blocked）：等待获取一个排它锁，如果该线程释放了锁就会结束此状态。
+	- 等待（Waiting）：无限期等待，处于这种状态的线程不会被分配 CPU 执行时间，需等待其它线程 `显式地` 唤醒，否则不会被分配 CPU 时间片。
+
+		| 进入方法 | 退出方法 |
+		| :--- | :--- |
+		| Object.wait() | Object.notify() / Object.notifyAll() |
+		| Thread.join() | 被调用线程执行完毕 |
+		| LockSupport.park() | LockSupport.unpark(Thread) |
+
+	- 休眠（Timed Waiting）：限期等待，处于这种状态的线程不会被分配 CPU 执行时间，不过无需等待其它线程显式地唤醒，在一定时间之后会被 `系统自动唤醒`。
+
+		| 进入方法 | 退出方法 |
+		| :--- | :--- |
+		| Thread.sleep() | 时间结束 |
+		| Object.wait(long timeout) | 时间结束 / Object.notify() / Object.notifyAll() |
+		| Thread.join(long timeout) | 时间结束 / 被调用线程执行完毕 |
+		| LockSupport.parkNanos() | LockSupport.unpark(Thread) |
+		| LockSupport.parkUntil() | LockSupport.unpark(Thread) |
+	
+	- 死亡（Terminated）：可以是线程结束任务之后自己结束，或者产生了异常而结束。
+
+- 术语描述
+	- Thread.sleep()：使线程进入限期等待状态时，常常用使一个线程 `睡眠` 进行描述。
+	- Object.wait()：使线程进入限期等待或者无限期等待时，常常用 `挂起` 一个线程进行描述。
+	- 睡眠和挂起是用来描述 `行为`，而阻塞和等待用来描述 `状态`。
+	- 阻塞和等待的区别
+		- `阻塞` 是 `被动` 的，它是在等待获取一个排它锁。
+		- `等待` 是 `主动` 的，通过调用 Thread.sleep() 和 Object.wait() 等方法进入。
+
 ## 线程协作
 - 当多个线程可以一起工作去解决某个问题时，如果某些部分必须在其它部分之前完成，那么就需要对线程进行协调。
 
@@ -327,6 +382,7 @@
 	```
 
 ### wait() notify() notifyAll()
+
 - 调用 wait() 使得线程等待某个条件满足，线程在等待时会被挂起，当其他线程的运行使得这个条件满足时，其它线程会调用 notify() 或者 notifyAll() 来唤醒挂起的线程。
 - 它们都属于 Object 的一部分，而不属于 Thread。
 - 只能用在 `同步方法` 或者 `同步控制块` 中使用，否则会在运行时抛出 `IllegalMonitorStateException`。
@@ -701,6 +757,7 @@
 	```
 
 ## 内存模型
+
 ### 主内存与工作内存
 
 - 处理器上的寄存器的读写速度比内存快几个数量级，为了解决这种 `速度矛盾`，在它们之间加入了 `高速缓存`。
@@ -742,30 +799,25 @@
 		- unlock：释放出于锁定状态的变量。
 	- 作用于工作内存
 		- store：把工作内存的一个变量的值传送到主内存中。
+		- load：作在 read 之后执行，把 read 得到的值放入工作内存的变量副本中。
 		- use：把工作内存中一个变量的值传递给执行引擎。
 		- assign：把一个从执行引擎接收到的值赋给工作内存的变量。
-		- load：作在 read 之后执行，把 read 得到的值放入工作内存的变量副本中。
 
 ### 内存模型三大特征
 #### 原子性
-
 - Java 内存模型保证了 read、load、assign、use、store、write、lock 和 unlock 操作具有原子性，例如对一个 int 类型的变量执行 assign 赋值操作，这个操作就是原子性的。
 
-	> long 和 double 的非原子性协定：Java 内存模型允许虚拟机将没有被 `volatile` 修饰的 64 位数据 (long，double) 的读写操作划分为两次 32 位的操作来进行，即 load、store、read 和 write 操作可以不具备原子性。
+	> long 和 double 的非原子性协定：Java 内存模型允许虚拟机将没有被 `volatile` 修饰的 64 位数据 （Long / Double 类型）的读写操作划分为两次 32 位的操作来进行，即 load、store、read 和 write 操作可以不具备原子性。
 
-- 有一个错误认识就是，int 等原子性的类型在多线程环境中不会出现线程安全问题。前面的 [线程不安全示例](线程不安全示例) 代码中，cnt 属于 int 类型变量，1000 个线程对它进行自增操作之后，得到的值为 997 而不是 1000。
+- 非原子性操作并不能保证线程安全问题：
+	- 前面的 [线程不安全示例](#线程不安全示例)，cnt 属于 int 类型变量，1000 个线程对它进行自增操作，得到的值不一定是 1000。
+	- 图 1 演示了两个线程同时对 cnt 进行操作，load、assign、store 这一系列操作整体上看不具备原子性，那么在 T1 修改 cnt 并且还没有将修改后的值写入主内存，T2 依然可以读入旧值。即线程 T1、T2 虽执行了两次自增运算，但主内存中 cnt 的值最后为 1 而不是 2。因此对 int 类型读写操作满足原子性 **只是说明 load、assign、store 这些单个操作具备原子性**。
 
-	下图演示了两个线程同时对 cnt 进行操作，load、assign、store 这一系列操作整体上看不具备原子性，那么在 T1 修改 cnt 并且还没有将修改后的值写入主内存，T2 依然可以读入旧值。可以看出，这两个线程虽然执行了两次自增运算，但是主内存中 cnt 的值最后为 1 而不是 2。因此对 int 类型读写操作满足原子性只是说明 load、assign、store 这些单个操作具备原子性。
-	
-	> 为了方便讨论，将内存间的交互操作简化为 3 个：load、assign、store。
-	
-	| ![两个线程同时对cnt进行操作示意](img/Cys2018-CS-Notes-Java_3-7-3.png) | ![AtomicInteger对cnt进行操作示意](img/Cys2018-CS-Notes-Java_3-7-4.png) |
-	| :-: | :-: |
-	| 图 8-4 两个线程同时对 cnt 进行操作示意 | 图 8-5 AtomicInteger 对 cnt 进行操作示意 |
+		| ![](img/CyC2018-CS-Notes-JMM-Atomicity-Example.svg) | ![](img/CyC2018-CS-Notes-JMM-Atomicity-AtomicInteger.svg) |
+		| :---: | :---: |
+		| 图 1 两个线程同时对 cnt 进行操作示意 | 图 2 AtomicInteger 对 cnt 进行操作示意 |
 
-- `AtomicInteger` 能保证多个线程修改的原子性，如图 8-5 所示。
-
-- 使用 AtomicInteger 重写之前线程不安全的代码之后得到以下线程安全实现：
+- AtomicInteger：如上图 2 所示，使用 AtomicInteger 以保证多个线程修改的原子性。比如，我们可改写之前线程不安全代码，得到以下线程安全实现。
 
 	```java
 	public class AtomicExample {
@@ -799,7 +851,7 @@
 	// Output: 1000
 	```
 
-- 除了使用原子类之外，也可以使用 `synchronized` 互斥锁来保证操作的原子性。它对应的内存间交互操作为 lock 和 unlock，在虚拟机实现上对应的字节码指令为 monitorenter 和 monitorexit。
+- synchronized：除使用原子类外，也可使用 synchronized 互斥锁来保证操作的原子性。它对应的内存间交互操作为 lock 和 unlock，在虚拟机实现上对应的字节码指令为 monitorenter 和 monitorexit。
 
 	```java
 	public class AtomicSyncExample {
@@ -835,78 +887,61 @@
 
 #### 可见性
 - 可见性：指当一个线程修改了共享变量的值，其它线程能够立即得知这个修改。Java 内存模型是通过在变量修改后将新值同步回主内存，在变量读取前从主内存刷新变量值来实现可见性的。
-- 主要有三种实现可见性的方式：
+- 可见性的实现方式：
 	- `volatile`：volatile 的特殊规则保证了新值能立即同步到主内存，以及每次使用前立即从主内存刷新。
 	- `synchronized`：对一个变量执行 unlock 操作之前，必须把变量值同步回主内存。
 	- `final`：被 final 关键字修饰的字段在构造器中一旦初始化完成，并且没有发生 `this引用逃逸`，那么其它线程就能看见 final 字段的值。
 
 		> `this引用逃逸`：其它线程通过 this 引用访问到初始化了一半的对象。
 
-- 对前面的线程不安全示例中的 cnt 变量使用 volatile 修饰，不能解决线程不安全问题，因为 volatile 并不能保证操作的原子性。
+- 局限性：对前面的线程不安全示例中的 cnt 变量使用 volatile 修饰，不能解决线程不安全问题，因为 volatile 并不能保证操作的原子性。
+
+	> Tips：解决线程不安全问题请加锁实现。
 
 #### 有序性
+
 - 重排序：在编译或执行时，为优化程序执行效率，编译器或处理器会对指令执行重排序。
-	- 编译器重排序：Java 编译器通过对 Java 代码语义理解，根据优化规则对代码指令执行重排序。
+	- 代码指令重排序：Java 编译器通过对 Java 代码语义理解，根据优化规则对代码指令执行重排序。
 	- 机器指令重排序：现阶段处理器能够自主判断和变更机器指令的执行顺序。
 
 - 有序性指在本线程内观察，所有操作都是有序的。在一个线程观察另一个线程，所有操作都是无序的，无序是因为发生了指令 `重排序`。在 Java 内存模型中，允许编译器和处理器对指令进行重排序，重排序过程不会影响到单线程程序的执行，却会影响到多线程并发执行的正确性。
 
-- `volatile` 关键字通过添加内存屏障的方式来禁止指令重排，即重排序时不能把后面的指令放到内存屏障之前。
+- `volatile` 关键字通过添加 `内存屏障` 的方式来禁止指令重排，即重排序时不能把后面的指令放到内存屏障之前。
 
 - 也可以通过 `synchronized` 来保证有序性，它保证每个时刻只有一个线程执行同步代码，相当于是让线程顺序执行同步代码。
 
 #### 先行发生原则
-
-- 上面提到了可以用 volatile 和 synchronized 来保证有序性。除此之外，JVM 还规定了先行发生原则，让一个操作无需控制就能先于另一个操作完成。
+- 上面提到了可以用 volatile 和 synchronized 来保证有序性。此外，JVM 还规定了先行发生原则（Happens-before），其中定义了禁止编译优化的场景，让一个操作无需控制就能先于另一个操作完成。
 - 若两个操作之间的关系不在下列规则，并且无法从下列规则推导出来的话，则它们没有顺序性保障，JVM 可以对它们随意地进行重排序。
+- 先行发生原则
+	- 程序次序原则（Program Order Rule）：在一个线程内，在程序前面的操作先行发生于后面的操作。更准确说，应该是代码中控制流的顺序（考虑分支、循环结构）。
+	- 管程锁定规则（Monitor Lock Rule）：一个解锁操作先行发生于后面对同一个锁的加锁操作。
 
-#### 程序次序原则
-- 程序次序原则 (Program Order Rule)：在一个线程内，在程序前面的操作先行发生于后面的操作。更准确说,应该是代码中控制流的顺序，因为要考虑分支、循环结构。如图 8-6 所示。
-
-	| ![程序次序原则](img/Cys2018-CS-Notes-Java_3-7-5.png) |
-	| :-: |
-	| 图 8-6 程序次序原则 |
-
-#### 管程锁定规则
-- 管程锁定规则 (Monitor Lock Rulu)：一个 unlock 操作先行发生于后面对同一个锁的 lock 操作。如图 8-7 所示。
-
-	> 必须是同一个锁；“后面” 指时间上的先后顺序。
+		> 必须是同一个锁；“后面” 指时间上的先后顺序。
 	
-	| ![程序次序原则](img/Cys2018-CS-Notes-Java_3-7-6.png) |
-	| :-: |
-	| 图 8-7 管程锁定规则 |
+		| ![](img/CyC2018-CS-Notes-JMM-ProgramOrderRule.svg) | ![](img/CyC2018-CS-Notes-JMM-MonitorLockRule.svg) |
+		| :---: | :---: |
+		| 程序次序原则 | 管程锁定规则 |
 
-#### Volatile 变量规则
-- volatile 变量规则 (Volatile Variable Rule)：对一个 volatile 变量的写操作先行发生于后面对这个变量的读操作。如图 8-8 所示。
+	- volatile 变量规则（Volatile Variable Rule）：对一个 volatile 变量的写操作先行发生于后面对这个变量的读操作。
 
-	> “后面” 指时间上的先后顺序。
-	
-	| ![程序次序原则](img/Cys2018-CS-Notes-Java_3-7-7.png) |
-	| :-: |
-	| 图 8-8 Volatile 变量规则 |
+		> “后面” 指时间上的先后顺序。
 
-#### 线程启动规则
-- 线程启动规则 (Thread Start Rule)：Thread 对象的 start() 方法调用先行发生于此线程的每一个动作。
+	- 线程启动规则（Thread Start Rule）：Thread 对象的 start() 方法调用先行发生于此线程的每一个动作。
 
-	| ![线程启动规则](img/Cys2018-CS-Notes-Java_3-7-8.png) |
-	| :-: |
-	| 图 8-9 线程启动规则 |
+		| ![](img/CyC2018-CS-Notes-JMM-VolatileVariableRule.svg) | ![](img/CyC2018-CS-Notes-JMM-ThreadStartRule.svg) |
+		| :---: | :---: |
+		| Volatile 变量规则 | 线程启动规则 |
 
-#### 线程终止规则
-- 线程终止规则 (Thread Termination Rule)：线程中的所有操作都先行发生于对此线程的终止检测。可通过 Thread.join() 方法结束、Thread.isAlive() 的返回值等手段检测到线程已经终止执行。
+	- 线程终止规则 （Thread Termination Rule）：线程中的所有操作都先行发生于对此线程的终止检测。可通过 Thread.join() 方法结束、Thread.isAlive() 的返回值等手段检测到线程是否已终止执行。
 
-	| ![线程终止规则](img/Cys2018-CS-Notes-Java_3-7-9.png) |
-	| :-: |
-	| 图 8-10 线程终止规则 |
+		| ![](img/CyC2018-CS-Notes-JMM-ThreadTerminationRule.svg) |
+		| :---: |
+		| 线程终止规则 |
 
-#### 线程中断规则
-- 线程中断规则 (Thread Interruption Rule)：对线程 interrupt() 方法的调用先行发生于被中断线程的代码检测到中断事件的发生，可以通过 Thread.interrupted() 方法检测到是否有中断发生。
-
-#### 对象终结规则
-- 对象终结规则 (Finalizer Rule)：一个对象的初始化完成 (构造函数执行结束) 先行发生于它的 finalize() 方法的开始。
-
-#### 传递性
-- 传递性 (Transitivity)：如果操作 A 先行发生于操作 B，操作 B 先行发生于操作 C，那么操作 A 先行发生于操作 C。
+	- 线程中断规则（Thread Interruption Rule）：对线程 interrupt() 方法的调用先行发生于被中断线程的代码检测到中断事件的发生，可以通过 Thread.interrupted() 方法检测到是否有中断发生。
+	- 对象终结规则（Finalizer Rule）：一个对象的初始化完成（构造函数执行结束)）先行发生于它的 finalize() 方法的开始。
+	- 传递性规则（Transitivity）：如果操作 A 先行发生于操作 B，操作 B 先行发生于操作 C，那么操作 A 先行发生于操作 C。
 
 ## 线程安全
 - 线程安全：当多个线程访问一个对象时，如果不考虑这些线程在运行时环境下的调度和交替执行，也不需要进行额外的同步，或者在调用方法进行任何其他的协调操作，调用这个对象的行为都可以获得正确的结果，那么这个对象是线程安全的  $^{[1, 2]}$。
@@ -914,10 +949,12 @@
 	> 该定义较严谨，它要求线程安全的代码都必须具备一个特征：代码本身封装了所有必要的正确性保障手段 (同步互斥等)，令调用者无须关系多线程的问题，无须自己采取措施来保证多线程的正确调用。
 
 ### 参考资料
+
 - [1] [周志明. 深入理解 Java 虚拟机 [M]. 第二版. 机械工业出版社, 2013](https://book.douban.com/subject/24722612/)
 - [2] [ Brian Goetz. Java Concurrency in Practice [M]. Addison-Wesley Professional, 2016](https://book.douban.com/subject/1888733/)
 
 ### Java 语言的线程安全
+
 - 不可变：
 	- 不可变 (Immutable) 的对象一定是线程安全的，不需要再采取任何的线程安全保障措施。只要一个不可变的对象被正确地构建出来，永远也不会看到它在多个线程之中处于不一致的状态。
 	- 多线程环境下，应当尽量使对象成为不可变，来满足线程安全。
@@ -973,10 +1010,11 @@
 - 随着硬件指令集的发展，我们可以使用基于 `冲突检测` 的 `乐观并发策略`：先进行操作，如果没有其它线程争用共享数据，那操作就成功了，否则采取补偿措施，即 `不断地重试`，直到成功为止。这种乐观的并发策略的许多实现都不需要将线程阻塞，因此这种同步操作称为 `非阻塞同步`。
 
 ##### CAS
-- 乐观锁需要操作和冲突检测这两个步骤具备原子性，这里就不能再使用互斥同步来保证了，只能靠硬件来完成。硬件支持的原子性操作最典型的是：`比较并交换` (Compare-and-Swap，CAS)。
+- 乐观锁需要操作和冲突检测这两个步骤具备原子性，这里就不能再使用互斥同步来保证了，只能靠硬件来完成。硬件支持的原子性操作最典型的是 `比较并交换` (Compare-and-Swap，CAS)。
 - CAS 指令需要有 3 个操作数，分别是内存地址 V、旧的预期值 A 和新值 B。当执行操作时，只有当 V 的值等于 A，才将 V 的值更新为 B。
 
 ##### AtomicInteger
+
 - J.U.C 包 (java.util.concurrent) 里面的整数原子类 AtomicInteger 的方法调用了 Unsafe 类的 CAS 操作。
 
 	- 以下代码使用了 AtomicInteger 执行了自增的操作。
@@ -1101,9 +1139,9 @@
 	
 		它所对应的底层结构图为：
 		
-		| ![ThreadLocal底层结构图](img/Cys2018-CS-Notes-Java_3-8.png) |
-		| :-: |
-		| 图 9-1 ThreadLocal底层结构图 |
+		| ![](img/CyC2018-CS-Notes-ThreadLocal.svg) |
+		| :---: |
+		| ThreadLocal底层结构图 |
 	
 	- 每个 Thread 都有一个 ThreadLocal.ThreadLocalMap 对象。
 
@@ -1139,18 +1177,21 @@
 - 可重入代码有一些共同的特征，例如不依赖存储在堆上的数据和公用的系统资源、用到的状态量都由参数中传入、不调用非可重入的方法等。
 - 通过简单原则来判断代码是否具备可重入性：如果一个方法，它的返回结果是可以预测的，只要输入相同的数据就能返回相同的结果，那么它满足可重入性的要求，当然也是线程安全的。
 
-## 锁优化
+## Synchronized 锁优化
+
 - 这里的锁优化主要是指 JVM 对 `synchronized` 的优化。
 
 ### 自旋锁
+
 - 互斥同步进入阻塞状态的开销都很大，应该尽量避免。在许多应用中，共享数据的锁定状态只会持续很短的一段时间。自旋锁的思想是让一个线程在请求一个共享数据的锁时执行 `无限循环 (自旋)` 一段时间，如果在这段时间内能获得锁，就可以避免进入阻塞状态。
 - 自旋锁虽然能避免进入阻塞状态从而减少开销，但是它需要进行无限循环操作，占用 CPU 时间、浪费处理器资源，为此它只适用于共享数据锁定状态较短的场景。
 - 在 JDK 1.6 中引入了自适应的自旋锁。自适应意味着自旋的次数不再固定了，而是由前一次在同一个锁上的自旋次数及锁的拥有者的状态来决定。
 
 ### 轻量级锁
-- JDK 1.6 引入了偏向锁和轻量级锁，从而让锁拥有了四个状态：无锁状态 (unlocked)、偏向锁状态 (biasble)、轻量级锁状态 (lightweight locked) 和重量级锁状态 (inflated)。
 
-	> 轻量级锁是较于传统的 “重量级” 锁的说法，它并不是用来代替重量级锁的，而是在没有多线程的前提下，减少传统的重量级锁定使用操作系统互斥量产生的 `性能消耗`。
+- JDK 1.6 引入了偏向锁和轻量级锁，从而让锁拥有了四个状态：无锁状态（Unlocked）、偏向锁状态（Biasble）、轻量级锁状态（Lightweight locked）和重量级锁状态 （Inflated）。
+
+	> 轻量级锁是较于传统的 “重量级” 锁的说法，它并不是用来代替重量级锁的，而是在没有多线程的前提下，减少传统重量级锁定使用操作系统互斥量而产生的 `性能消耗`。
 
 ### 偏向锁
 
@@ -1197,15 +1238,13 @@
 
 > 摘录自原文：[CyC2018. Java 多线程开发良好的实践. www.cyc2018.xyz](http://www.cyc2018.xyz/Java/Java%20并发.html#十三、多线程开发良好的实践)
 
-- 定义线程，起个有意义的名字，便于识别，且方便找 BUG。
-
+- 定义线程，起个有意义的名字，便于识别且方便找 BUG。
 - 缩小同步范围，从而减少锁争用。例如对于 synchronized，应该尽量使用同步块而不是同步方法。
+- 多用同步工具，少用 wait() 和 notify()
 
-- 多用同步工具，少用 wait() 和 notify()。
-	- 例如，CountDownLatch, CyclicBarrier, Semaphore 和 Exchanger 这些同步类简化了编码操作，而用 wait() 和 notify() 很难实现复杂控制流；
-	- 其次，这些同步类是由最好的企业编写和维护，在后续的 JDK 中还会不断优化和完善。
+	> 例如：CountDownLatch, CyclicBarrier, Semaphore 和 Exchanger 这些同步类简化了编码操作，而用 wait() 和 notify() 很难实现复杂控制流。
 
 - 使用 BlockingQueue 实现 `生产者-消费者` 架构模式。
-- 多用并发集合，少用同步集合。 例如应该使用 ConcurrentHashMap 而不是 HashMap。
+- 多用并发集合，少用同步集合。比如应该使用 ConcurrentHashMap 而不是 HashMap。
 - 使用本地变量和不可变类来保证线程安全。
 - 使用线程池，而不是直接创建线程，这是因为创建线程代价很高，线程池可以有效地利用有限的线程来启动任务。
