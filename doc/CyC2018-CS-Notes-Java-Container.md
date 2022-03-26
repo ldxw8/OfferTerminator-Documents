@@ -45,9 +45,9 @@
 ### ArrayList
 >  以下源码细节是基于 JDK 1.8 版本展开讨论的。
 
-| ![CyC2018-CS-Notes-Java-ArrayList_1-1](img/CyC2018-CS-Notes-Java-ArrayList_1-1.png)|
+| ![](img/CyC2018-CS-Notes-Java-ArrayList-Introduction.svg) |
 | :---: |
-| 图 2-1 ArrayList 概述 |
+| ArrayList 概述 |
 
 #### 参考资料
 - [细雨蒙情. ArrayList (JDK1.8) 源码分析. jianshu.com](https://www.jianshu.com/p/ea4f943206ea)
@@ -83,7 +83,7 @@
 	```java
 	// 默认初始化容量
 	private static final int DEFAULT_CAPACITY = 10;
-
+	
 	// 当用户指定该 ArrayList 容量为 0 时返回该空数组
 	private static final Object[] EMPTY_ELEMENTDATA = {};
 	
@@ -92,10 +92,10 @@
 	
 	// 数组对象 (非私有以简化嵌套类访问)
 	transient Object[] elementData;     
-
+	
 	// 数组中元素的个数 (注意不是数组的长度)
 	private int size;
-
+	
 	// 不带参数的构造方法
 	public ArrayList() {
 		super();
@@ -113,12 +113,12 @@
 		// 新建指定容量的 Object 类型数组
 		this.elementData = new Object[initialCapacity];
 	}
-
+	
 	// 传入外部集合的构造方法
 	public ArrayList(Collection<? extends E> c) {
 		// 持有传入集合的内部数组的引用
 		elementData = c.toArray();
-
+	
 		// 更新集合元素个数大小
 		if ((size = elementData.length) != 0) {
 			// 判断引用的数组类型, 并将引用转换成 Object 数组引用
@@ -227,9 +227,9 @@
 ### LinkedList
 >  以下源码细节是基于 JDK 1.8 版本展开讨论的。
 
-| ![CyC2018-CS-Notes-Java-LinkedList_1-1](img/CyC2018-CS-Notes-Java-LinkedList_1-1.png) |
+| ![](img/CyC2018-CS-Notes-Java-LinkedList-Introduction.svg) |
 | :---: |
-| 图 2-2 LinkedList 概述 |
+| LinkedList 概述 |
 
 #### 参考资料
 - [十二页. LinkedList (JDK1.8/JDK1.7/JDK1.6). csdn.net](https://blog.csdn.net/u011392897/article/details/57115818)
@@ -305,7 +305,7 @@
 		E item; // 当前节点值
 		Node<E> next; // 下一个节点
 		Node<E> prev; // 上一个节点
-
+	
 		Node(Node<E> prev, E element, Node<E> next) {
 			this.item = element;
 			this.next = next;
@@ -360,11 +360,12 @@
 - LinkedList 的所有方法都没有进行同步，它是 `线程不安全` 的。
 
 ### HashMap
+
 >  以下源码细节是基于 JDK 1.8 版本展开讨论的。
 
-| ![CyC2018-CS-Notes-Java-HashMap_1-1](img/CyC2018-CS-Notes-Java-HashMap_1-1.png) |
+| ![](img/CyC2018-CS-Notes-Java-HashMap-Introduction.svg) |
 | :---: |
-| 图 2-3 HashMap 概述 |
+| HashMap 概述 |
 
 #### 参考资料
 - [十二页. HashMap JDK1.8 源码分析. csdn.net](https://blog.csdn.net/u011392897/article/details/60151323)
@@ -372,16 +373,17 @@
 - [YSOcean. HashMap (JDK1.8). cnblogs.com](https://www.cnblogs.com/ysocean/p/8711071.html)
 
 #### 基本性质
-- HashMap 存储的是 key-value 的键值对，允许 key 为 null，也允许 value 为null。
-- HashMap 内部为数组和链表的组合结构。若 Hash 冲突的概率比较高，就会导致同一个桶中的链表长度过长、遍历效率降低。
+
+- HashMap 存储的是 key-value 键值对，允许 key 为 null，也允许 value 为 null。
+- HashMap 内部为哈希数组与链表/红黑树的组合结构。若 Hash 冲突概率比较高，就会导致同一个桶中的链表长度过长、遍历效率降低。
 
 	> 通过源码可知：以内部类 Node 表示结点，存储着键值对，且包含了四个字段。其中 next 字段我们可以看出 Node 会相链组成一个链表。即数组中的每个位置被当成一个桶，一个桶存放一个链表。
 
-	故在 JDK 1.8 中如果链表长度到达阀值 (默认是8)，就会将链表转换成 `红黑二叉树` 保存，以提高 Hash 冲突时的查找速度。整体结构如图 2-3-1 所示：
+- 故在 JDK 1.8 中如果链表长度到达阀值（默认是8），就会将链表转换成 `红黑二叉树` 保存，以提高 Hash 冲突时的查找速度。整体结构如图 2-3-1 所示：
 
-	| ![CyC2018-CS-Notes-Java-HashMap_1-2](img/CyC2018-CS-Notes-Java-HashMap_1-2.png) |
+	| ![](img/CyC2018-CS-Notes-Java-HashMap-Sturct.svg) |
 	| :---: |
-	| 图 2-3-1 HashMap 的整体结构 |
+	| HashMap 的整体结构 |
 
 - 链表添加时，新节点会放在链表末尾，而不是像 JDK 1.6/1.7 一样放在头部；
 - 扩容操作也会尽量保证扩容后还在同一条链表上的节点之间的 `相对顺序` 不变。
@@ -493,14 +495,14 @@
 	for(Object value : map.values()){
 	    System.out.println(value);
 	}
-
+	
 	// 方法二：得到 Entry 集合，然后遍历 Entry
 	Set<Map.Entry<String,Object>> entrySet = map.entrySet();
 	for(Map.Entry<String,Object> entry : entrySet){
 		System.out.println( entry.getKey() );
 		System.out.println( entry.getValue() );
 	}
-
+	
 	// 方法三：迭代
 	// 效率较前者高，且在遍历的过程中支持对集合中的元素进行删除
 	Iterator<Map.Entry<String,Object>> iterator = map.entrySet().iterator();
@@ -632,9 +634,9 @@
 - 遍历 HashMap 得到元素的顺序不是按照插入的顺序输出的。
 
 ### ConcurrentHashMap
-| ![](img/CyC2018-CS-Notes-Java-ConcurrentHashMap_1-1.png) |
-| :-: |
-| 图 2-4 ConcurrentHashMap 引入背景 |
+| ![](img/CyC2018-CS-Notes-Java-ConcurrentHashMap-Introduction.svg) |
+| :---: |
+| ConcurrentHashMap 引入背景 |
 
 #### 参考资料
 - [Single_Yam. 为并发而生的 ConcurrentHashMap. cnblogs.com](https://www.cnblogs.com/yangming1996/p/8031199.html)
@@ -646,7 +648,7 @@
 | :-: | :-: |
 | 图 2-4-1 JDK 1.7 ConcurrentHashMap | 图 2-4-2 JDK 1.8 ConcurrentHashMap |
 
-- JDK 1.7：每个分段锁 Segment 维护着几个桶 HashEntry，多线程可同时访问不同分段锁上的桶 (并发量就是 Segment 的个数)。
+- JDK 1.7：每个分段锁 Segment 维护着几个桶 HashEntry，多线程可同时访问不同分段锁上的桶 （并发量就是 Segment 的个数）。即压力分散思想，即使每个线程都想抢锁，那就多配几把锁让它抢占。
 
 	> 版本特征：ReentrantLock + Segment + HashEntry
 
@@ -658,9 +660,11 @@
 - put()：并发添加
 
 ##### 其他操作
+
 - get()：获取元素
 
 #### 源码细节
+
 ##### 重要成员属性
 ```java
 // 代表整个哈希表

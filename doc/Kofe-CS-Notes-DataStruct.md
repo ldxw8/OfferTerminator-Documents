@@ -40,7 +40,7 @@
 	```java
 	public abstract class Sort<T extends Comparable<T>> {
 	    public abstract void sort(T[] nums);
-
+	
 	    protect boolean less(T v, T w) {
 	        return v.compareTo(w) > 0; // 升序排序
 	    }
@@ -143,7 +143,7 @@
 	                     low = mid;
 	                 }
 	             }
-
+	
 	             // 右移动元素腾出插入位置
 	             for (int j = insert; j > high; j--) { 
 	                 swap(nums, j, j-1);
@@ -162,17 +162,17 @@
 
 	```java
 	public class Shell<T extends Comparable<T>> extends Sort<T> {
-
+	
 	    @Override
 	    public void sort(T[] nums) {
-
+	
 	        int N = nums.length;
 	        int h = 1;
-
+	
 	        while (h < N / 3) {
 	            h = 3 * h + 1; // 1, 4, 13, 40, ...
 	        }
-
+	
 	        while (h >= 1) {
 	            for (int i = h; i < N; i++) {
 	                for (int j = i;j >= h && less(nums[j], nums[j - h]); j -= h) {
@@ -501,6 +501,7 @@
 
 #### 红黑树
 ##### 引入背景
+
 | ![平衡二叉树与红黑树](img/Kofe-CS-Notes-DataStruct-Tree_1-3.png) |
 | :-: |
 | 图 7-3 平衡二叉树与红黑树 |
@@ -520,7 +521,7 @@
 	- `性质一`：结点可以是红色或者黑色的。
 	- `性质二`：根结点是黑色的。
 	- `性质三`：所有外部结点的颜色是黑色的。
-		- `外部结点` 以 `空指针` 表示 (也可称其为叶子结点)。
+		- `外部结点` 以 `空指针` 表示（也可称其为叶子结点）。
 		- `NIL` 表示叶子结点，它不含数据，而只充当树在此结束的指示。
 		
 			> 这样定义的好处是，即满足性质五的要求，且算法更容易描述。
@@ -531,6 +532,8 @@
 - 在以上性质的约束下，可知道红黑树的 `关键特性`：从根到叶子的最长可能路径不多于最短可能路径的两倍长，结果是这棵树是平衡的。
 	
 - 基于二叉查找数的红黑树，通过一些性质使得树相对平衡， 使得查找、插入、删除最坏情况的时间复杂度依然为 $O({log_2}^n)$。
+
+	> 正是红黑树的这 5 条性质，使得一棵结点为 n 的红黑树始终保持 $\log n$ 的高度。 
 
 ##### 插入与插入修复
 - 我们默认以二叉排序树的方法增加结点，并标记它为红色。
@@ -592,6 +595,7 @@
   | 图 7-4 B 树 与 B+ 树 |
 
 ##### 参考资料
+
 - [维基百科. B+树. zh.wikipedia.org]()
 - [Nullzx. B 树和 B+ 树的插入删除图文详解. cnblogs.com](https://www.cnblogs.com/nullzx/p/8729425.html)
 - [CodingLabs. MySQL索引背后的数据结构及算法原理. CodingLabs.org](http://blog.codinglabs.org/articles/theory-of-mysql-index.html)
