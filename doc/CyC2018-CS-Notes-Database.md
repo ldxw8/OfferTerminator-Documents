@@ -1264,6 +1264,3 @@ WHERE SOUNDEX(col1) = SOUNDEX('apple')
 ### 切分
 
 ### 复制
-
-## Redis
-
