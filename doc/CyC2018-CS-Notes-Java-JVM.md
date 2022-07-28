@@ -1,32 +1,29 @@
 # 技术面试必备基础知识-Java-虚拟机
 
-> 原文：[CS-Notes-Java-虚拟机](https://cyc2018.github.io/CS-Notes/#/notes/Java%20%E8%99%9A%E6%8B%9F%E6%9C%BA)
-
 ## 参考资料 
+- [Cyc2018. Java 虚拟机 [OL]. www.cyc2018.xyz](http://www.cyc2018.xyz/Java/Java%20%E8%99%9A%E6%8B%9F%E6%9C%BA.html)
 - [周志明. 深入理解 Java 虚拟机 [M]. 第二版. 机械工业出版社, 2013](https://book.douban.com/subject/24722612/)
-- [归去来兮. HotSpot的安全区和安全点. cnblogs.com](https://www.cnblogs.com/mazhimazhi/p/11337660.html)
+- [归去来兮. HotSpot的安全区和安全点 [OL]. cnblogs.com](https://www.cnblogs.com/mazhimazhi/p/11337660.html)
 
 ## JVM 运行时数据区域
-- Java 虚拟机 (Java Virtual Machine, JVM) 在执行 Java 程序的过程中会把它所管理的内存划分为若干不同的数据区域。
-- 这些区域各有用途，以及各自创建和销毁的时间。比如有的区域随着虚拟机进程的启动而存在，有些区域以来用户线程的启动而创建，结束而销毁。
+- Java 虚拟机（Java Virtual Machine，JVM）在执行 Java 程序过程中会把它所管理的内存划分为若干不同的数据区域。
+- 这些区域各有用途以及各自创建和销毁的时间。比如，有的区域随着虚拟机进程的启动而存在，有些区域以用户线程的启动而创建、结束而销毁。
 
-	| ![运行时数据区域](img/Cys2018-CS-Notes-Java_4-1.png) |
-	| :-: |
-	| 图 1-1 Java 虚拟机运行时数据区域 (来自 [CyC2018.CS-Notes](https://cyc2018.github.io/CS-Notes/#/notes/Java%20虚拟机?id=一、运行时数据区域) ) |
+	| ![](img/CS-Notes-JVM-Runtime-DataArea.svg) |
+	| :---: |
+	| JVM 运行时数据区域 |
 
 ### 程序计数器
-- 程序计数器：记录正在执行的虚拟机字节码指令的地址 (如果正在执行的是本地方法则为空)。
+- 程序计数器，记录正在执行的虚拟机字节码指令的地址 (如果正在执行的是本地方法则为空)。
+- Java 的多线程是通过线程轮流切换并分配处理器执行时间的方式实现的，任何时刻一个处理器 （多核心处理器是内核）只会执行一条线程中的指令。 当某个线程的时间片消耗完毕会自动切换至下一个线程继续执行。
+- 为此，确保线程切换后能恢复正确的执行位置，每条线程都需要拥有一个独立的程序计数器，以b保存当前线程的执行位置。我们称这类内存区域为 `线程私有的内存`。
 
-- Java 虚拟机的多线程是通过线程轮流切换并分配处理器执行时间的方式实现的，在任何时刻一个处理器 (多核心处理器是内核) 都只会执行一条线程中的指令。 
-
-	为此，确保线程切换后能恢复正确的执行位置，每条线程都需要拥有一个独立的程序计数器。我们称这类内存区域为 `线程私有的内存`。
-
-### Java 虚拟机栈
+### 虚拟机栈
 - Java 虚拟机栈：`线程私有的内存`。每个 Java 方法在执行的同时会创建一个 `栈帧` 用于存储 `局部变量表`、`操作数栈`、`常量池引用` 等信息。从方法调用直至执行完成的过程，对应着一个栈帧在 Java 虚拟机栈中入栈和出栈的过程。
 
-	| ![栈帧](img/Cys2018-CS-Notes-Java_4-1-1.png) |
-	| :-: |
-	| 图 1-2 栈帧 |
+	| ![](img/CS-Notes-JVM-Runtime-DataArea-Frame.svg) |
+	| :---: |
+	| 栈帧 |
 
 - 该区域可能抛出以下异常：
 	- 当线程请求的栈深度超过最大值，会抛出 StackOverflowError 异常；
@@ -100,9 +97,9 @@
 
 	```java
 	public class Test {
-
+	
 		public Object instance = null;
-
+	
 		public static void main(String[] args) {
 			Test a = new Test();
 			Test b = new Test();
@@ -511,11 +508,11 @@
             A = 2;
         }
     }
-
+    
     static class Sub extends Parent {
         public static int B = A;
     }
-
+    
     public static void main(String[] args) {
          System.out.println(Sub.B);  // 2
     }
@@ -609,12 +606,12 @@
 	public abstract class ClassLoader {
 	    // The parent class loader for delegation
 	    private final ClassLoader parent;
-
+	
 	    public Class<?> loadClass(String name) 
 	        throws ClassNotFoundException {
 	        return loadClass(name, false);
 	    }
-
+	
 	    protected Class<?> loadClass(String name, boolean resolve) 
 	        throws ClassNotFoundException {
 	        synchronized ( getClassLoadingLock(name) ) {
@@ -631,7 +628,7 @@
 	                    // ClassNotFoundException thrown if class not found
 	                    // from the non-null parent class loader
 	                }
-
+	
 	                if (c == null) {
 	                    // If still not found, then invoke findClass in order
 	                    // to find the class.
@@ -644,7 +641,7 @@
 	            return c;
 	        }
 	    }
-
+	
 	    protected Class<?> findClass(String name) 
 	        throws ClassNotFoundException {
 	        throw new ClassNotFoundException(name);
@@ -662,13 +659,13 @@
 
 	```java
 	public class FileSystemClassLoader extends ClassLoader {
-
+	
 	    private String rootDir;
-
+	
 	    public FileSystemClassLoader(String rootDir) {
 	        this.rootDir = rootDir;
 	    }
-
+	
 	    protected Class<?> findClass(String name) 
 	        throws ClassNotFoundException {
 	        byte[] classData = getClassData(name);
@@ -679,7 +676,7 @@
 	                classData.length);
 	        }
 	    }
-
+	
 	    private byte[] getClassData(String className) {
 	        String path = classNameToPath(className);
 	        try {
@@ -698,7 +695,7 @@
 	        }
 	        return null;
 	    }
-
+	
 	    private String classNameToPath(String className) {
 	        return rootDir + File.separatorChar
 	            + className.replace('.', File.separatorChar) 
