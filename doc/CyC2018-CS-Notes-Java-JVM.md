@@ -1,7 +1,5 @@
 # 技术面试必备基础知识-Java-虚拟机
 
-
-
 ## JVM 运行时数据区域
 - Java 虚拟机（Java Virtual Machine，JVM）在执行 Java 程序过程中会把它所管理的内存划分为若干不同的数据区域。
 - 这些区域各有用途以及各自创建和销毁的时间。比如，有的区域随着虚拟机进程的启动而存在，有些区域以用户线程的启动而创建、结束而销毁。
@@ -11,7 +9,7 @@
 	| JVM 运行时数据区域 |
 
 ### 程序计数器
-- 程序计数器，记录正在执行的虚拟机字节码指令的地址，若正在执行的是本地方法则为空。
+- 程序计数器，可看作是当前线程所执行字节码的行号指示器。若执行的是 Java 方法，则记录正在执行的虚拟机字节码指令的地址；若执行的是本地方法则为空。
 - Java 的多线程是通过线程轮流切换并分配处理器执行时间的方式实现的，任何时刻一个处理器 （多核心处理器是内核）只会执行一条线程中的指令，当某个线程的时间片消耗完毕会自动切换至下一个线程继续执行。
 - 为此，确保线程切换后能恢复正确的执行位置，每条线程都需要拥有一个独立的程序计数器，以保存当前线程的执行位置，我们称这类内存区域为 `线程私有的内存`。
 
@@ -20,7 +18,7 @@
 
 	| ![](img/CS-Notes-JVM-Runtime-DataArea-Frame.svg) |
 	| :---: |
-	| 栈帧 |
+	| Java 方法执行的内存模型 |
 
 - 栈帧结构
 	- 操作数栈：字节码执行时使用的栈结构。
@@ -39,15 +37,10 @@
 			int res = a();
 			System.out.println(res);
 		}
-	
-		public static int a(){
-			return b();
-		}
-	
-		public static int b(){
-			return c();
-		}
-	
+		
+		public static int a(){ return b(); }
+		public static int b(){ return c(); }
+		
 		public static int c(){
 			int a = 10;
 			int b = 20;
@@ -57,11 +50,14 @@
 	```
 	
 	| ![](img/CS-Notes-JVM-Runtime-DataArea-Frame-Demo.svg) |
-	| :---------------------------------------------------: |
-	|                   虚拟机栈运作流程                    |
+	| :---: |
+	| 虚拟机栈运作流程 |
 
 - 该区域可能抛出以下异常：
-	- 当线程请求的栈深度超过最大值，会抛出 StackOverflowError 异常；
+	- 当线程请求的栈深度超过最大值，会抛出 StackOverflowError 异常。
+
+		> 比如无限递归。
+
 	- 栈进行动态扩展时如果无法申请到足够内存，会抛出 OutOfMemoryError 异常。
 - 可以通过 `-Xss` 这个虚拟机参数来指定每个线程的 Java 虚拟机栈内存大小，在 JDK 1.4 中默认为 256K，而在 JDK 1.5+ 默认为 1M：
 
@@ -75,32 +71,33 @@
 
 ### 堆
 - 所有线程共享的内存区域，虚拟机启动时创建。
-- `所有对象` 和 `数组` 都在这里分配内存，是垃圾收集的主要区域 (GC 堆，Garbage Collected Heap)。
+- `所有对象` 和 `数组` 都在这里分配内存，是垃圾收集的主要区域（GC 堆，Garbage Collected Heap）。
 - 现代的垃圾收集器基本都是采用 `分代收集算法`，其主要的思想是针对不同类型的对象采取不同的垃圾回收算法。可以将堆分成两块：
 	- 新生代（Young Generation）
 	- 老年代（Old Generation）
-- 堆不需要连续内存 (不要求物理上连续的内存空间，逻辑连续即可)，并且可以动态增加其内存，增加失败会抛出 OutOfMemoryError 异常。
+- 堆不需要连续内存（不要求物理上连续的内存空间，逻辑连续即可），并且可以动态增加其内存，增加失败会抛出 OutOfMemoryError 异常。可通过 `-Xms` 和 `-Xmx` 这两个虚拟机参数来指定一个程序的堆内存大小，第一个参数设置初始值，第二个参数设置最大值。
 
-	可以通过 `-Xms` 和 `-Xmx` 这两个虚拟机参数来指定一个程序的堆内存大小，第一个参数设置初始值，第二个参数设置最大值。
-	
 	```shell
 	java -Xms1M -Xmx2M HackTheJava
 	```
 
 ### 方法区
-- 所有线程共享的内存区域。
-- 用于存放已被加载的 `类信息`、`常量`、`静态变量`、`动态编译缓存` 等数据。
+- 所有线程共享的内存区域，用于存放已被加载的 `类信息`、`常量`、`静态变量`、`编译时生成的常量池` 等数据。
+
+	| ![](img/CS-Notes-JVM-Runtime-DataArea-Method.svg) |
+	| :---: |
+	| 方法区结构 |
+
 - 和堆一样不需要连续的内存，并且可以动态扩展，动态扩展失败一样会抛出 OutOfMemoryError 异常。
 - 对这块区域进行垃圾回收的主要目标是对常量池的回收和对类的卸载，但是一般比较难实现。
 - HotSpot 虚拟机把它当成 `永久代` 来进行垃圾回收。但很难确定永久代的大小，因为它受到很多因素影响，并且每次 Full GC 之后永久代的大小都会改变，所以经常会抛出 OutOfMemoryError 异常。
-
-	> 为了更容易管理方法区，从 JDK 1.8 开始，移除永久代，并把方法区移至元空间，它位于本地内存中，而不是虚拟机内存中。
-
 - 方法区是一个 JVM 规范，永久代与元空间都是其一种实现方式。在 JDK 1.8 之后，原来永久代的数据被分到了堆和元空间中。元空间存储类的元信息，静态变量和常量池等放入堆中。
+
+	> 为了更容易管理方法区，从 JDK 1.8 开始，移除永久代并把方法区移至元空间，它位于本地内存中，而非虚拟机内存。
 
 ### 运行时常量池
 - 运行时常量池是方法区的一部分。
-- Class 文件中的常量池 (编译器生成的字面量和符号引用) 会在类加载后被放入这个区域。
+- Class 文件中的常量池（编译器生成的字面量和符号引用）会在类加载后被放入这个区域。
 - 除了在编译期生成的常量，还允许动态生成，例如 String 类的 intern()。
 
 	```java
@@ -116,9 +113,50 @@
 	}
 	```
 
+- [举例] String 类利用常量池进行优化
+
+	```java
+	public class Main {
+		public static void main(String[] args) {
+			// Case.01: str1、str2 被存放于常量池中
+			String str1 = "Hello World";
+			String str2 = "Hello World";
+			String str3 = str1 + str2;						// 思考 str3 又是如何形式的？
+			
+			System.out.println(str1 == str2); 		// true, 地址比较
+			System.out.println(str1.equals(str2));// true, 字符串比较
+	
+			// Case.02: 新建对象 str4、str5 存放于堆中（实参还是存放于常量池中）
+			String str4 = new String("Naive");
+			String str5 = new String("Naive");
+			// false, 对象不同内存地址不同
+			System.out.println(str1 == str2);
+			
+	    // Case.03
+			// 第一次调用 intern 方法会把堆中字符串复制并放入常量池 
+			// JDK 1.7 之后不进行复制操作，而是直接修改指向堆中引用
+			// 第二次调用 intern 方法会直接返回常量池中字符串的地址
+			String str6 = new String("ab") + new String("c");
+			String str7 = new String("ab") + new String("c");
+			// true, 对象不同内存地址不同
+			System.out.println(str6.intern() == str7.intern());
+		}
+	}
+	```
+
+
 ### 直接内存
-- 直接内存并不是虚拟机运行时数据区的一部分，也不是 JVM 规范中定义的内存区域。
+- 直接内存（也称堆外内存）并不是虚拟机运行时数据区的一部分，也不是 JVM 规范中定义的内存区域。
 - 在 JDK 1.4 中新引入了 `NIO`（New Input/Output）类，它可以使用 Native 函数库直接分配堆外内存，然后通过一个存储在 Java 堆里的 DirectByteBuffer 对象作为这块内存的引用进行操作。这样能在一些场景中显著提高性能，因为避免了在堆内存和堆外内存来回拷贝数据。
+
+	```java
+	public class Main {
+		public static void main(String[] args) {
+		}
+	}
+	```
+
+- 直接内存虽然不受 Java 堆大小限制，但是作为内存还是受限于载体机器的内存大小。配置堆内存最大值时，注意不要大于物理内存的大小限制，不然会导致动态扩展时抛出 OutOfMemoryError 异常。
 
 ## 垃圾收集算法与工具
 - 垃圾收集 (Garbage Collection, GC) 主要是针对 `堆` 和 `方法区` 进行。
