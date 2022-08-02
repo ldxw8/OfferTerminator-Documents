@@ -1,4 +1,4 @@
-# 技术面试必备基础知识-Java-虚拟机
+# Java 虚拟机
 
 ## JVM 运行时数据区域
 - Java 虚拟机（Java Virtual Machine，JVM）在执行 Java 程序过程中会把它所管理的内存划分为若干不同的数据区域。
