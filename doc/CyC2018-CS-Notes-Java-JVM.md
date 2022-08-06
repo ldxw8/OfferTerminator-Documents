@@ -1,6 +1,6 @@
 # Java 虚拟机
 
-## JVM 运行时数据区域
+## JVM运行时数据区域
 - Java 虚拟机（Java Virtual Machine，JVM）在执行 Java 程序过程中会把它所管理的内存划分为若干不同的数据区域。
 - 这些区域各有用途以及各自创建和销毁的时间。比如，有的区域随着虚拟机进程的启动而存在，有些区域以用户线程的启动而创建、结束而销毁。
 
@@ -616,38 +616,60 @@
 - `Concurrent Mode Failure`：执行 CMS GC 的过程中同时有对象要放入老年代，而此时老年代空间不足（可能是 GC 过程中浮动垃圾过多导致暂时性的空间不足），便会报 Concurrent Mode Failure 错误，并触发 Full GC。
 
 ## 虚拟机类加载机制
-- 类是在运行期间第一次使时才动态加载的，而不是一次性加载所有类。
-
 ### 类的生命周期
+- Java 类的加载过程指的是加载、验证、准备、解析和初始化这 5 个阶段。
 - Java 类的生命周期指的是一个 class 文件从加载到卸载的全过程。
 
-	> 类的加载其实就是 Class 对象的加载。
-
-	| ![](img/CyC2018-CS-Notes-Java-_4-1.png) |
-	| :-: |
-	| 图 4-1 Java 类的生命周期 |
-	
-- 类的加载过程指的是加载、验证、准备、解析和初始化这 5 个阶段。
+	| ![](img/CS-Notes-JVM-ClassLoading-Lifecycle.svg) |
+	| :---: |
+	| Java 类的生命周期 |
 
 ### 类的加载过程
+- 类是在运行期间第一次使时才动态加载的，而不是一次性加载所有类。比如，加载主类才能运行主类的 main 方法；通过反射数据库驱动类以加载数据库驱动。
+- 类会被触发自动完成加载的情况：
+	- 使用 new 创建对象
+	- 使用某个类的静态成员（变量或方法）
+
+		> 注意：final 声明的静态变量，在编译时被放到当前类的常量池中，此种情况不会触发自动加载的。
+
+	- 使用反射获取类信息
+	- 加载一个类的子类时
+
+		> 子类或者匿名类会另外创建一个 class 文件，以各自存储类的信息。比如 Main\$Solution.class、Main\$1.class。
+		
+		```java
+		public class Main {
+			public static void main(String[] args) {
+				// 对应 Main$1.class
+				new Runnable() {
+					@Override
+					public void run() { ... }
+				}
+			}
+			// 对应 Main$Solution.class
+			public static Solution { ... }
+		}
+		```
+
 #### 加载
-- Java 代码的编译和加载过程：
+- Java 代码编译和加载过程
 
-	| ![](img/CyC2018-CS-Notes-Java-_4-2.png) |
-	| :-: |
-	| 图 4-2 代码的编译和加载过程 |
+	| ![](img/CS-Notes-JVM-ClassLoading-Processing.svg) |
+	| :---: |
+	| Java 代码编译和加载过程 |
 
-- 加载过程 JVM 需要完成以下三件事：
-    - 通过 `类的完全限定名称` 获取定义该类的 `二进制字节流`。
-    - 将该 `字节流` 表示的 `静态存储结构` 转换为 `方法区` 的 `运行时存储结构`。
-    - 在内存中生成一个代表该类的 `Class` 对象，作为方法区中该操作类中各种数据的访问入口。
+- 加载是类加载过程的一个阶段，加载过程 JVM 需要完成以下三件事：
+	- 通过 `类的完全限定名称` 获取定义该类的 `二进制字节流`。
+	- 将该字节流表示的静态存储结构转换为 `方法区运行时数据结构`。
+	- 在堆内存中生成一个代表该类的 Class 对象，作为方法区中该操作类中各种数据的访问入口。
 
 #### 验证
 - 确保 Class 文件的字节流中包含的信息符合当前虚拟机的要求，并且不会危害虚拟机自身的安全。
 
 #### 准备
-- `类变量` 是被 `static` 修饰的变量，准备阶段为类变量分配内存并设置初始值，使用的是 `方法区` 的内存。
+- 为类变量（static 修饰）分配内存并设置初始值，使用的是 `方法区` 的内存。
 
+	> 区分各种概念变量：
 	> `类变量`：独立于方法之外的变量，用 static 修饰。也称为静态成员变量。<br>
 	> `实例变量`：独立于方法之外的变量，不过没有 static 修饰。<br>
 	> `局部变量`：类的方法中的变量。
@@ -676,20 +698,20 @@
 
 	> 初始化阶段才真正开始执行类中定义的 Java 程序代码。
 
-- 初始化阶段是虚拟机执行类构造器 <clinit>() 方法的过程。
-- <clinit>() 是由编译器自动收集类中所有 `类变量的赋值语句` 和 `静态语句块` 中的语句合并产生的，编译器收集的顺序由语句在源文件中出现的顺序决定。特别注意的是，静态语句块只能访问到定义在它之前的类变量，定义在它之后的类变量只能赋值，不能访问。
+- 初始化阶段是虚拟机执行类构造器 <clinit> 方法的过程。
+- <clinit> 方法是由编译器自动收集类中所有 `类变量的赋值语句` 和 `静态语句块` 中的语句合并产生的，编译器收集的顺序由语句在源文件中出现的顺序决定。特别注意，静态语句块只能访问到定义在它之前的类变量，定义在它之后的类变量只能赋值，不能访问。
 
 	```java
     public class Test {
         static {
             i = 0;                // 给变量赋值可以正常编译通过
-            System.out.print(i);  // 这句编译器会提示“非法向前引用”
+            System.out.print(i);  // 这句编译器会提示 “非法向前引用”
         }
         static int i = 1;
     }
 	```
 
-- 由于父类的 <clinit>() 方法先执行，也就意味着父类中定义的静态语句块的执行要优先于子类。
+- 由于父类的 <clinit> 方法先执行，也就意味着父类中定义的静态语句块的执行要优先于子类。
 
     ```java
     static class Parent {
@@ -744,53 +766,54 @@
 		```
 
 ### 类与类加载器
-- 两个类相等，需要类本身相等，并且使用同一个类加载器进行加载。这是因为每一个类加载器都拥有一个独立的 `类名称空间`。
-- 这里的相等，包括类的 Class 对象的 equals() 方法、isAssignableFrom() 方法、isInstance() 方法的返回结果为 true，也包括使用 instanceof 关键字做对象所属关系判定结果为 true。
+- 两个类相等，需要类本身相等，并且使用同一个类加载器进行加载。因为每一个类加载器都拥有一个独立的 `类名称空间`。
+- 这里的相等，包括类的 Class 对象的 equals() 方法、isAssignableFrom() 方法、isInstance() 方法的判定结果为 true，也包括使用 instanceof 关键字做对象所属关系判定结果为 true。
 
 ### 类加载器分类
-- 从 Java `虚拟机` 的角度，只存在以下两种不同的类加载器：
-	- `启动类加载器`：使用 C++ 实现，是虚拟机自身一部分；
-	- `所有其它类的加载器`：使用 Java 实现，独立于虚拟机，继承自抽象类 java.lang.ClassLoader。
-- 从 Java `开发人员` 的角度，类加载器可以划分得更细致些：
-	- `启动类加载器` (Bootstrap ClassLoader)：
+- 从 JVM 角度，只存在两种类加载器：
+	- 启动类加载器：使用 C++ 实现，是 JVM 自身一部分；
+	- 所有其它类的加载器：使用 Java 实现，独立于虚拟机，继承自抽象类 java.lang.ClassLoader。
+- 从 Java 开发人员角度，类加载器可划分为：
+	- 启动类加载器（Bootstrap ClassLoader）
 		- 此类加载器负责将存放在 `<JRE_HOME>\lib` 目录中的，或者被 `-Xbootclasspath` 参数所指定的路径中的，并且是虚拟机识别的 `类库` 加载到虚拟机内存中。
 
 			> 仅按照文件名识别，比如 rt.jar。名字不符合的类库即使放在 lib 目录中也不会被加载。
-
+		
 		- 启动类加载器无法被 Java 程序直接引用，用户在编写自定义类加载器时，如果需要把加载请求委派给启动类加载器，直接使用 null 代替即可。
-	- `扩展类加载器` (Extension ClassLoader)：
+	- 扩展类加载器（Extension ClassLoader）
 		- 这个类加载器是由 ExtClassLoader (sun.misc.Launcher$ExtClassLoader) 实现的。
 		- 它负责将 `<JAVA_HOME>/lib/ext` 或者被 `java.ext.dir` 系统变量所指定路径中的所有类库加载到内存中，开发者可以直接使用扩展类加载器。
-	- `应用程序类加载器` (Application ClassLoader)：
+	- 应用程序类加载器（Application ClassLoader）
 		- 这个类加载器是由 AppClassLoader（sun.misc.Launcher$AppClassLoader）实现的。
-		- 由于这个类加载器是 ClassLoader 中的 getSystemClassLoader() 方法的返回值，因此一般称为系统类加载器。它负责加载 `用户类路径` (ClassPath) 上所指定的类库，开发者可以直接使用这个类加载器，如果应用程序中没有自定义过自己的类加载器，一般情况下这个就是程序中默认的类加载器。
+		- 由于这个类加载器是 ClassLoader 中的 getSystemClassLoader() 方法的返回值，因此一般称为系统类加载器。它负责加载用户类路径（ClassPath）上所指定的类库，开发者可以直接使用这个类加载器，如果应用程序中没有自定义过自己的类加载器，一般情况下这个就是程序中默认的类加载器。
 
 ### 双亲委派模型
-- 应用程序是由三种类加载器互相配合从而实现类加载，除此之外还可以加入自己定义的类加载器。
-- 图 4-3 展示了类加载器之间的层次关系，称为双亲委派模型 (Parents Delegation Model)。
+#### 概念
+- 如下图所示，展示了类加载器之间的层次关系，即一个类加载器首先将类加载请求转发到父类加载器，只有当顶级加载器加载失败时，则逐级原路交还调用者完成加载，称之为双亲委派模型（Parents Delegation Model）。
+- 应用程序是由三种类加载器互相配合从而实现类加载，此外也可以加入自定义的类加载器。
 
-	| ![](img/CyC2018-CS-Notes-Java-_4-3.png) |
+	| ![](img/CS-Notes-JVM-ClassLoader-ParentsDelegationModel.svg) |
 	| :-: |
-	| 图 4-3 类加载器间的层次关系 |
+	| 类加载器间的层次关系 |
 
 	- 该模型要求除了顶层的启动类加载器外，其它的类加载器都要有自己的父类加载器。
 	- 这里的父子关系一般通过组合关系（Composition）来实现，而不是继承关系（Inheritance）。
 
-#### 工作过程
-
-- 一个类加载器首先将类加载请求转发到父类加载器，只有当父类加载器无法完成时才尝试自己加载。
-
 #### 好处
+- 防止同一个 class 文件重复被加载，且确保了任意一个类在 JVM 中的唯一性。
 
-- 使得 Java 类随着它的类加载器一起具有一种带有优先级的层次关系，从而使得基础类得到统一。
-- 例如 java.lang.Object 存放在 rt.jar 中，若编写另外一个 java.lang.Object 并放到 ClassPath 中，程序可以编译通过。
-	- 由于双亲委派模型的存在，所以在 rt.jar 中的 Object 比在 ClassPath 中的 Object 优先级更高。
-	- 这是因为 rt.jar 中的 Object 使用的是启动类加载器，而 ClassPath 中的 Object 使用的是应用程序类加载器。
-	- rt.jar 中的 Object 优先级更高，那么程序中所有的 Object 都是这个 Object。
+	> 原理：两个类相等，需要类本身相等，并且使用同一个类加载器进行加载。
+
+- 使得 Java 类随着它的类加载器一起具有一种带有优先级的层次关系，从而使得基础类得到统一。比如 java.lang.Object 存放在 rt.jar 中，若编写另外一个 java.lang.Object 并放到 ClassPath 中，程序可以通过编译。
+	- 由于双亲委派模型的存在，在 rt.jar 中的 Object 比在 ClassPath 中的 Object 优先级更高。
+	- 因为 rt.jar 中的 Object 使用的是启动类加载器，而 ClassPath 中的 Object 使用的是应用程序类加载器。
+	- rt.jar 中的 Object 优先级更高，保证了程序中所有的 Object 都是这个 Object。
 
 #### 实现
 
-- 以下是抽象类 java.lang.ClassLoader 的代码片段，其中的 loadClass() 方法运行过程如下：先检查类是否已经加载过，如果没有则让父类加载器去加载。当父类加载器加载失败时抛出 ClassNotFoundException，此时尝试自己去加载。
+- 以下是抽象类 java.lang.ClassLoader 的代码片段，其中的 loadClass() 方法运行过程如下：
+	- 先检查类是否已经加载过，如果没有则让父类加载器去加载。
+	- 当父类加载器加载失败时抛出 ClassNotFoundException，此时尝试自己去加载。
 
 	```java
 	public abstract class ClassLoader {
@@ -845,57 +868,58 @@
 	- 它首先根据类的全名在文件系统上查找类的字节代码文件 (.class 文件)；
 	- 然后读取该文件内容，最后通过 defineClass() 方法来把这些字节代码转换成 java.lang.Class 类的实例。
 
-- java.lang.ClassLoader 的 loadClass() 实现了双亲委派模型的逻辑，自定义类加载器一般不去重写它，但是需要重写 findClass() 方法。
+- java.lang.ClassLoader 的 loadClass 方法实现了双亲委派模型的逻辑，自定义类加载器一般不去重写它，但是需要重写 findClass 方法。
 
 	```java
 	public class FileSystemClassLoader extends ClassLoader {
 	
-	    private String rootDir;
+		private String rootDir;
 	
-	    public FileSystemClassLoader(String rootDir) {
-	        this.rootDir = rootDir;
-	    }
-	
-	    protected Class<?> findClass(String name) 
-	        throws ClassNotFoundException {
-	        byte[] classData = getClassData(name);
-	        if (classData == null) {
-	            throw new ClassNotFoundException();
-	        } else {
-	            return defineClass(name, classData, 0, 
-	                classData.length);
-	        }
-	    }
+		public FileSystemClassLoader(String rootDir) {
+			this.rootDir = rootDir;
+		}
+		
+		@Override
+		protected Class<?> findClass(String name) 
+			throws ClassNotFoundException {
+			byte[] classData = getClassData(name);
+			if (classData == null) {
+				throw new ClassNotFoundException();
+			} else {
+				return defineClass(name, classData, 0, 
+					classData.length);
+			}
+		}
 	
 	    private byte[] getClassData(String className) {
-	        String path = classNameToPath(className);
-	        try {
-	            InputStream ins = new FileInputStream(path);
-	            ByteArrayOutputStream baos = 
-	                new ByteArrayOutputStream();
-	            int bufferSize = 4096;
-	            byte[] buffer = new byte[bufferSize];
-	            int bytesNumRead;
-	            while ((bytesNumRead = ins.read(buffer)) != -1) {
-	                baos.write(buffer, 0, bytesNumRead);
-	            }
-	            return baos.toByteArray();
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
-	        return null;
+			String path = classNameToPath(className);
+			try {
+				InputStream ins = new FileInputStream(path);
+				ByteArrayOutputStream baos = 
+					new ByteArrayOutputStream();
+				int bufferSize = 4096;
+				byte[] buffer = new byte[bufferSize];
+				int bytesNumRead;
+				while ((bytesNumRead = ins.read(buffer)) != -1) {
+					baos.write(buffer, 0, bytesNumRead);
+				}
+				return baos.toByteArray();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			return null;
 	    }
 	
 	    private String classNameToPath(String className) {
-	        return rootDir + File.separatorChar
-	            + className.replace('.', File.separatorChar) 
-	            + ".class";
+			return rootDir + File.separatorChar
+				+ className.replace('.', File.separatorChar) 
+				+ ".class";
 	    }
 	}
 	```
 	
 ## 参考资料 
-- [Cyc2018. Java 虚拟机 [OL]. www.cyc2018.xyz](http://www.cyc2018.xyz/Java/Java%20%E8%99%9A%E6%8B%9F%E6%9C%BA.html)
 - [周志明. 深入理解 Java 虚拟机 [M]. 第三版. 机械工业出版社, 2019](https://book.douban.com/subject/34907497/)
 - [周志明. 深入理解 Java 虚拟机 [M]. 第二版. 机械工业出版社, 2013](https://book.douban.com/subject/24722612/)
+- [Cyc2018. Java 虚拟机 [OL]. www.cyc2018.xyz](http://www.cyc2018.xyz/Java/Java%20%E8%99%9A%E6%8B%9F%E6%9C%BA.html)
 - [青空の霞光. Java JVM [OL]. bilibili.com](https://www.bilibili.com/video/BV1Er4y1r7as)
